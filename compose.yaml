@@ -1,0 +1,9 @@
+services:
+  database:
+    container_name: coffeebud_database
+    image: timescale/timescaledb-ha:pg18
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env

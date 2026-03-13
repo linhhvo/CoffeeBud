@@ -1,0 +1,11 @@
+.env
+*.env
+.env.*
+
+#IDE
+.idea/
+.vscode/
+
+*.exe
+*.out
+bin/
