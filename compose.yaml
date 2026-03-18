@@ -7,3 +7,23 @@ services:
       - "5432:5432"
     env_file:
       - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    container_name: db_migration
+    image: migrate/migrate
+    volumes:
+      - ./migrations:/migrations
+    command:
+      - -path=/migrations/
+      - -database=${POSTGRES_URL}
+      - up
+    depends_on:
+      database:
+        condition: service_healthy
+
+
