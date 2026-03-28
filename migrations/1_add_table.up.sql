@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS devices(
     device_id varchar(50) PRIMARY KEY,
     user_id uuid NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     battery_level smallint,
-    last_synced_at timestamp
+    last_synced_at timestamptz
 );
 
 CREATE TABLE IF NOT EXISTS habit_rules(
@@ -25,11 +25,11 @@ CREATE TABLE IF NOT EXISTS pet_states(
 );
 
 CREATE TABLE activity_events (
-    time timestamp NOT NULL,
+    timestamp timestamptz NOT NULL,
     user_id uuid NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     device_id varchar(50) NOT NULL REFERENCES devices(device_id) ON DELETE CASCADE,
     action_type varchar(50) NOT NULL
 );
 
 SELECT
-    create_hypertable('activity_events', 'time');
+    create_hypertable('activity_events', 'timestamp');

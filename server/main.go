@@ -1,44 +1,36 @@
 package main
 
 import (
-	"database/sql"
+	"coffee-bud/internal/database"
+	"coffee-bud/internal/handlers"
+	"coffee-bud/internal/middleware"
+	"coffee-bud/internal/validators"
 	"log"
-	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/joho/godotenv/autoload"
-	_ "github.com/lib/pq"
 )
 
 func main() {
-	/** DATABASE **/
-	db_url := os.Getenv("APP_POSTGRES_URL")
-
-	db, err := sql.Open("postgres", db_url)
-
-	if err != nil {
-		log.Fatalf("error connecting to database:\n%s", err)
-	}
-
+	/** DATABASE CONNECTION **/
+	db := database.ConnectDatabase()
 	defer func() {
 		if err := db.Close(); err != nil {
-			log.Fatal("error closing database")
+			log.Fatalf("error closing database:\n%v", err.Error())
 		}
 	}()
-
-	pingErr := db.Ping()
-	if pingErr != nil {
-		log.Fatalf("can't ping db:\n%s", err)
-	}
 
 	/** API **/
 	// gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-	router.GET("/test", func(c *gin.Context) {
-		c.String(http.StatusOK, "test GET message")
-	})
+	router.Use(middleware.ErrorHandler())
 
+	validators.ConfigCustomValidators()
+
+	router.POST("/api/signup", handlers.CreateUserHandler(db))
+	router.POST("/api/login", handlers.GetUserHandler(db))
+
+	router.POST("/api/activities", handlers.AddActivityHandler(db))
+	router.GET("/api/activities", handlers.GetAllActivitiesHandler(db))
 	router.Run(":8080")
 }
