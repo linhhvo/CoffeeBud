@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -55,7 +56,7 @@ func GetUserHandler(db *sql.DB) gin.HandlerFunc {
 
 		user, err := repositories.GetUser(ctx, db, json)
 		if err != nil {
-			if err == sql.ErrNoRows {
+			if errors.Is(err, sql.ErrNoRows) {
 				c.Status(http.StatusUnauthorized)
 				c.Error(err)
 				return

@@ -5,6 +5,7 @@ import (
 	"coffee-bud/internal/models"
 	"coffee-bud/internal/repositories"
 	"database/sql"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -53,7 +54,7 @@ func GetAllActivitiesHandler(db *sql.DB) gin.HandlerFunc {
 
 		activities, err := repositories.GetAllActivities(ctx, db)
 		if err != nil {
-			if err == sql.ErrNoRows {
+			if errors.Is(err, sql.ErrNoRows) {
 				c.Status(http.StatusUnauthorized)
 				c.Error(err)
 				return
