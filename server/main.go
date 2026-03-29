@@ -5,6 +5,7 @@ import (
 	"coffee-bud/internal/handlers"
 	"coffee-bud/internal/middleware"
 	"coffee-bud/internal/validators"
+	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +31,14 @@ func main() {
 	router.POST("/api/signup", handlers.CreateUserHandler(db))
 	router.POST("/api/login", handlers.GetUserHandler(db))
 
+	router.POST("/api/devices", handlers.UpdateDeviceHandler(db))
+	router.POST("/api/new-device", handlers.PairDeviceHandler(db))
+
 	router.POST("/api/activities", handlers.AddActivityHandler(db))
 	router.GET("/api/activities", handlers.GetAllActivitiesHandler(db))
-	router.Run(":8080")
+	err := router.Run(":8080")
+	if err != nil {
+		fmt.Printf("error running router: %v", err.Error())
+		return
+	}
 }

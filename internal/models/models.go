@@ -18,9 +18,14 @@ type Device struct {
 	LastSyncTime time.Time `json:"last_sync_time"`
 }
 
+type DevicePairing struct {
+	UserId       uuid.UUID `json:"user_id"`
+	PairedDevice Device    `json:"device"`
+	PairedTime   time.Time
+}
+
 type AcitivityEvent struct {
 	DeviceId   string    `json:"device_id" binding:"required"`
-	UserId     uuid.UUID `json:"user_id"`
 	ActionType string    `json:"action_type" binding:"required,validActionType"`
 	Timestamp  time.Time `json:"timestamp" binding:"required"`
 }

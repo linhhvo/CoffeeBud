@@ -4,19 +4,28 @@ import (
 	"coffee-bud/internal/models"
 	"context"
 	"database/sql"
-	"fmt"
 )
 
-func AddActivity(ctx context.Context, db *sql.DB, data models.AcitivityEvent) (models.AcitivityEvent, error) {
+func AddActivity(
+	ctx context.Context,
+	db *sql.DB,
+	data models.AcitivityEvent,
+) (models.AcitivityEvent, error) {
 	var newActivity models.AcitivityEvent
 
-	userId, err := GetUserByDeviceId(ctx, db, data.DeviceId)
-	if err != nil {
-		return newActivity, fmt.Errorf("can't find connected user account for this device")
-	}
-	row := db.QueryRowContext(ctx, "insert into activity_events (device_id, user_id, action_type, timestamp) values ($1, $2, $3, $4)", data.DeviceId, userId, data.ActionType, data.Timestamp)
+	row := db.QueryRowContext(
+		ctx,
+		"INSERT INTO activity_events (device_id, action_type, timestamp) VALUES ($1, $2, $3)",
+		data.DeviceId,
+		data.ActionType,
+		data.Timestamp,
+	)
 
-	err = row.Scan(&newActivity.Timestamp, &newActivity.UserId, &newActivity.DeviceId, &newActivity.ActionType)
+	err := row.Scan(
+		&newActivity.Timestamp,
+		&newActivity.DeviceId,
+		&newActivity.ActionType,
+	)
 	if err != nil {
 		return newActivity, err
 	}
@@ -24,10 +33,13 @@ func AddActivity(ctx context.Context, db *sql.DB, data models.AcitivityEvent) (m
 	return newActivity, nil
 }
 
-func GetAllActivities(ctx context.Context, db *sql.DB) ([]models.AcitivityEvent, error) {
+func GetAllActivities(
+	ctx context.Context,
+	db *sql.DB,
+) ([]models.AcitivityEvent, error) {
 	var foundActivities []models.AcitivityEvent
 
-	rows, err := db.QueryContext(ctx, "select * from activity_events")
+	rows, err := db.QueryContext(ctx, "SELECT * FROM activity_events")
 
 	if err != nil {
 		return foundActivities, err
@@ -36,7 +48,11 @@ func GetAllActivities(ctx context.Context, db *sql.DB) ([]models.AcitivityEvent,
 
 	for rows.Next() {
 		var activity models.AcitivityEvent
-		err = rows.Scan(&activity.Timestamp, &activity.UserId, &activity.DeviceId, &activity.ActionType)
+		err = rows.Scan(
+			&activity.Timestamp,
+			&activity.DeviceId,
+			&activity.ActionType,
+		)
 		if err != nil {
 			return foundActivities, err
 		}
