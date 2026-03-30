@@ -56,7 +56,7 @@ func GetUserHandler(db *sql.DB) gin.HandlerFunc {
 
 		user, err := repositories.GetUser(ctx, db, json)
 		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
+			if errors.Is(err, repositories.ErrNoUser) {
 				c.Status(http.StatusUnauthorized)
 				c.Error(err)
 				return

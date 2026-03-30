@@ -4,9 +4,12 @@ import (
 	"coffee-bud/internal/models"
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
 )
+
+var ErrNoUser = errors.New("user not found")
 
 func AddUser(
 	ctx context.Context,
@@ -54,6 +57,9 @@ func GetUser(
 		&foundUser.CreatedTime,
 	)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return foundUser, ErrNoUser
+		}
 		return foundUser, err
 	}
 

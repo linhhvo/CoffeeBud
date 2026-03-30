@@ -25,5 +25,5 @@ type AcitivityEvent struct {
 	DeviceId   string    `json:"device_id" binding:"required"`
 	UserId     uuid.UUID `json:"user_id"`
 	ActionType string    `json:"action_type" binding:"required,validActionType"`
-	Timestamp  time.Time `json:"timestamp" binding:"required"`
+	Timestamp  string    `json:"timestamp" binding:"required"`
 }

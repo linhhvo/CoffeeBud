@@ -28,8 +28,8 @@ func main() {
 
 	validators.ConfigCustomValidators()
 
-	router.POST("/api/register", handlers.CreateUserHandler(db))
-	router.POST("/api/login", handlers.GetUserHandler(db))
+	router.POST("/api/auth/register", handlers.CreateUserHandler(db))
+	router.POST("/api/auth/login", handlers.GetUserHandler(db))
 
 	router.POST("/api/devices", handlers.UpdateDeviceHandler(db))
 	router.POST("/api/devices/pair", handlers.PairDeviceHandler(db))
@@ -37,6 +37,11 @@ func main() {
 
 	router.POST("/api/activities", handlers.AddActivityHandler(db))
 	router.GET("/api/activities", handlers.GetAllActivitiesHandler(db))
+	router.GET(
+		"/api/users/:userId/activities",
+		handlers.GetActivitiesByUserHandler(db),
+	)
+
 	err := router.Run(":8080")
 	if err != nil {
 		fmt.Printf("error running router: %v", err.Error())

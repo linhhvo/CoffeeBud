@@ -53,7 +53,10 @@ func UpdateDeviceHandler(db *sql.DB) gin.HandlerFunc {
 		)
 
 		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) { // if device is not paired
+			if errors.Is(
+				err,
+				repositories.ErrNoDevice,
+			) { // if device is not paired
 				// TODO: send payload to frontend for pairing
 				middleware.SuccessResponse(
 					c,
@@ -116,7 +119,7 @@ func RemoveDeviceHandler(db *sql.DB) gin.HandlerFunc {
 
 		device, err := repositories.DeleteDevice(ctx, db, deviceId)
 		if err != nil {
-			if err.Error() == "device not found" {
+			if errors.Is(err, repositories.ErrNoDevice) {
 				c.Status(http.StatusNotFound)
 				c.Error(errors.New("can't find device to remove"))
 				return

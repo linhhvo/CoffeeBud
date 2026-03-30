@@ -10,6 +10,8 @@ import (
 	"github.com/google/uuid"
 )
 
+var ErrNoDevice = errors.New("device not found")
+
 func AddDevice(
 	ctx context.Context,
 	db *sql.DB,
@@ -88,6 +90,9 @@ func GetDevice(
 		&device.PairedTime,
 	)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return device, ErrNoDevice
+		}
 		return device, err
 	}
 
@@ -121,7 +126,7 @@ func DeleteDevice(
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return deletedDevice, errors.New("device not found")
+			return deletedDevice, ErrNoDevice
 		}
 		return deletedDevice, fmt.Errorf(
 			"error scanning returned row after deleting device: %v",
@@ -130,7 +135,7 @@ func DeleteDevice(
 	}
 
 	_, err = GetDevice(ctx, db, deviceId)
-	if errors.Is(err, sql.ErrNoRows) {
+	if errors.Is(err, ErrNoDevice) {
 		return deletedDevice, nil
 	}
 

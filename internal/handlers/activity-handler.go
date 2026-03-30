@@ -25,13 +25,7 @@ func AddActivityHandler(db *sql.DB) gin.HandlerFunc {
 
 		activity, err := repositories.AddActivity(ctx, db, json)
 		if err != nil {
-			if strings.Contains(err.Error(), "duplicate") {
-				c.Status(http.StatusConflict)
-				c.Error(err)
-				return
-			}
-
-			if strings.Contains(err.Error(), "user account") {
+			if errors.Is(err, repositories.ErrNoDevice) {
 				c.Status(http.StatusNotFound)
 				c.Error(err)
 				return
@@ -50,12 +44,33 @@ func GetAllActivitiesHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		var activities []models.AcitivityEvent
-
 		activities, err := repositories.GetAllActivities(ctx, db)
 		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				c.Status(http.StatusUnauthorized)
+			c.Status(http.StatusInternalServerError)
+			c.Error(err)
+			return
+		}
+
+		middleware.SuccessResponse(c, http.StatusOK, activities)
+	}
+}
+
+func GetActivitiesByUserHandler(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		userId := c.Param("userId")
+
+		activities, err := repositories.GetActivitiesByUser(ctx, db, userId)
+		if err != nil {
+			if strings.Contains(err.Error(), "invalid input") {
+				c.Status(http.StatusBadRequest)
+				c.Error(err)
+				return
+			}
+
+			if errors.Is(err, repositories.ErrNoUser) {
+				c.Status(http.StatusNotFound)
 				c.Error(err)
 				return
 			}
