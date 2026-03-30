@@ -28,11 +28,11 @@ func main() {
 
 	validators.ConfigCustomValidators()
 
-	router.POST("/api/signup", handlers.CreateUserHandler(db))
+	router.POST("/api/register", handlers.CreateUserHandler(db))
 	router.POST("/api/login", handlers.GetUserHandler(db))
 
 	router.POST("/api/devices", handlers.UpdateDeviceHandler(db))
-	router.POST("/api/new-device", handlers.PairDeviceHandler(db))
+	router.POST("/api/devices/pair", handlers.PairDeviceHandler(db))
 
 	router.POST("/api/activities", handlers.AddActivityHandler(db))
 	router.GET("/api/activities", handlers.GetAllActivitiesHandler(db))

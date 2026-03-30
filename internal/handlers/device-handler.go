@@ -6,6 +6,7 @@ import (
 	"coffee-bud/internal/repositories"
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,7 @@ import (
   - server receives the request -> check if device is paired
   	- if not paired, send device payload to frontend to list as an available device then return 202
 	- if paired, add a new device record to devices table then return 201
-		- when user clicks connect, send a POST request to endpoint /api/new-device
+		- when user clicks connect, send a POST request to endpoint /api/devices/pair
 		{
 		"userId": "12312-123423-1231",
 		"device":
@@ -53,7 +54,14 @@ func UpdateDeviceHandler(db *sql.DB) gin.HandlerFunc {
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) { // if device is not paired
 				// TODO: send payload to frontend for pairing
-				middleware.SuccessResponse(c, 202, devicePairing)
+				middleware.SuccessResponse(
+					c,
+					202,
+					fmt.Sprintf(
+						"device %s is available for pairing",
+						json.DeviceId,
+					),
+				)
 				return
 			}
 			c.Status(http.StatusInternalServerError)

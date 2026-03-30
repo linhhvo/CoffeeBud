@@ -18,9 +18,9 @@ func AddDeviceInfo(
 
 	row := db.QueryRowContext(
 		ctx,
-		"INSERT INTO devices (device_id, battery_level) VALUES ($1,$2) RETURNING device_id, battery_level, last_synced_at",
-		data.DeviceId,
+		"UPDATE devices SET battery_level=$1, last_synced_at=CURRENT_TIMESTAMP WHERE device_id=$2 RETURNING device_id, battery_level, last_synced_at",
 		data.BatteryLevel,
+		data.DeviceId,
 	)
 
 	err := row.Scan(
@@ -83,15 +83,17 @@ func GetDevicePairing(
 		deviceId,
 	)
 
-	if err := row.Scan(
+	err := row.Scan(
 		&devicePair.PairedDevice.DeviceId,
 		&devicePair.UserId,
-	); err != nil {
+		&devicePair.PairedTime,
+	)
+	if err != nil {
 		return devicePair, err
 	}
 
 	// check if user_id is a valid UUID
-	if devicePair.UserId != uuid.Nil {
+	if devicePair.UserId == uuid.Nil {
 		return devicePair, fmt.Errorf("user ID is invalid")
 	}
 

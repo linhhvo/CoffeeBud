@@ -21,7 +21,7 @@ type Device struct {
 type DevicePairing struct {
 	UserId       uuid.UUID `json:"user_id"`
 	PairedDevice Device    `json:"device"`
-	PairedTime   time.Time
+	PairedTime   time.Time `json:"paired_time"`
 }
 
 type AcitivityEvent struct {
