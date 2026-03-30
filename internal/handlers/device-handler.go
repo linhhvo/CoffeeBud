@@ -45,7 +45,8 @@ func UpdateDeviceHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		devicePairing, err := repositories.GetDevicePairing(
+		// check if device is already in the system
+		device, err := repositories.GetDevice(
 			ctx,
 			db,
 			json.DeviceId,
@@ -70,7 +71,7 @@ func UpdateDeviceHandler(db *sql.DB) gin.HandlerFunc {
 		}
 
 		// if device is already paired
-		devicePairing.PairedDevice, err = repositories.AddDeviceInfo(
+		device, err = repositories.UpdateDevice(
 			ctx,
 			db,
 			json,
@@ -81,14 +82,14 @@ func UpdateDeviceHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		middleware.SuccessResponse(c, 201, devicePairing.PairedDevice)
+		middleware.SuccessResponse(c, 201, device)
 	}
 }
 
 func PairDeviceHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		var json models.DevicePairing
+		var json models.Device
 
 		if err := c.ShouldBindJSON(&json); err != nil {
 			c.Status(http.StatusBadRequest)
@@ -96,7 +97,7 @@ func PairDeviceHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		pairing, err := repositories.AddDevicePairing(ctx, db, json)
+		pairing, err := repositories.AddDevice(ctx, db, json)
 		if err != nil {
 			c.Status(http.StatusNotFound)
 			c.Error(err)
@@ -105,4 +106,27 @@ func PairDeviceHandler(db *sql.DB) gin.HandlerFunc {
 
 		middleware.SuccessResponse(c, 201, pairing)
 	}
+}
+
+func RemoveDeviceHandler(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		deviceId := c.Param("deviceId")
+
+		device, err := repositories.DeleteDevice(ctx, db, deviceId)
+		if err != nil {
+			if err.Error() == "device not found" {
+				c.Status(http.StatusNotFound)
+				c.Error(errors.New("can't find device to remove"))
+				return
+			}
+			c.Status(http.StatusInternalServerError)
+			c.Error(err)
+			return
+		}
+
+		middleware.SuccessResponse(c, 200, device)
+	}
+
 }

@@ -12,20 +12,20 @@ func AddUser(
 	ctx context.Context,
 	db *sql.DB,
 	data models.User,
-) (string, error) {
-	var newUser string
+) (models.User, error) {
+	var newUser models.User
 
 	data.UserId = uuid.New()
 
 	row := db.QueryRowContext(
 		ctx,
-		"INSERT INTO users (user_id, username, password) VALUES ($1, $2, $3) returning username",
+		"INSERT INTO users (user_id, username, password) VALUES ($1, $2, $3) RETURNING user_id, username, created_at",
 		data.UserId,
 		data.Username,
 		data.Password,
 	)
 
-	err := row.Scan(&newUser)
+	err := row.Scan(&newUser.UserId, &newUser.Username, &newUser.CreatedTime)
 	if err != nil {
 		return newUser, err
 	}
@@ -47,7 +47,12 @@ func GetUser(
 		data.Password,
 	)
 
-	err := row.Scan(&foundUser.UserId, &foundUser.Username, &foundUser.Password)
+	err := row.Scan(
+		&foundUser.UserId,
+		&foundUser.Username,
+		&foundUser.Password,
+		&foundUser.CreatedTime,
+	)
 	if err != nil {
 		return foundUser, err
 	}

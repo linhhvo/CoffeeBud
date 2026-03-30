@@ -33,6 +33,7 @@ func main() {
 
 	router.POST("/api/devices", handlers.UpdateDeviceHandler(db))
 	router.POST("/api/devices/pair", handlers.PairDeviceHandler(db))
+	router.DELETE("/api/devices/:deviceId", handlers.RemoveDeviceHandler(db))
 
 	router.POST("/api/activities", handlers.AddActivityHandler(db))
 	router.GET("/api/activities", handlers.GetAllActivitiesHandler(db))
