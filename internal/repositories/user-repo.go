@@ -45,9 +45,8 @@ func GetUser(
 
 	row := db.QueryRowContext(
 		ctx,
-		"SELECT * FROM users WHERE username = $1 AND password = $2",
+		"SELECT * FROM users WHERE username = $1",
 		data.Username,
-		data.Password,
 	)
 
 	err := row.Scan(

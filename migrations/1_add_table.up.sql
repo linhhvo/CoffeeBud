@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS users
 (
     user_id    uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     username   varchar(50) UNIQUE NOT NULL,
-    password   varchar(50)        NOT NULL,
+    password   varchar(255)       NOT NULL,
     created_at timestamptz      DEFAULT CURRENT_TIMESTAMP
 );
 

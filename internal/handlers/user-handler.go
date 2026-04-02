@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 
 	"coffee-bud/internal/middleware"
 	"coffee-bud/internal/models"
@@ -24,6 +25,18 @@ func CreateUserHandler(db *sql.DB) gin.HandlerFunc {
 			c.Error(err)
 			return
 		}
+
+		passwordHash, err := bcrypt.GenerateFromPassword(
+			[]byte(json.Password),
+			bcrypt.DefaultCost,
+		)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			c.Error(err)
+			return
+		}
+
+		json.Password = string(passwordHash)
 
 		newUser, err := repositories.AddUser(ctx, db, json)
 
@@ -57,12 +70,22 @@ func GetUserHandler(db *sql.DB) gin.HandlerFunc {
 		user, err := repositories.GetUser(ctx, db, json)
 		if err != nil {
 			if errors.Is(err, repositories.ErrNoUser) {
-				c.Status(http.StatusUnauthorized)
+				c.Status(http.StatusNotFound)
 				c.Error(err)
 				return
 			}
 			c.Status(http.StatusInternalServerError)
 			c.Error(err)
+			return
+		}
+
+		err = bcrypt.CompareHashAndPassword(
+			[]byte(user.Password),
+			[]byte(json.Password),
+		)
+		if err != nil {
+			c.Status(http.StatusUnauthorized)
+			c.Error(errors.New("invalid password"))
 			return
 		}
 
