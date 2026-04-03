@@ -4,18 +4,31 @@ import (
 	"coffee-bud/internal/models"
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
 )
 
-func AddUser(ctx context.Context, db *sql.DB, data models.User) (string, error) {
-	var newUser string
+var ErrNoUser = errors.New("user not found")
+
+func AddUser(
+	ctx context.Context,
+	db *sql.DB,
+	data models.User,
+) (models.User, error) {
+	var newUser models.User
 
 	data.UserId = uuid.New()
 
-	row := db.QueryRowContext(ctx, "insert into users (user_id, username, password) values ($1, $2, $3) returning username", data.UserId, data.Username, data.Password)
+	row := db.QueryRowContext(
+		ctx,
+		"INSERT INTO users (user_id, username, password) VALUES ($1, $2, $3) RETURNING user_id, username, created_at",
+		data.UserId,
+		data.Username,
+		data.Password,
+	)
 
-	err := row.Scan(&newUser)
+	err := row.Scan(&newUser.UserId, &newUser.Username, &newUser.CreatedTime)
 	if err != nil {
 		return newUser, err
 	}
@@ -23,28 +36,31 @@ func AddUser(ctx context.Context, db *sql.DB, data models.User) (string, error) 
 	return newUser, nil
 }
 
-func GetUser(ctx context.Context, db *sql.DB, data models.User) (models.User, error) {
+func GetUser(
+	ctx context.Context,
+	db *sql.DB,
+	data models.User,
+) (models.User, error) {
 	var foundUser models.User
 
-	row := db.QueryRowContext(ctx, "select * from users where username = $1 and password = $2", data.Username, data.Password)
+	row := db.QueryRowContext(
+		ctx,
+		"SELECT * FROM users WHERE username = $1",
+		data.Username,
+	)
 
-	err := row.Scan(&foundUser.UserId, &foundUser.Username, &foundUser.Password)
+	err := row.Scan(
+		&foundUser.UserId,
+		&foundUser.Username,
+		&foundUser.Password,
+		&foundUser.CreatedTime,
+	)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return foundUser, ErrNoUser
+		}
 		return foundUser, err
 	}
 
 	return foundUser, nil
-}
-
-func GetUserByDeviceId(ctx context.Context, db *sql.DB, deviceId string) (string, error) {
-	var userId string
-	row := db.QueryRowContext(ctx, "select user_id from devices where device_id = $1", deviceId)
-
-	if err := row.Scan(&userId); err != nil {
-		if err == sql.ErrNoRows {
-			return userId, err
-		}
-		return userId, err
-	}
-	return userId, nil
 }

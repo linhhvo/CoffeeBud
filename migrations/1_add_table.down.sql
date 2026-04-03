@@ -8,4 +8,4 @@ DROP TABLE IF EXISTS pet_states;
 
 DROP TABLE IF EXISTS activity_events;
 
-DROP extension IF EXISTS timescaledb;
+DROP EXTENSION IF EXISTS timescaledb;
