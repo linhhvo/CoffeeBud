@@ -27,3 +27,11 @@ type AcitivityEvent struct {
 	ActionType string    `json:"action_type" binding:"required,validActionType"`
 	Timestamp  string    `json:"timestamp" binding:"required"`
 }
+
+type HabitRule struct {
+	UserId          uuid.UUID `json:"user_id"`
+	DeviceId        string    `json:"device_id"`
+	WaterIntakeGoal int       `json:"water_intake_goal"`
+	CoffeeLimit     int       `json:"coffee_limit"`
+	BreakInterval   int       `json:"break_interval"`
+}

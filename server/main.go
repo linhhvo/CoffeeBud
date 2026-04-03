@@ -57,6 +57,12 @@ func main() {
 		// 	"/users/:userId/activities",
 		// 	handlers.GetActivitiesByUserHandler(db),
 		// )
+
+		// retrieve habit rules for specific user account
+		api.GET("/habit-rules", handlers.GetHabitRuleByUserHandler(db))
+
+		// update habit rules
+		api.POST("/habit-rules", handlers.UpdateHabitRuleHandler(db))
 	}
 
 	err := router.Run(":8080")
