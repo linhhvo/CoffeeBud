@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"coffee-bud/internal/session"
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -14,7 +16,7 @@ import (
 	"coffee-bud/internal/repositories"
 )
 
-func CreateUserHandler(db *sql.DB) gin.HandlerFunc {
+func RegisterUserHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
@@ -55,7 +57,7 @@ func CreateUserHandler(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
-func GetUserHandler(db *sql.DB) gin.HandlerFunc {
+func UserLogInHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
@@ -89,6 +91,21 @@ func GetUserHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
+		err = session.SetCookie(c, user.UserId.String())
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			c.Error(fmt.Errorf("failed to set cookie -- %v", err.Error()))
+			return
+		}
+
 		middleware.SuccessResponse(c, http.StatusOK, user.Username)
+	}
+}
+
+func UserLogOutHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token, _ := c.Cookie(session.CookieName)
+		session.ClearSessions(c, token)
+		middleware.SuccessResponse(c, http.StatusOK, nil)
 	}
 }

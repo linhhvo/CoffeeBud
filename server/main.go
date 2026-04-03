@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
@@ -27,20 +28,26 @@ func main() {
 	router.Use(middleware.ErrorHandler())
 
 	validators.ConfigCustomValidators()
+	api := router.Group("/api")
 
-	router.POST("/api/auth/register", handlers.CreateUserHandler(db))
-	router.POST("/api/auth/login", handlers.GetUserHandler(db))
+	api.POST("/auth/register", handlers.RegisterUserHandler(db))
+	api.POST("/auth/login", handlers.UserLogInHandler(db))
+	api.POST("/auth/logout", handlers.UserLogOutHandler())
 
-	router.POST("/api/devices", handlers.UpdateDeviceHandler(db))
-	router.POST("/api/devices/pair", handlers.PairDeviceHandler(db))
-	router.DELETE("/api/devices/:deviceId", handlers.RemoveDeviceHandler(db))
+	api.POST("/devices", handlers.UpdateDeviceHandler(db))
 
-	router.POST("/api/activities", handlers.AddActivityHandler(db))
-	router.GET("/api/activities", handlers.GetAllActivitiesHandler(db))
-	router.GET(
-		"/api/users/:userId/activities",
-		handlers.GetActivitiesByUserHandler(db),
-	)
+	api.POST("/activities", handlers.AddActivityHandler(db))
+	api.GET("/activities", handlers.GetAllActivitiesHandler(db))
+
+	api.Use(middleware.Authenticate())
+	{
+		api.POST("/devices/pair", handlers.PairDeviceHandler(db))
+		api.DELETE("/devices/:deviceId", handlers.RemoveDeviceHandler(db))
+		api.GET(
+			"/users/:userId/activities",
+			handlers.GetActivitiesByUserHandler(db),
+		)
+	}
 
 	err := router.Run(":8080")
 	if err != nil {
