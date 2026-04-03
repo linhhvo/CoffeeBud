@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 /**
@@ -94,11 +95,21 @@ func PairDeviceHandler(db *sql.DB) gin.HandlerFunc {
 		ctx := c.Request.Context()
 		var json models.Device
 
-		if err := c.ShouldBindJSON(&json); err != nil {
+		var err error
+		if err = c.ShouldBindJSON(&json); err != nil {
 			c.Status(http.StatusBadRequest)
 			c.Error(err)
 			return
 		}
+
+		userId, exists := c.Get("userId")
+		if !exists {
+			c.Status(http.StatusUnauthorized)
+			c.Error(errors.New("invalid user"))
+			return
+		}
+
+		json.UserId = userId.(uuid.UUID)
 
 		pairing, err := repositories.AddDevice(ctx, db, json)
 		if err != nil {

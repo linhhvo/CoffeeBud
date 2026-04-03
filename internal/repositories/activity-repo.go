@@ -6,6 +6,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func AddActivity(
@@ -50,45 +52,45 @@ func AddActivity(
 	return newActivity, nil
 }
 
-func GetAllActivities(
-	ctx context.Context,
-	db *sql.DB,
-) ([]models.AcitivityEvent, error) {
-	var foundActivities []models.AcitivityEvent
-
-	rows, err := db.QueryContext(ctx, "SELECT * FROM activity_events")
-
-	if err != nil {
-		return foundActivities, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var activity models.AcitivityEvent
-		err = rows.Scan(
-			&activity.Timestamp,
-			&activity.DeviceId,
-			&activity.UserId,
-			&activity.ActionType,
-		)
-		if err != nil {
-			return foundActivities, err
-		}
-
-		foundActivities = append(foundActivities, activity)
-	}
-
-	if err := rows.Err(); err != nil {
-		return foundActivities, err
-	}
-
-	return foundActivities, nil
-}
+// func GetAllActivities(
+// 	ctx context.Context,
+// 	db *sql.DB,
+// ) ([]models.AcitivityEvent, error) {
+// 	var foundActivities []models.AcitivityEvent
+//
+// 	rows, err := db.QueryContext(ctx, "SELECT * FROM activity_events")
+//
+// 	if err != nil {
+// 		return foundActivities, err
+// 	}
+// 	defer rows.Close()
+//
+// 	for rows.Next() {
+// 		var activity models.AcitivityEvent
+// 		err = rows.Scan(
+// 			&activity.Timestamp,
+// 			&activity.DeviceId,
+// 			&activity.UserId,
+// 			&activity.ActionType,
+// 		)
+// 		if err != nil {
+// 			return foundActivities, err
+// 		}
+//
+// 		foundActivities = append(foundActivities, activity)
+// 	}
+//
+// 	if err := rows.Err(); err != nil {
+// 		return foundActivities, err
+// 	}
+//
+// 	return foundActivities, nil
+// }
 
 func GetActivitiesByUser(
 	ctx context.Context,
 	db *sql.DB,
-	userId string,
+	userId uuid.UUID,
 ) ([]models.AcitivityEvent, error) {
 	var foundActivities []models.AcitivityEvent
 

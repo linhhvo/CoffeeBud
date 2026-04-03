@@ -6,12 +6,13 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 var CookieName = os.Getenv("COOKIE_NAME")
-var sessions = make(map[string]string)
+var sessions = make(map[string]uuid.UUID)
 
-func SetCookie(c *gin.Context, userId string) error {
+func SetCookie(c *gin.Context, userId uuid.UUID) error {
 	newToken, err := IssueNewToken(userId)
 	if err != nil {
 		return err
@@ -35,7 +36,7 @@ func SetCookie(c *gin.Context, userId string) error {
 func IsSessionValid(tokenStr string) error {
 	_, exists := sessions[tokenStr]
 	if !exists {
-		return errors.New("token revoked")
+		return errors.New("no saved token")
 	}
 	return nil
 }

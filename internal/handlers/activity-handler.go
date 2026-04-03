@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func AddActivityHandler(db *sql.DB) gin.HandlerFunc {
@@ -40,28 +41,37 @@ func AddActivityHandler(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
-func GetAllActivitiesHandler(db *sql.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
-
-		activities, err := repositories.GetAllActivities(ctx, db)
-		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			c.Error(err)
-			return
-		}
-
-		middleware.SuccessResponse(c, http.StatusOK, activities)
-	}
-}
+// func GetAllActivitiesHandler(db *sql.DB) gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		ctx := c.Request.Context()
+//
+// 		activities, err := repositories.GetAllActivities(ctx, db)
+// 		if err != nil {
+// 			c.Status(http.StatusInternalServerError)
+// 			c.Error(err)
+// 			return
+// 		}
+//
+// 		middleware.SuccessResponse(c, http.StatusOK, activities)
+// 	}
+// }
 
 func GetActivitiesByUserHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		userId := c.Param("userId")
+		userId, exists := c.Get("userId")
+		if !exists {
+			c.Status(http.StatusUnauthorized)
+			c.Error(errors.New("invalid user"))
+			return
+		}
 
-		activities, err := repositories.GetActivitiesByUser(ctx, db, userId)
+		activities, err := repositories.GetActivitiesByUser(
+			ctx,
+			db,
+			userId.(uuid.UUID),
+		)
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid input") {
 				c.Status(http.StatusBadRequest)

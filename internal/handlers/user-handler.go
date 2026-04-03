@@ -91,7 +91,7 @@ func UserLogInHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		err = session.SetCookie(c, user.UserId.String())
+		err = session.SetCookie(c, user.UserId)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.Error(fmt.Errorf("failed to set cookie -- %v", err.Error()))
