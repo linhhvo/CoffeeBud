@@ -21,7 +21,7 @@ type Device struct {
 	PairedTime   time.Time `json:"paired_time"`
 }
 
-type AcitivityEvent struct {
+type ActivityEvent struct {
 	DeviceId   string    `json:"device_id" binding:"required"`
 	UserId     uuid.UUID `json:"user_id"`
 	ActionType string    `json:"action_type" binding:"required,validActionType"`
@@ -34,4 +34,9 @@ type HabitRule struct {
 	WaterIntakeGoal int       `json:"water_intake_goal"`
 	CoffeeLimit     int       `json:"coffee_limit"`
 	BreakInterval   int       `json:"break_interval"`
+}
+
+type DataSyncPayload struct {
+	DeviceInfo Device          `json:"device_info"`
+	Activities []ActivityEvent `json:"activities"`
 }

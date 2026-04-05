@@ -16,7 +16,7 @@ import (
 func AddActivityHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		var json models.AcitivityEvent
+		var json models.ActivityEvent
 
 		if err := c.ShouldBindJSON(&json); err != nil {
 			c.Status(http.StatusBadRequest)

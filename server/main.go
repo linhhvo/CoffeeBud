@@ -42,6 +42,8 @@ func main() {
 	api.POST("/activities", handlers.AddActivityHandler(db))
 	// api.GET("/activities", handlers.GetAllActivitiesHandler(db))
 
+	api.POST("/sync", handlers.SyncDataHandler(db))
+
 	// endpoints that require token from client
 	api.Use(middleware.Authenticate())
 	{
