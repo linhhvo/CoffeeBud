@@ -29,7 +29,7 @@ func SyncDataHandler(db *sql.DB) gin.HandlerFunc {
 		}
 
 		// check if device is already in the system
-		_, err := repositories.GetDevice(
+		device, err := repositories.GetDevice(
 			ctx,
 			db,
 			json.DeviceInfo.DeviceId,
@@ -78,11 +78,31 @@ func SyncDataHandler(db *sql.DB) gin.HandlerFunc {
 		}
 
 		// TODO: get habit rules
+		rule, err := repositories.GetHabitRuleByUser(
+			ctx,
+			db,
+			device.UserId,
+		)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				c.Status(http.StatusNotFound)
+				c.Error(errors.New("habit rule is not set"))
+				return
+			}
 
+			c.Status(http.StatusNotFound)
+			c.Error(
+				fmt.Errorf(
+					"failed to retrieve habit rules -- %v",
+					err.Error(),
+				),
+			)
+			return
+		}
 		// TODO: get pet mood based on new data
 
 		// TODO: get pet name and avatar
 
-		middleware.SuccessResponse(c, 201, "data updated")
+		middleware.SuccessResponse(c, 201, rule)
 	}
 }
