@@ -42,6 +42,8 @@ func main() {
 	api.POST("/activities", handlers.AddActivityHandler(db))
 	// api.GET("/activities", handlers.GetAllActivitiesHandler(db))
 
+	api.POST("/sync", handlers.SyncDataHandler(db))
+
 	// endpoints that require token from client
 	api.Use(middleware.Authenticate())
 	{
@@ -57,6 +59,12 @@ func main() {
 		// 	"/users/:userId/activities",
 		// 	handlers.GetActivitiesByUserHandler(db),
 		// )
+
+		// retrieve habit rules for specific user account
+		api.GET("/habit-rules", handlers.GetHabitRuleByUserHandler(db))
+
+		// update habit rules
+		api.POST("/habit-rules", handlers.UpdateHabitRuleHandler(db))
 	}
 
 	err := router.Run(":8080")

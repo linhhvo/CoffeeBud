@@ -13,9 +13,9 @@ import (
 func AddActivity(
 	ctx context.Context,
 	db *sql.DB,
-	data models.AcitivityEvent,
-) (models.AcitivityEvent, error) {
-	var newActivity models.AcitivityEvent
+	data models.ActivityEvent,
+) (models.ActivityEvent, error) {
+	var newActivity models.ActivityEvent
 
 	device, err := GetDevice(ctx, db, data.DeviceId)
 	if err != nil {
@@ -91,8 +91,8 @@ func GetActivitiesByUser(
 	ctx context.Context,
 	db *sql.DB,
 	userId uuid.UUID,
-) ([]models.AcitivityEvent, error) {
-	var foundActivities []models.AcitivityEvent
+) ([]models.ActivityEvent, error) {
+	var foundActivities []models.ActivityEvent
 
 	err := db.QueryRowContext(
 		ctx,
@@ -115,7 +115,7 @@ func GetActivitiesByUser(
 	defer rows.Close()
 
 	for rows.Next() {
-		var activity models.AcitivityEvent
+		var activity models.ActivityEvent
 		err = rows.Scan(
 			&activity.Timestamp,
 			&activity.DeviceId,

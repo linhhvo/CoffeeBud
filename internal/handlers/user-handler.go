@@ -53,6 +53,18 @@ func RegisterUserHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
+		err = repositories.AddDefaultHabitRule(ctx, db, newUser.UserId)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			c.Error(
+				fmt.Errorf(
+					"failed to add default habit rules -- %v",
+					err.Error(),
+				),
+			)
+			return
+		}
+
 		middleware.SuccessResponse(c, 201, newUser)
 	}
 }
