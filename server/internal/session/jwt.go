@@ -2,14 +2,14 @@ package session
 
 import (
 	"errors"
-	"os"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
-var secret = []byte(os.Getenv("JWT_SECRET"))
+var secret []byte
 
 type CustomClaims struct {
 	UserId uuid.UUID `json:"user_id"`
@@ -25,6 +25,8 @@ func IssueNewToken(userId uuid.UUID) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	fmt.Println("jwt secret", string(secret))
 
 	return token.SignedString(secret)
 }

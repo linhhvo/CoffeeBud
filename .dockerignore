@@ -1,7 +1,7 @@
 .git
 .gitignore
 
-.env
+server/.env
 *.env
 .env.*
 

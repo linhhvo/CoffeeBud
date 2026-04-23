@@ -2,6 +2,7 @@ package session
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -9,10 +10,16 @@ import (
 	"github.com/google/uuid"
 )
 
-var CookieName = os.Getenv("COOKIE_NAME")
+var CookieName string
 var sessions = make(map[string]uuid.UUID)
 
+func Init() {
+	CookieName = os.Getenv("COOKIE_NAME")
+	secret = []byte(os.Getenv("JWT_SECRET"))
+}
+
 func SetCookie(c *gin.Context, userId uuid.UUID) error {
+	fmt.Println("cookie name ", CookieName)
 	newToken, err := IssueNewToken(userId)
 	if err != nil {
 		return err
@@ -30,6 +37,10 @@ func SetCookie(c *gin.Context, userId uuid.UUID) error {
 	c.SetCookieData(&cookie)
 
 	sessions[newToken] = userId
+
+	for k, v := range sessions {
+		fmt.Println(k, v)
+	}
 	return nil
 }
 
