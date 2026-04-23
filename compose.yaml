@@ -25,3 +25,21 @@ services:
     depends_on:
       database:
         condition: service_healthy
+
+  client:
+    container_name: coffeebud_client
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+      - deno_cache:/deno-dir
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - DENO_DIR=/deno-dir
+
+volumes:
+  deno_cache:
