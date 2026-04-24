@@ -19,7 +19,6 @@ func Init() {
 }
 
 func SetCookie(c *gin.Context, userId uuid.UUID) error {
-	fmt.Println("cookie name ", CookieName)
 	newToken, err := IssueNewToken(userId)
 	if err != nil {
 		return err

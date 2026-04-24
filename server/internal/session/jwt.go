@@ -2,7 +2,6 @@ package session
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -25,8 +24,6 @@ func IssueNewToken(userId uuid.UUID) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	fmt.Println("jwt secret", string(secret))
 
 	return token.SignedString(secret)
 }
