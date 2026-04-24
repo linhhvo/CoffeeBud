@@ -1,7 +1,10 @@
 import "./App.css";
 import LoginPage from "./components/LoginPage.tsx";
-import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import RegisterPage from "./components/RegisterPage.tsx";
+import Layout from "./components/Layout.tsx";
+import DashboardPage from "./components/DashboardPage.tsx";
+import SettingsPage from "./components/SettingsPage.tsx";
 
 const router = createBrowserRouter([{
     path: "/login",
@@ -10,8 +13,18 @@ const router = createBrowserRouter([{
     path: "/register",
     element: <RegisterPage />,
 }, {
-    path: "/dashboard",
-    element: <h1>this is dashboard page</h1>,
+    path: "/",
+    element: <Layout />,
+    children: [
+        {
+            path: "/dashboard",
+            element: <DashboardPage />,
+        },
+        {
+            path: "/settings",
+            element: <SettingsPage />,
+        },
+    ],
 }]);
 
 function App() {

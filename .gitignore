@@ -19,6 +19,8 @@ dist
 dist-ssr
 *.local
 package-lock.json
+deno.lock
+.vite
 
 # Editor directories and files
 .vscode/*

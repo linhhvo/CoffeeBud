@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, {useState} from "react";
+import {Link} from "react-router-dom";
 
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState<string>("");
@@ -78,7 +78,7 @@ const LoginPage: React.FC = () => {
                                     e: React.ChangeEvent<HTMLInputElement>,
                                 ) => setUsername(e.target.value)}
                                 required
-                                className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
+                                className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-emerald-700 sm:text-sm/6"
                             />
                         </div>
                     </div>
@@ -101,7 +101,7 @@ const LoginPage: React.FC = () => {
                                 onChange={(
                                     e: React.ChangeEvent<HTMLInputElement>,
                                 ) => setPassword(e.target.value)}
-                                className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
+                                className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-emerald-700 sm:text-sm/6"
                             />
                         </div>
                     </div>
@@ -111,7 +111,7 @@ const LoginPage: React.FC = () => {
                     <div>
                         <button
                             type="submit"
-                            className="flex w-full justify-center rounded-md bg-emerald-900 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-emerald-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                            className="cursor-pointer flex w-full justify-center rounded-md bg-emerald-900 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-emerald-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
                         >
                             {isSubmitting ? "Registering..." : "Register"}
                         </button>
