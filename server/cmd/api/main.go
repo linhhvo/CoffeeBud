@@ -4,15 +4,23 @@ import (
 	"coffee-bud/internal/database"
 	"coffee-bud/internal/handlers"
 	"coffee-bud/internal/middleware"
+	"coffee-bud/internal/session"
 	"coffee-bud/internal/validators"
+	"coffee-bud/internal/websocket"
 	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/joho/godotenv/autoload"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if err := godotenv.Load("./.env", "../.env"); err != nil {
+		log.Fatalf("error loading environments: %v", err.Error())
+	}
+
+	session.Init()
+
 	/** DATABASE CONNECTION **/
 	db := database.ConnectDatabase()
 	defer func() {
@@ -67,8 +75,10 @@ func main() {
 		api.POST("/habit-rules", handlers.UpdateHabitRuleHandler(db))
 	}
 
-	err := router.Run(":8080")
-	if err != nil {
+	// websocket endpoint
+	api.GET("/ws", websocketServer.WebSocketHandler())
+
+	if err := router.Run(":8080"); err != nil {
 		fmt.Printf("error running router: %v", err.Error())
 		return
 	}

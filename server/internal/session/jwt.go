@@ -2,14 +2,13 @@ package session
 
 import (
 	"errors"
-	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
-var secret = []byte(os.Getenv("JWT_SECRET"))
+var secret []byte
 
 type CustomClaims struct {
 	UserId uuid.UUID `json:"user_id"`

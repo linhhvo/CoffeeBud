@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"coffee-bud/internal/middleware"
+	"coffee-bud/internal/models"
+	"coffee-bud/internal/repositories"
 	"coffee-bud/internal/session"
 	"database/sql"
 	"errors"
@@ -10,10 +13,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-
-	"coffee-bud/internal/middleware"
-	"coffee-bud/internal/models"
-	"coffee-bud/internal/repositories"
 )
 
 func RegisterUserHandler(db *sql.DB) gin.HandlerFunc {

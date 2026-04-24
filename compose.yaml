@@ -8,7 +8,7 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -17,7 +17,7 @@ services:
     container_name: db_migration
     image: migrate/migrate
     volumes:
-      - ./migrations:/migrations
+      - ./server/migrations:/migrations
     command:
       - -path=/migrations/
       - -database=${POSTGRES_URL}
@@ -26,4 +26,20 @@ services:
       database:
         condition: service_healthy
 
+  client:
+    container_name: coffeebud_client
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+      - deno_cache:/deno-dir
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - DENO_DIR=/deno-dir
 
+volumes:
+  deno_cache:
