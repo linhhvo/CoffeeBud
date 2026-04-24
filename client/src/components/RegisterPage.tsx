@@ -19,14 +19,12 @@ const LoginPage: React.FC = () => {
             await authService.register({ username, password });
             setDisplayMsg("Account created. Please log in.");
         } catch (error) {
-            // Catch network errors or the manual errors we threw above
             if (error instanceof Error) {
                 setDisplayMsg(error.message);
             } else {
                 setDisplayMsg("An unexpected network error occurred.");
             }
         } finally {
-            // Regardless of success or failure, turn off the loading state
             setIsSubmitting(false);
         }
     };

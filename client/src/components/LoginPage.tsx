@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authService } from "../apis/auth.service.ts";
+import { useAuth } from "../context/AuthContext";
 
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState<string>("");
@@ -11,6 +12,8 @@ const LoginPage: React.FC = () => {
 
     const navigate = useNavigate();
 
+    const { setLoggedIn } = useAuth();
+
     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
 
@@ -19,17 +22,16 @@ const LoginPage: React.FC = () => {
 
         try {
             await authService.login({ username, password });
+            setLoggedIn();
 
             navigate("/dashboard");
         } catch (error) {
-            // Catch network errors or the manual errors we threw above
             if (error instanceof Error) {
                 setErrorMessage(error.message);
             } else {
                 setErrorMessage("An unexpected network error occurred.");
             }
         } finally {
-            // Regardless of success or failure, turn off the loading state
             setIsSubmitting(false);
         }
     };

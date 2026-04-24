@@ -23,16 +23,27 @@ func SetCookie(c *gin.Context, userId uuid.UUID) error {
 		return err
 	}
 
-	cookie := http.Cookie{
+	jwtCookie := http.Cookie{
 		Name:     CookieName,
 		Value:    newToken,
 		Path:     "/",
 		Secure:   true,
 		HttpOnly: true,
+		MaxAge:   3600,
 		SameSite: http.SameSiteStrictMode,
 	}
 
-	c.SetCookieData(&cookie)
+	authFlagCookie := http.Cookie{
+		Name:     "is_authenticated",
+		Value:    "true",
+		Path:     "/",
+		SameSite: http.SameSiteStrictMode,
+		Secure:   true,
+		MaxAge:   3600,
+	}
+
+	c.SetCookieData(&jwtCookie)
+	c.SetCookieData(&authFlagCookie)
 
 	sessions[newToken] = userId
 
@@ -58,7 +69,17 @@ func ClearSessions(c *gin.Context, tokenId string) {
 		MaxAge:   -1,
 	}
 
+	emptyFlagCookie := http.Cookie{
+		Name:     "is_authenticated",
+		Value:    "",
+		Path:     "/",
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   -1,
+	}
+
 	c.SetCookieData(&emptyCookie)
+	c.SetCookieData(&emptyFlagCookie)
 
 	delete(sessions, tokenId)
 }

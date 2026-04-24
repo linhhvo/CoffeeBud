@@ -4,24 +4,30 @@ import RegisterPage from "./RegisterPage.tsx";
 import Layout from "./Layout.tsx";
 import DashboardPage from "./DashboardPage.tsx";
 import SettingsPage from "./SettingsPage.tsx";
+import ProtectedRoute from "./ProtectedRoute.tsx";
 
 export const router = createBrowserRouter([{
     path: "/login",
-    element: <LoginPage />,
+    Component: LoginPage,
 }, {
     path: "/register",
-    element: <RegisterPage />,
+    Component: RegisterPage,
 }, {
     path: "/",
-    element: <Layout />,
+    Component: Layout,
     children: [
         {
-            path: "/dashboard",
-            element: <DashboardPage />,
-        },
-        {
-            path: "/settings",
-            element: <SettingsPage />,
+            Component: ProtectedRoute,
+            children: [
+                {
+                    path: "dashboard",
+                    Component: DashboardPage,
+                },
+                {
+                    path: "settings",
+                    Component: SettingsPage,
+                },
+            ],
         },
     ],
 }]);
