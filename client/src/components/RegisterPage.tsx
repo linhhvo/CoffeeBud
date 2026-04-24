@@ -1,5 +1,6 @@
-import React, {useState} from "react";
-import {Link} from "react-router-dom";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { authService } from "../apis/auth.service.ts";
 
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState<string>("");
@@ -15,28 +16,7 @@ const LoginPage: React.FC = () => {
         setIsSubmitting(true);
 
         try {
-            const response = await fetch(
-                "http://localhost:8080/api/auth/register",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    credentials: "include",
-                    body: JSON.stringify({ username, password }),
-                },
-            );
-
-            // Parse the JSON response from the server
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    data.message ||
-                        "Registration failed.",
-                );
-            }
-
+            await authService.register({ username, password });
             setDisplayMsg("Account created. Please log in.");
         } catch (error) {
             // Catch network errors or the manual errors we threw above

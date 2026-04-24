@@ -1,5 +1,6 @@
-import React, {useState} from "react";
-import {Link, useNavigate} from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { authService } from "../apis/auth.service.ts";
 
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState<string>("");
@@ -17,27 +18,7 @@ const LoginPage: React.FC = () => {
         setIsSubmitting(true);
 
         try {
-            const response = await fetch(
-                "http://localhost:8080/api/auth/login",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    credentials: "include",
-                    body: JSON.stringify({ username, password }),
-                },
-            );
-
-            // Parse the JSON response from the server
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    data.message ||
-                        "Login failed.",
-                );
-            }
+            await authService.login({ username, password });
 
             navigate("/dashboard");
         } catch (error) {

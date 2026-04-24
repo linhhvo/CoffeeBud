@@ -2,7 +2,6 @@ package session
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 
@@ -37,9 +36,6 @@ func SetCookie(c *gin.Context, userId uuid.UUID) error {
 
 	sessions[newToken] = userId
 
-	for k, v := range sessions {
-		fmt.Println(k, v)
-	}
 	return nil
 }
 
