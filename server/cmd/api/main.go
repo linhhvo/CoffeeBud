@@ -6,7 +6,7 @@ import (
 	"coffee-bud/internal/middleware"
 	"coffee-bud/internal/session"
 	"coffee-bud/internal/validators"
-	"coffee-bud/internal/websocket"
+	websocketServer "coffee-bud/internal/websocket"
 	"fmt"
 	"log"
 
@@ -29,6 +29,10 @@ func main() {
 		}
 	}()
 
+	/** WEBSOCKET  **/
+	wsHub := websocketServer.NewHub()
+	go wsHub.HandleMessage()
+
 	/** API **/
 	// gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -44,7 +48,7 @@ func main() {
 	api.POST("/auth/logout", handlers.UserLogOutHandler())
 
 	// receive device information from physical device
-	api.POST("/devices", handlers.UpdateDeviceHandler(db))
+	api.POST("/devices", handlers.UpdateDeviceHandler(wsHub, db))
 
 	// receive activity events from physical device
 	api.POST("/activities", handlers.AddActivityHandler(db))
@@ -55,6 +59,9 @@ func main() {
 	// endpoints that require token from client
 	api.Use(middleware.Authenticate())
 	{
+		// websocket endpoint
+		api.GET("/ws", websocketServer.WebSocketHandler(wsHub))
+
 		// connect a device to user account
 		api.POST("/devices/pair", handlers.PairDeviceHandler(db))
 
@@ -74,9 +81,6 @@ func main() {
 		// update habit rules
 		api.POST("/habit-rules", handlers.UpdateHabitRuleHandler(db))
 	}
-
-	// websocket endpoint
-	api.GET("/ws", websocketServer.WebSocketHandler())
 
 	if err := router.Run(":8080"); err != nil {
 		fmt.Printf("error running router: %v", err.Error())

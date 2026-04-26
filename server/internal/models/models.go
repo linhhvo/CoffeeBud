@@ -40,3 +40,8 @@ type DataSyncPayload struct {
 	DeviceInfo Device          `json:"device_info"`
 	Activities []ActivityEvent `json:"activities"`
 }
+
+type WebSocketPayload struct {
+	Event string `json:"event"`
+	Data  any    `json:"data"`
+}

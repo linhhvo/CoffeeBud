@@ -4,6 +4,7 @@ import (
 	"coffee-bud/internal/middleware"
 	"coffee-bud/internal/models"
 	"coffee-bud/internal/repositories"
+	websocketServer "coffee-bud/internal/websocket"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -13,29 +14,7 @@ import (
 	"github.com/google/uuid"
 )
 
-/**
-  - device makes a POST request to endpoint /api/devices
-    {
-    "deviceId": "device123-456",
-    "battery_level": 100
-    }
-  - server receives the request -> check if device is paired
-  	- if not paired, send device payload to frontend to list as an available device then return 202
-	- if paired, add a new device record to devices table then return 201
-		- when user clicks connect, send a POST request to endpoint /api/devices/pair
-		{
-		"userId": "12312-123423-1231",
-		"device":
-			{
-			"deviceId": "device123-456",
-			"battery_level": 100
-			}
-		}
-		- server adds a record to device_user table and add a record to devices table then return 201
-		- UI sends a GET request to /api/devices/:username to retrieve the device info
-*/
-
-func UpdateDeviceHandler(db *sql.DB) gin.HandlerFunc {
+func UpdateDeviceHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 		var json models.Device
@@ -57,8 +36,13 @@ func UpdateDeviceHandler(db *sql.DB) gin.HandlerFunc {
 			if errors.Is(
 				err,
 				repositories.ErrNoDevice,
-			) { // if device is not paired
-				// TODO: send payload to frontend for pairing
+			) {
+				// if device is not paired, display device on client side for pairing
+				hub.Broadcast <- models.WebSocketPayload{
+					Event: "new-device",
+					Data:  json.DeviceId,
+				}
+
 				middleware.SuccessResponse(
 					c,
 					202,
@@ -95,8 +79,7 @@ func PairDeviceHandler(db *sql.DB) gin.HandlerFunc {
 		ctx := c.Request.Context()
 		var json models.Device
 
-		var err error
-		if err = c.ShouldBindJSON(&json); err != nil {
+		if err := c.ShouldBindJSON(&json); err != nil {
 			c.Status(http.StatusBadRequest)
 			c.Error(err)
 			return
