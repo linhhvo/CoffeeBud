@@ -40,6 +40,14 @@ func main() {
 	router.Use(middleware.ErrorHandler())
 
 	validators.ConfigCustomValidators()
+
+	// websocket endpoint
+	router.GET(
+		"/ws",
+		middleware.Authenticate(),
+		websocketServer.WebSocketHandler(wsHub),
+	)
+
 	api := router.Group("/api")
 
 	// user authentication from client
@@ -59,8 +67,6 @@ func main() {
 	// endpoints that require token from client
 	api.Use(middleware.Authenticate())
 	{
-		// websocket endpoint
-		api.GET("/ws", websocketServer.WebSocketHandler(wsHub))
 
 		// connect a device to user account
 		api.POST("/devices/pair", handlers.PairDeviceHandler(db))
