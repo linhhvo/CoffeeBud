@@ -55,13 +55,7 @@ func main() {
 	api.POST("/auth/login", handlers.UserLogInHandler(db))
 	api.POST("/auth/logout", handlers.UserLogOutHandler())
 
-	// receive device information from physical device
-	api.POST("/devices", handlers.UpdateDeviceHandler(wsHub, db))
-
-	// receive activity events from physical device
-	api.POST("/activities", handlers.AddActivityHandler(db))
-	// api.GET("/activities", handlers.GetAllActivitiesHandler(db))
-
+	// endpoints to interact with physical device
 	api.POST("/sync", handlers.SyncDataHandler(db))
 
 	// endpoints that require token from client
