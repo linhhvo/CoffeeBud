@@ -11,13 +11,12 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	if err := godotenv.Load("./.env", "../.env"); err != nil {
-		log.Fatalf("error loading environments: %v", err.Error())
-	}
+	// if err := godotenv.Load("./.env", "../.env"); err != nil {
+	// 	log.Fatalf("error loading environments: %v", err.Error())
+	// }
 
 	session.Init()
 

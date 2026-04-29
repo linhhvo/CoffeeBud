@@ -31,7 +31,7 @@ func ConnectDatabase() *sql.DB {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://migrations",
+		"file:///usr/local/bin/migrations",
 		"postgres",
 		driver,
 	)
