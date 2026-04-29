@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState } from "react";
 import { checkIsAuthenticated, clearAuthFlag } from "../utils/cookie";
 
 interface AuthContextType {
-    authenticated: boolean;
+    isAuthenticated: boolean;
     setLoggedIn: () => void;
     setLoggedOut: () => void;
 }
@@ -12,20 +12,24 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = (
     { children },
 ) => {
-    const [authenticated, setAuthenticated] = useState<boolean>(
+    const [IsAuthenticated, setIsAuthenticated] = useState<boolean>(
         checkIsAuthenticated(),
     );
 
-    const setLoggedIn = () => setAuthenticated(true);
+    const setLoggedIn = () => setIsAuthenticated(true);
 
     const setLoggedOut = () => {
         clearAuthFlag();
-        setAuthenticated(false);
+        setIsAuthenticated(false);
     };
 
     return (
         <AuthContext.Provider
-            value={{ authenticated: authenticated, setLoggedIn, setLoggedOut }}
+            value={{
+                isAuthenticated: IsAuthenticated,
+                setLoggedIn,
+                setLoggedOut,
+            }}
         >
             {children}
         </AuthContext.Provider>

@@ -2,14 +2,18 @@ import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import icon from "../assets/icon.png";
 import { authService } from "../apis/auth.service.ts";
+import { useAuth } from "../context/AuthContext.tsx";
 
 const Navbar: React.FC = () => {
     const navigate = useNavigate();
+    const { setLoggedOut } = useAuth();
 
     const handleLogout = async () => {
         try {
             // API call to clear the session cookie on the server
             await authService.logout();
+
+            setLoggedOut();
 
             navigate("/login");
         } catch (error) {

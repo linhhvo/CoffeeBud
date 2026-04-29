@@ -3,8 +3,8 @@ export interface UserCredential {
     password: string;
 }
 
-export interface AuthResponse {
-    statusCode: number;
+export interface ApiResponse {
+    code: number;
     success: boolean;
     data?: string;
     error?: string;
