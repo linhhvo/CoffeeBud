@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -35,6 +36,9 @@ func AddDevice(
 		&newDevice.PairedTime,
 	)
 	if err != nil {
+		if strings.Contains(err.Error(), "violates foreign key constraint") {
+			return newDevice, ErrNoUser
+		}
 		return newDevice, err
 	}
 

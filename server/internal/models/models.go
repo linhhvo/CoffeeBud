@@ -42,6 +42,6 @@ type DataSyncPayload struct {
 }
 
 type WebSocketPayload struct {
-	Event string `json:"event"`
-	Data  any    `json:"data"`
+	EventType string `json:"event_type"`
+	EventData any    `json:"event_data"`
 }

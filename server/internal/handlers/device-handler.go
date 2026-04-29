@@ -39,8 +39,8 @@ func UpdateDeviceHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 			) {
 				// if device is not paired, display device on client side for pairing
 				hub.Broadcast <- models.WebSocketPayload{
-					Event: "new-device",
-					Data:  json.DeviceId,
+					EventType: "NEW_DEVICE",
+					EventData: json,
 				}
 
 				middleware.SuccessResponse(

@@ -6,7 +6,7 @@ import (
 	"coffee-bud/internal/middleware"
 	"coffee-bud/internal/session"
 	"coffee-bud/internal/validators"
-	websocketServer "coffee-bud/internal/websocket"
+	"coffee-bud/internal/websocket"
 	"fmt"
 	"log"
 
