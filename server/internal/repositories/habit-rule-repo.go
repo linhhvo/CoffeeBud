@@ -151,7 +151,7 @@ func HasPendingRuleChanges(
 		return 0, err
 	}
 
-	if lastUpdateTime.After(device.LastSyncTime) {
+	if lastUpdateTime.After(device.LastSyncTime) || device.PairedTime.Equal(device.LastSyncTime) {
 		return 1, nil
 	}
 

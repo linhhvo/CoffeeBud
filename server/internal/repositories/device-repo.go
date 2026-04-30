@@ -22,7 +22,7 @@ func AddDevice(
 
 	row := db.QueryRowContext(
 		ctx,
-		"INSERT INTO devices (device_id, user_id, battery_level) VALUES ($1,$2, $3) RETURNING device_id, user_id, status, battery_level, last_synced_at, paired_at",
+		"INSERT INTO devices (device_id, user_id, battery_level) VALUES ($1,$2, $3) RETURNING device_id, user_id, status",
 		data.DeviceId,
 		data.UserId,
 		data.BatteryLevel,
@@ -32,9 +32,6 @@ func AddDevice(
 		&device.DeviceId,
 		&device.UserId,
 		&device.Status,
-		&device.BatteryLevel,
-		&device.LastSyncTime,
-		&device.PairedTime,
 	)
 	if err != nil {
 		if strings.Contains(err.Error(), "violates foreign key constraint") {
@@ -55,7 +52,7 @@ func UpdateDevice(
 
 	row := db.QueryRowContext(
 		ctx,
-		"UPDATE devices SET battery_level=$1, status=$2, last_synced_at=CURRENT_TIMESTAMP WHERE device_id=$3 RETURNING device_id, user_id, status, battery_level, last_synced_at, paired_at",
+		"UPDATE devices SET battery_level=$1, status=(CASE WHEN $2 = '' THEN status ELSE $2 END), last_synced_at=CURRENT_TIMESTAMP, paired_at=(CASE WHEN $2 = '' THEN paired_at ELSE CURRENT_TIMESTAMP END) WHERE device_id=$3 RETURNING device_id, user_id, status, battery_level, last_synced_at, paired_at",
 		data.BatteryLevel,
 		data.Status,
 		data.DeviceId,
