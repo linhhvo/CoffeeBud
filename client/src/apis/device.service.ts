@@ -1,11 +1,10 @@
-import {apiClient} from "./client.ts";
-import type {ApiResponse} from "./types.ts";
+import { apiClient } from "./client.ts";
+import type { ApiResponse } from "./types.ts";
 
 export const deviceService = {
     pair: (deviceId: string) => {
-        return apiClient<ApiResponse>("/devices/pair", {
+        return apiClient<ApiResponse>(`/devices/pair/${deviceId}`, {
             method: "POST",
-            body: JSON.stringify({device_id: deviceId}),
         });
     },
     delete: (deviceId: string) => {

@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -23,7 +24,7 @@ func GetHabitRuleByUser(
 	)
 	err := row.Scan(
 		&rule.UserId,
-		&rule.WaterIntakeGoal,
+		&rule.WaterInterval,
 		&rule.CoffeeLimit,
 		&rule.BreakInterval,
 	)
@@ -81,8 +82,8 @@ func UpdateHabitRule(
 
 	row := db.QueryRowContext(
 		ctx,
-		"UPDATE habit_rules SET water_intake_goal=$1, coffee_limit=$2, break_interval_minutes=$3 WHERE user_id=$4 RETURNING user_id, water_intake_goal, coffee_limit, break_interval_minutes",
-		data.WaterIntakeGoal,
+		"UPDATE habit_rules SET water_interval_minutes=$1, coffee_limit=$2, break_interval_minutes=$3 WHERE user_id=$4 RETURNING user_id,water_interval_minutes, coffee_limit, break_interval_minutes",
+		data.WaterInterval,
 		data.CoffeeLimit,
 		data.BreakInterval,
 		data.UserId,
@@ -90,7 +91,7 @@ func UpdateHabitRule(
 
 	err := row.Scan(
 		&rule.UserId,
-		&rule.WaterIntakeGoal,
+		&rule.WaterInterval,
 		&rule.CoffeeLimit,
 		&rule.BreakInterval,
 	)
@@ -99,16 +100,16 @@ func UpdateHabitRule(
 		if errors.Is(err, sql.ErrNoRows) {
 			row := db.QueryRowContext(
 				ctx,
-				"INSERT INTO habit_rules (user_id, water_intake_goal, coffee_limit, break_interval_minutes) VALUES ($1, $2, $3, $4) RETURNING user_id, water_intake_goal, coffee_limit, break_interval_minutes",
+				"INSERT INTO habit_rules (user_id, water_interval_minutes, coffee_limit, break_interval_minutes) VALUES ($1, $2, $3, $4) RETURNING user_id, water_interval_minutes, coffee_limit, break_interval_minutes",
 				data.UserId,
-				data.WaterIntakeGoal,
+				data.WaterInterval,
 				data.CoffeeLimit,
 				data.BreakInterval,
 			)
 
 			err = row.Scan(
 				&rule.UserId,
-				&rule.WaterIntakeGoal,
+				&rule.WaterInterval,
 				&rule.CoffeeLimit,
 				&rule.BreakInterval,
 			)
@@ -120,4 +121,39 @@ func UpdateHabitRule(
 	}
 
 	return rule, nil
+}
+
+func HasPendingRuleChanges(
+	ctx context.Context,
+	db *sql.DB,
+	deviceId string,
+) (int, error) {
+	var lastUpdateTime time.Time
+
+	userId, err := GetUserIdByDevice(ctx, db, deviceId)
+	if err != nil {
+		return 0, err
+	}
+
+	row := db.QueryRowContext(
+		ctx,
+		"SELECT last_updated FROM habit_rules WHERE user_id = $1",
+		userId,
+	)
+
+	err = row.Scan(&lastUpdateTime)
+	if err != nil {
+		return 0, err
+	}
+
+	device, err := GetDevice(ctx, db, deviceId)
+	if err != nil {
+		return 0, err
+	}
+
+	if lastUpdateTime.After(device.LastSyncTime) {
+		return 1, nil
+	}
+
+	return 0, nil
 }

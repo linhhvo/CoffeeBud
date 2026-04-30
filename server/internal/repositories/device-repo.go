@@ -18,31 +18,32 @@ func AddDevice(
 	db *sql.DB,
 	data models.Device,
 ) (models.Device, error) {
-	var newDevice models.Device
+	var device models.Device
 
 	row := db.QueryRowContext(
 		ctx,
-		"INSERT INTO devices (device_id, user_id, battery_level) VALUES ($1,$2, $3) RETURNING device_id, user_id, battery_level, last_synced_at, paired_at",
+		"INSERT INTO devices (device_id, user_id, battery_level) VALUES ($1,$2, $3) RETURNING device_id, user_id, status, battery_level, last_synced_at, paired_at",
 		data.DeviceId,
 		data.UserId,
 		data.BatteryLevel,
 	)
 
 	err := row.Scan(
-		&newDevice.DeviceId,
-		&newDevice.UserId,
-		&newDevice.BatteryLevel,
-		&newDevice.LastSyncTime,
-		&newDevice.PairedTime,
+		&device.DeviceId,
+		&device.UserId,
+		&device.Status,
+		&device.BatteryLevel,
+		&device.LastSyncTime,
+		&device.PairedTime,
 	)
 	if err != nil {
 		if strings.Contains(err.Error(), "violates foreign key constraint") {
-			return newDevice, ErrNoUser
+			return device, ErrNoUser
 		}
-		return newDevice, err
+		return device, err
 	}
 
-	return newDevice, nil
+	return device, nil
 }
 
 func UpdateDevice(
@@ -50,27 +51,29 @@ func UpdateDevice(
 	db *sql.DB,
 	data models.Device,
 ) (models.Device, error) {
-	var newDevice models.Device
+	var device models.Device
 
 	row := db.QueryRowContext(
 		ctx,
-		"UPDATE devices SET battery_level=$1, last_synced_at=CURRENT_TIMESTAMP WHERE device_id=$2 RETURNING device_id, user_id, battery_level, last_synced_at, paired_at",
+		"UPDATE devices SET battery_level=$1, status=$2, last_synced_at=CURRENT_TIMESTAMP WHERE device_id=$3 RETURNING device_id, user_id, status, battery_level, last_synced_at, paired_at",
 		data.BatteryLevel,
+		data.Status,
 		data.DeviceId,
 	)
 
 	err := row.Scan(
-		&newDevice.DeviceId,
-		&newDevice.UserId,
-		&newDevice.BatteryLevel,
-		&newDevice.LastSyncTime,
-		&newDevice.PairedTime,
+		&device.DeviceId,
+		&device.UserId,
+		&device.Status,
+		&device.BatteryLevel,
+		&device.LastSyncTime,
+		&device.PairedTime,
 	)
 	if err != nil {
-		return newDevice, err
+		return device, err
 	}
 
-	return newDevice, nil
+	return device, nil
 }
 
 func GetDevice(
@@ -89,6 +92,7 @@ func GetDevice(
 	err := row.Scan(
 		&device.DeviceId,
 		&device.UserId,
+		&device.Status,
 		&device.BatteryLevel,
 		&device.LastSyncTime,
 		&device.PairedTime,
@@ -117,13 +121,14 @@ func DeleteDevice(
 
 	row := db.QueryRowContext(
 		ctx,
-		"DELETE FROM devices WHERE device_id=$1 RETURNING device_id, user_id, battery_level, last_synced_at, paired_at",
+		"DELETE FROM devices WHERE device_id=$1 RETURNING device_id, user_id, status,battery_level, last_synced_at, paired_at",
 		deviceId,
 	)
 
 	err := row.Scan(
 		&deletedDevice.DeviceId,
 		&deletedDevice.UserId,
+		&deletedDevice.Status,
 		&deletedDevice.BatteryLevel,
 		&deletedDevice.LastSyncTime,
 		&deletedDevice.PairedTime,

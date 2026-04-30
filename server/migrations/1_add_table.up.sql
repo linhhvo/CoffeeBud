@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS devices
 (
     device_id      varchar(50) PRIMARY KEY,
     user_id        uuid NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+    status         varchar(50) DEFAULT 'pending',
     battery_level  smallint,
     last_synced_at timestamptz DEFAULT CURRENT_TIMESTAMP,
     paired_at      timestamptz DEFAULT CURRENT_TIMESTAMP
@@ -20,9 +21,10 @@ CREATE TABLE IF NOT EXISTS devices
 CREATE TABLE IF NOT EXISTS habit_rules
 (
     user_id                uuid PRIMARY KEY REFERENCES users (user_id) ON DELETE CASCADE,
-    water_intake_goal      smallint DEFAULT 10,
-    coffee_limit           smallint DEFAULT 10,
-    break_interval_minutes smallint DEFAULT 120
+    water_interval_minutes smallint    DEFAULT 10,
+    coffee_limit           smallint    DEFAULT 10,
+    break_interval_minutes smallint    DEFAULT 120,
+    last_updated           timestamptz DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS pet_states

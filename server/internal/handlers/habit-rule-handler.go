@@ -24,11 +24,7 @@ func GetHabitRuleByUserHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		rule, err := repositories.GetHabitRuleByUser(
-			ctx,
-			db,
-			userId.(uuid.UUID),
-		)
+		rule, err := repositories.GetHabitRuleByUser(ctx, db, userId.(uuid.UUID))
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				c.Status(http.StatusNotFound)
@@ -37,12 +33,7 @@ func GetHabitRuleByUserHandler(db *sql.DB) gin.HandlerFunc {
 			}
 
 			c.Status(http.StatusNotFound)
-			c.Error(
-				fmt.Errorf(
-					"failed to retrieve habit rules -- %v",
-					err.Error(),
-				),
-			)
+			c.Error(fmt.Errorf("failed to retrieve habit rules -- %v", err.Error()))
 			return
 		}
 
@@ -74,12 +65,7 @@ func UpdateHabitRuleHandler(db *sql.DB) gin.HandlerFunc {
 		rule, err := repositories.UpdateHabitRule(ctx, db, json)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
-			c.Error(
-				fmt.Errorf(
-					"failed to update habit rule -- %v",
-					err.Error(),
-				),
-			)
+			c.Error(fmt.Errorf("failed to update habit rule -- %v", err.Error()))
 			return
 		}
 		middleware.SuccessResponse(c, 201, rule)
