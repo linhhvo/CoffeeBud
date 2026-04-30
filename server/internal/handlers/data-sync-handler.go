@@ -45,6 +45,9 @@ func SyncDataHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
+		// check to see if there are changes to habit rules to notify device
+		rulesChanged, err := repositories.HasPendingRuleChanges(ctx, db, device.DeviceId)
+
 		// update device info
 		_, err = repositories.UpdateDevice(ctx, db, device)
 		if err != nil {
@@ -70,9 +73,6 @@ func SyncDataHandler(db *sql.DB) gin.HandlerFunc {
 				return
 			}
 		}
-
-		// check to see if there are changes to habit rules to notify device
-		rulesChanged, err := repositories.HasPendingRuleChanges(ctx, db, device.DeviceId)
 
 		// TODO: get pet mood based on new data
 

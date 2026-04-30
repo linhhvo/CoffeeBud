@@ -82,7 +82,7 @@ func UpdateHabitRule(
 
 	row := db.QueryRowContext(
 		ctx,
-		"UPDATE habit_rules SET water_interval_minutes=$1, coffee_limit=$2, break_interval_minutes=$3 WHERE user_id=$4 RETURNING user_id,water_interval_minutes, coffee_limit, break_interval_minutes",
+		"UPDATE habit_rules SET water_interval_minutes=$1, coffee_limit=$2, break_interval_minutes=$3, last_updated=CURRENT_TIMESTAMP WHERE user_id=$4 RETURNING user_id,water_interval_minutes, coffee_limit, break_interval_minutes",
 		data.WaterInterval,
 		data.CoffeeLimit,
 		data.BreakInterval,
