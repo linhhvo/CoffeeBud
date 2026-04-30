@@ -25,7 +25,7 @@ func AddActivity(
 
 	row := db.QueryRowContext(
 		ctx,
-		"INSERT INTO activity_events (device_id, user_id, action_type, timestamp) VALUES ($1, $2, $3, $4) RETURNING device_id, user_id, action_type, timestamp",
+		"INSERT INTO activity_events (device_id, user_id, activity_type, timestamp) VALUES ($1, $2, $3, $4) RETURNING device_id, user_id, activity_type, timestamp",
 		data.DeviceId,
 		userId,
 		data.ActivityType,

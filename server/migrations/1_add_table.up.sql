@@ -2,10 +2,11 @@ CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 
 CREATE TABLE IF NOT EXISTS users
 (
-    user_id    uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    username   varchar(50) UNIQUE NOT NULL,
-    password   varchar(255)       NOT NULL,
-    created_at timestamptz      DEFAULT CURRENT_TIMESTAMP
+    user_id      uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    username     varchar(50) UNIQUE NOT NULL,
+    password     varchar(255)       NOT NULL,
+    created_at   timestamptz      DEFAULT CURRENT_TIMESTAMP,
+    last_updated timestamptz      DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS devices
@@ -31,15 +32,16 @@ CREATE TABLE IF NOT EXISTS pet_states
 (
     user_id      uuid PRIMARY KEY REFERENCES users (user_id) ON DELETE CASCADE,
     avatar_id    varchar(50) DEFAULT 'default_avatar',
-    current_mood varchar(50) DEFAULT 'happy'
+    current_mood varchar(50) DEFAULT 'happy',
+    last_updated timestamptz DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE activity_events
 (
-    timestamp   timestamptz NOT NULL,
-    device_id   varchar(50) NOT NULL REFERENCES devices (device_id),
-    user_id     uuid        NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
-    action_type varchar(50) NOT NULL
+    timestamp     timestamptz NOT NULL,
+    device_id     varchar(50) NOT NULL REFERENCES devices (device_id),
+    user_id       uuid        NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+    activity_type varchar(50) NOT NULL
 );
 
 SELECT create_hypertable('activity_events', 'timestamp');
