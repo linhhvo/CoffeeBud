@@ -28,14 +28,14 @@ func AddActivity(
 		"INSERT INTO activity_events (device_id, user_id, action_type, timestamp) VALUES ($1, $2, $3, $4) RETURNING device_id, user_id, action_type, timestamp",
 		data.DeviceId,
 		userId,
-		data.ActionType,
+		data.ActivityType,
 		data.Timestamp,
 	)
 
 	err = row.Scan(
 		&newActivity.DeviceId,
 		&newActivity.UserId,
-		&newActivity.ActionType,
+		&newActivity.ActivityType,
 		&newActivity.Timestamp,
 	)
 	if err != nil {
@@ -113,7 +113,7 @@ func GetActivitiesByUser(
 			&activity.Timestamp,
 			&activity.DeviceId,
 			&activity.UserId,
-			&activity.ActionType,
+			&activity.ActivityType,
 		)
 		if err != nil {
 			return foundActivities, err

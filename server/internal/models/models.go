@@ -23,10 +23,10 @@ type Device struct {
 }
 
 type ActivityEvent struct {
-	DeviceId   string    `uri:"deviceId" json:"device_id"`
-	UserId     uuid.UUID `json:"user_id"`
-	ActionType string    `json:"action_type" binding:"required,validActionType"`
-	Timestamp  time.Time `json:"timestamp" binding:"required"`
+	DeviceId     string    `uri:"deviceId" json:"device_id"`
+	UserId       uuid.UUID `json:"user_id"`
+	ActivityType string    `json:"type" binding:"required,validActivityType"`
+	Timestamp    time.Time `json:"timestamp" binding:"required"`
 }
 
 type HabitRule struct {

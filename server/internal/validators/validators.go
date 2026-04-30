@@ -7,12 +7,12 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-var validActionType validator.Func = func(fl validator.FieldLevel) bool {
+var validActivityType validator.Func = func(fl validator.FieldLevel) bool {
 	validTypes := []string{"coffee", "water", "break"}
 
-	actionType, ok := fl.Field().Interface().(string)
+	activityType, ok := fl.Field().Interface().(string)
 	if ok {
-		if !slices.Contains(validTypes, actionType) {
+		if !slices.Contains(validTypes, activityType) {
 			return false
 		}
 	}
@@ -21,6 +21,6 @@ var validActionType validator.Func = func(fl validator.FieldLevel) bool {
 
 func ConfigCustomValidators() {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("validActionType", validActionType)
+		v.RegisterValidation("validActivityType", validActivityType)
 	}
 }
