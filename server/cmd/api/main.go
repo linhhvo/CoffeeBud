@@ -11,12 +11,13 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	// if err := godotenv.Load("./.env", "../.env"); err != nil {
-	// 	log.Fatalf("error loading environments: %v", err.Error())
-	// }
+	if err := godotenv.Load("./.env", "../.env"); err != nil {
+		log.Fatalf("error loading environments: %v", err.Error())
+	}
 
 	session.Init()
 
@@ -40,6 +41,13 @@ func main() {
 
 	validators.ConfigCustomValidators()
 
+	api := router.Group("/api")
+
+	/** ROUTES FOR PHYSICAL DEVICE INTERACTION **/
+	api.POST("/sync/:deviceId", handlers.AddDeviceHandler(wsHub, db)) // pair new device
+	api.PUT("/sync/:deviceId", handlers.SyncDataHandler(db))
+
+	/** ROUTES FOR CLIENT INTERACTION **/
 	// websocket endpoint
 	router.GET(
 		"/ws",
@@ -47,22 +55,15 @@ func main() {
 		websocketServer.WebSocketHandler(wsHub),
 	)
 
-	api := router.Group("/api")
-
-	// user authentication from client
 	api.POST("/auth/register", handlers.RegisterUserHandler(db))
 	api.POST("/auth/login", handlers.UserLogInHandler(db))
 	api.POST("/auth/logout", handlers.UserLogOutHandler())
 
-	// endpoints to interact with physical device
-	api.POST("/sync", handlers.SyncDataHandler(db))
-
 	// endpoints that require token from client
 	api.Use(middleware.Authenticate())
 	{
-
 		// connect a device to user account
-		api.POST("/devices/pair", handlers.PairDeviceHandler(db))
+		api.POST("/devices/pair/:deviceId", handlers.PairDeviceHandler(db))
 
 		// disconnect a device from user account
 		api.DELETE("/devices/:deviceId", handlers.RemoveDeviceHandler(db))
