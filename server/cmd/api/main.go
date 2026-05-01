@@ -29,6 +29,10 @@ func main() {
 		}
 	}()
 
+	/** WEBSOCKET  **/
+	wsHub := websocketServer.NewHub()
+	go wsHub.HandleMessage()
+
 	/** API **/
 	// gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -36,27 +40,30 @@ func main() {
 	router.Use(middleware.ErrorHandler())
 
 	validators.ConfigCustomValidators()
+
 	api := router.Group("/api")
 
-	// user authentication from client
+	/** ROUTES FOR PHYSICAL DEVICE INTERACTION **/
+	api.POST("/sync/:deviceId", handlers.AddDeviceHandler(wsHub, db)) // pair new device
+	api.PUT("/sync/:deviceId", handlers.SyncDataHandler(db))
+
+	/** ROUTES FOR CLIENT INTERACTION **/
+	// websocket endpoint
+	router.GET(
+		"/ws",
+		middleware.Authenticate(),
+		websocketServer.WebSocketHandler(wsHub),
+	)
+
 	api.POST("/auth/register", handlers.RegisterUserHandler(db))
 	api.POST("/auth/login", handlers.UserLogInHandler(db))
 	api.POST("/auth/logout", handlers.UserLogOutHandler())
-
-	// receive device information from physical device
-	api.POST("/devices", handlers.UpdateDeviceHandler(db))
-
-	// receive activity events from physical device
-	api.POST("/activities", handlers.AddActivityHandler(db))
-	// api.GET("/activities", handlers.GetAllActivitiesHandler(db))
-
-	api.POST("/sync", handlers.SyncDataHandler(db))
 
 	// endpoints that require token from client
 	api.Use(middleware.Authenticate())
 	{
 		// connect a device to user account
-		api.POST("/devices/pair", handlers.PairDeviceHandler(db))
+		api.POST("/devices/pair/:deviceId", handlers.PairDeviceHandler(db))
 
 		// disconnect a device from user account
 		api.DELETE("/devices/:deviceId", handlers.RemoveDeviceHandler(db))
@@ -74,9 +81,6 @@ func main() {
 		// update habit rules
 		api.POST("/habit-rules", handlers.UpdateHabitRuleHandler(db))
 	}
-
-	// websocket endpoint
-	api.GET("/ws", websocketServer.WebSocketHandler())
 
 	if err := router.Run(":8080"); err != nil {
 		fmt.Printf("error running router: %v", err.Error())

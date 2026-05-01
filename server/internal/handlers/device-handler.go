@@ -4,68 +4,48 @@ import (
 	"coffee-bud/internal/middleware"
 	"coffee-bud/internal/models"
 	"coffee-bud/internal/repositories"
+	websocketServer "coffee-bud/internal/websocket"
 	"database/sql"
 	"errors"
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
-/**
-  - device makes a POST request to endpoint /api/devices
-    {
-    "deviceId": "device123-456",
-    "battery_level": 100
-    }
-  - server receives the request -> check if device is paired
-  	- if not paired, send device payload to frontend to list as an available device then return 202
-	- if paired, add a new device record to devices table then return 201
-		- when user clicks connect, send a POST request to endpoint /api/devices/pair
-		{
-		"userId": "12312-123423-1231",
-		"device":
-			{
-			"deviceId": "device123-456",
-			"battery_level": 100
-			}
-		}
-		- server adds a record to device_user table and add a record to devices table then return 201
-		- UI sends a GET request to /api/devices/:username to retrieve the device info
-*/
-
-func UpdateDeviceHandler(db *sql.DB) gin.HandlerFunc {
+func AddDeviceHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		var json models.Device
+		var data models.Device
 
-		if err := c.ShouldBindJSON(&json); err != nil {
+		if err := c.ShouldBindUri(&data); err != nil {
+			c.Status(http.StatusBadRequest)
+			c.Error(err)
+			return
+		}
+
+		if err := c.ShouldBindQuery(&data); err != nil {
 			c.Status(http.StatusBadRequest)
 			c.Error(err)
 			return
 		}
 
 		// check if device is already in the system
-		device, err := repositories.GetDevice(
-			ctx,
-			db,
-			json.DeviceId,
-		)
+		_, err := repositories.GetDevice(ctx, db, data.DeviceId)
 
 		if err != nil {
-			if errors.Is(
-				err,
-				repositories.ErrNoDevice,
-			) { // if device is not paired
-				// TODO: send payload to frontend for pairing
+			if errors.Is(err, repositories.ErrNoDevice) {
+				// if device is not paired, display device on client side for pairing
+				hub.Broadcast <- models.WebSocketPayload{
+					EventType: "NEW_DEVICE",
+					EventData: data,
+				}
+
 				middleware.SuccessResponse(
 					c,
 					202,
-					fmt.Sprintf(
-						"device %s is available for pairing",
-						json.DeviceId,
-					),
+					data.DeviceId,
 				)
 				return
 			}
@@ -75,28 +55,24 @@ func UpdateDeviceHandler(db *sql.DB) gin.HandlerFunc {
 		}
 
 		// if device is already paired
-		device, err = repositories.UpdateDevice(
-			ctx,
-			db,
-			json,
-		)
+		data.Status = "confirmed"
+		_, err = repositories.UpdateDevice(ctx, db, data)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.Error(err)
 			return
 		}
 
-		middleware.SuccessResponse(c, 201, device)
+		middleware.SuccessResponse(c, 201, data)
 	}
 }
 
 func PairDeviceHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		var json models.Device
+		var data models.Device
 
-		var err error
-		if err = c.ShouldBindJSON(&json); err != nil {
+		if err := c.ShouldBindUri(&data); err != nil {
 			c.Status(http.StatusBadRequest)
 			c.Error(err)
 			return
@@ -109,9 +85,9 @@ func PairDeviceHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		json.UserId = userId.(uuid.UUID)
+		data.UserId = userId.(uuid.UUID)
 
-		pairing, err := repositories.AddDevice(ctx, db, json)
+		pairing, err := repositories.AddDevice(ctx, db, data)
 		if err != nil {
 			c.Status(http.StatusNotFound)
 			c.Error(err)
@@ -126,9 +102,17 @@ func RemoveDeviceHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		deviceId := c.Param("deviceId")
+		var device models.Device
 
-		device, err := repositories.DeleteDevice(ctx, db, deviceId)
+		if err := c.ShouldBindUri(&device); err != nil {
+			c.Status(http.StatusBadRequest)
+			c.Error(err)
+			return
+		}
+
+		log.Println("device id: \"", device.DeviceId, "\"")
+
+		device, err := repositories.DeleteDevice(ctx, db, device.DeviceId)
 		if err != nil {
 			if errors.Is(err, repositories.ErrNoDevice) {
 				c.Status(http.StatusNotFound)

@@ -14,29 +14,31 @@ type User struct {
 }
 
 type Device struct {
-	DeviceId     string    `json:"device_id" binding:"required"`
+	DeviceId     string    `uri:"deviceId" json:"device_id" binding:"required"`
 	UserId       uuid.UUID `json:"user_id"`
-	BatteryLevel int       `json:"battery_level"`
+	Status       string    `json:"status"`
+	BatteryLevel int       `form:"battery" json:"battery_level"`
 	LastSyncTime time.Time `json:"last_sync_time"`
 	PairedTime   time.Time `json:"paired_time"`
 }
 
 type ActivityEvent struct {
-	DeviceId   string    `json:"device_id" binding:"required"`
-	UserId     uuid.UUID `json:"user_id"`
-	ActionType string    `json:"action_type" binding:"required,validActionType"`
-	Timestamp  string    `json:"timestamp" binding:"required"`
+	DeviceId     string    `uri:"deviceId" json:"device_id"`
+	UserId       uuid.UUID `json:"user_id"`
+	ActivityType string    `json:"type" binding:"required,validActivityType"`
+	Timestamp    time.Time `json:"timestamp" binding:"required"`
 }
 
 type HabitRule struct {
-	UserId          uuid.UUID `json:"user_id"`
-	DeviceId        string    `json:"device_id"`
-	WaterIntakeGoal int       `json:"water_intake_goal"`
-	CoffeeLimit     int       `json:"coffee_limit"`
-	BreakInterval   int       `json:"break_interval"`
+	UserId         uuid.UUID `json:"user_id"`
+	DeviceId       string    `json:"device_id"`
+	WaterInterval  int       `json:"water_interval"`
+	CoffeeLimit    int       `json:"coffee_limit"`
+	BreakInterval  int       `json:"break_interval"`
+	LastUpdateTime time.Time `json:"last_update_time"`
 }
 
-type DataSyncPayload struct {
-	DeviceInfo Device          `json:"device_info"`
-	Activities []ActivityEvent `json:"activities"`
+type WebSocketPayload struct {
+	EventType string `json:"event_type"`
+	EventData any    `json:"event_data"`
 }

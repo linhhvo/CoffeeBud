@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -24,25 +23,19 @@ func AddActivity(
 
 	userId := device.UserId
 
-	var timestamp time.Time
-	timestamp, err = time.Parse("02-01-2006 15:04:05 MST", data.Timestamp)
-	if err != nil {
-		return newActivity, err
-	}
-
 	row := db.QueryRowContext(
 		ctx,
-		"INSERT INTO activity_events (device_id, user_id, action_type, timestamp) VALUES ($1, $2, $3, $4) RETURNING device_id, user_id, action_type, timestamp",
+		"INSERT INTO activity_events (device_id, user_id, activity_type, timestamp) VALUES ($1, $2, $3, $4) RETURNING device_id, user_id, activity_type, timestamp",
 		data.DeviceId,
 		userId,
-		data.ActionType,
-		timestamp,
+		data.ActivityType,
+		data.Timestamp,
 	)
 
 	err = row.Scan(
 		&newActivity.DeviceId,
 		&newActivity.UserId,
-		&newActivity.ActionType,
+		&newActivity.ActivityType,
 		&newActivity.Timestamp,
 	)
 	if err != nil {
@@ -120,7 +113,7 @@ func GetActivitiesByUser(
 			&activity.Timestamp,
 			&activity.DeviceId,
 			&activity.UserId,
-			&activity.ActionType,
+			&activity.ActivityType,
 		)
 		if err != nil {
 			return foundActivities, err

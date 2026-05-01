@@ -64,3 +64,26 @@ func GetUser(
 
 	return foundUser, nil
 }
+
+func GetUserIdByDevice(
+	ctx context.Context,
+	db *sql.DB,
+	deviceId string,
+) (uuid.UUID, error) {
+	var foundUserId uuid.UUID
+
+	row := db.QueryRowContext(
+		ctx,
+		"SELECT user_id FROM devices WHERE device_id = $1",
+		deviceId,
+	)
+
+	if err := row.Scan(&foundUserId); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return foundUserId, ErrNoUser
+		}
+		return foundUserId, err
+	}
+
+	return foundUserId, nil
+}

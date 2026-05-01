@@ -1,23 +1,23 @@
 import { apiClient } from "./client";
-import type { AuthResponse, UserCredential } from "./types";
+import type { ApiResponse, UserCredential } from "./types";
 
 export const authService = {
     register: (credentials: UserCredential) => {
-        return apiClient<AuthResponse>("/auth/register", {
+        return apiClient<ApiResponse>("/auth/register", {
             method: "POST",
             body: JSON.stringify(credentials),
         });
     },
 
     login: (credentials: UserCredential) => {
-        return apiClient<AuthResponse>("/auth/login", {
+        return apiClient<ApiResponse>("/auth/login", {
             method: "POST",
             body: JSON.stringify(credentials),
         });
     },
 
     logout: () => {
-        return apiClient<AuthResponse>("/auth/logout", {
+        return apiClient<ApiResponse>("/auth/logout", {
             method: "POST",
         });
     },
