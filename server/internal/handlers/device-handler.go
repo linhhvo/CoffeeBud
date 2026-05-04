@@ -56,6 +56,10 @@ func AddDeviceHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 
 		// if device is already paired
 		data.Status = "confirmed"
+		hub.Broadcast <- models.WebSocketPayload{
+			EventType: "DEVICE_PAIRED",
+			EventData: data,
+		}
 		_, err = repositories.UpdateDevice(ctx, db, data)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)

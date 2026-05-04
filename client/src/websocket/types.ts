@@ -5,6 +5,7 @@ export interface WsEventMsg {
 
 export enum WsEventTypes {
     NEW_DEVICE = "NEW_DEVICE",
+    DEVICE_PAIRED = "DEVICE_PAIRED",
     UPDATE_DEVICE = "UPDATE_DEVICE",
     UPDATE_DASHBOARD = "UPDATE_DASHBOARD",
     UPDATE_PET = "UPDATE_PET",
