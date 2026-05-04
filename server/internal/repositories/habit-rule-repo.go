@@ -146,12 +146,12 @@ func HasPendingRuleChanges(
 		return 0, err
 	}
 
-	device, err := GetDevice(ctx, db, deviceId)
+	device, err := GetDeviceById(ctx, db, deviceId)
 	if err != nil {
 		return 0, err
 	}
 
-	if lastUpdateTime.After(device.LastSyncTime) || device.PairedTime.Equal(device.LastSyncTime) {
+	if lastUpdateTime.After(*(device.LastSyncTime)) || device.PairedTime.Equal(*(device.LastSyncTime)) {
 		return 1, nil
 	}
 

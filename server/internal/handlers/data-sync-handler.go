@@ -33,7 +33,7 @@ func SyncDataHandler(db *sql.DB) gin.HandlerFunc {
 
 		}
 		// check if device is already in the system
-		_, err := repositories.GetDevice(ctx, db, device.DeviceId)
+		_, err := repositories.GetDeviceById(ctx, db, device.DeviceId)
 		if err != nil {
 			if errors.Is(err, repositories.ErrNoDevice) {
 				c.Status(http.StatusNotFound)

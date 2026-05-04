@@ -7,6 +7,7 @@ import (
 	websocketServer "coffee-bud/internal/websocket"
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -17,35 +18,37 @@ import (
 func AddDeviceHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		var data models.Device
+		var device models.Device
 
-		if err := c.ShouldBindUri(&data); err != nil {
+		// Bind device ID
+		if err := c.ShouldBindUri(&device); err != nil {
 			c.Status(http.StatusBadRequest)
 			c.Error(err)
 			return
 		}
 
-		if err := c.ShouldBindQuery(&data); err != nil {
+		// Bind battery level
+		if err := c.ShouldBindQuery(&device); err != nil {
 			c.Status(http.StatusBadRequest)
 			c.Error(err)
 			return
 		}
 
 		// check if device is already in the system
-		_, err := repositories.GetDevice(ctx, db, data.DeviceId)
+		_, err := repositories.GetDeviceById(ctx, db, device.DeviceId)
 
 		if err != nil {
 			if errors.Is(err, repositories.ErrNoDevice) {
 				// if device is not paired, display device on client side for pairing
 				hub.Broadcast <- models.WebSocketPayload{
 					EventType: "NEW_DEVICE",
-					EventData: data,
+					EventData: device,
 				}
 
 				middleware.SuccessResponse(
 					c,
 					202,
-					data.DeviceId,
+					device.DeviceId,
 				)
 				return
 			}
@@ -55,19 +58,20 @@ func AddDeviceHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 		}
 
 		// if device is already paired
-		data.Status = "confirmed"
-		hub.Broadcast <- models.WebSocketPayload{
-			EventType: "DEVICE_PAIRED",
-			EventData: data,
-		}
-		_, err = repositories.UpdateDevice(ctx, db, data)
+		device.Status = "confirmed"
+		device, err = repositories.UpdateDevice(ctx, db, device)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.Error(err)
 			return
 		}
 
-		middleware.SuccessResponse(c, 201, data)
+		hub.Broadcast <- models.WebSocketPayload{
+			EventType: "DEVICE_PAIRED",
+			EventData: device,
+		}
+
+		middleware.SuccessResponse(c, 201, device)
 	}
 }
 
@@ -114,7 +118,7 @@ func RemoveDeviceHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		log.Println("device id: \"", device.DeviceId, "\"")
+		log.Println("remove device \"", device.DeviceId, "\"")
 
 		device, err := repositories.DeleteDevice(ctx, db, device.DeviceId)
 		if err != nil {
@@ -131,4 +135,26 @@ func RemoveDeviceHandler(db *sql.DB) gin.HandlerFunc {
 		middleware.SuccessResponse(c, 200, device)
 	}
 
+}
+
+func GetDevicesByUser(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		userId, exists := c.Get("userId")
+		if !exists {
+			c.Status(http.StatusUnauthorized)
+			c.Error(errors.New("invalid user"))
+			return
+		}
+
+		devices, err := repositories.GetDeviceByUser(ctx, db, userId.(uuid.UUID))
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			c.Error(fmt.Errorf("can't retrieve device list: %v", err))
+			return
+		}
+
+		middleware.SuccessResponse(c, 200, devices)
+	}
 }

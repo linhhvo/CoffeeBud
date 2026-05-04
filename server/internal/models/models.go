@@ -14,12 +14,12 @@ type User struct {
 }
 
 type Device struct {
-	DeviceId     string    `uri:"deviceId" json:"device_id" binding:"required"`
-	UserId       uuid.UUID `json:"user_id"`
-	Status       string    `json:"status"`
-	BatteryLevel int       `form:"battery" json:"battery_level"`
-	LastSyncTime time.Time `json:"last_sync_time"`
-	PairedTime   time.Time `json:"paired_time"`
+	DeviceId     string     `uri:"deviceId" json:"device_id" binding:"required"`
+	UserId       uuid.UUID  `json:"user_id"`
+	Status       string     `json:"status"`
+	BatteryLevel int        `form:"battery" json:"battery_level"`
+	LastSyncTime *time.Time `json:"last_sync_time"`
+	PairedTime   *time.Time `json:"paired_time"`
 }
 
 type ActivityEvent struct {

@@ -73,7 +73,7 @@ func UpdateDevice(
 	return device, nil
 }
 
-func GetDevice(
+func GetDeviceById(
 	ctx context.Context,
 	db *sql.DB,
 	deviceId string,
@@ -109,6 +109,34 @@ func GetDevice(
 	return device, nil
 }
 
+func GetDeviceByUser(ctx context.Context, db *sql.DB, userId uuid.UUID) ([]models.Device, error) {
+	var devices []models.Device
+
+	rows, err := db.QueryContext(ctx, "SELECT * FROM devices WHERE user_id = $1", userId)
+	if err != nil {
+		return devices, err
+	}
+
+	for rows.Next() {
+		var device models.Device
+		err := rows.Scan(
+			&device.DeviceId,
+			&device.UserId,
+			&device.Status,
+			&device.BatteryLevel,
+			&device.LastSyncTime,
+			&device.PairedTime,
+		)
+		if err != nil {
+			return devices, err
+		}
+
+		devices = append(devices, device)
+	}
+
+	return devices, nil
+}
+
 func DeleteDevice(
 	ctx context.Context,
 	db *sql.DB,
@@ -140,7 +168,7 @@ func DeleteDevice(
 		)
 	}
 
-	_, err = GetDevice(ctx, db, deviceId)
+	_, err = GetDeviceById(ctx, db, deviceId)
 	if errors.Is(err, ErrNoDevice) {
 		return deletedDevice, nil
 	}

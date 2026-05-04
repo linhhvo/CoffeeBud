@@ -68,6 +68,9 @@ func main() {
 		// disconnect a device from user account
 		api.DELETE("/devices/:deviceId", handlers.RemoveDeviceHandler(db))
 
+		// get a list of devices connected to user account
+		api.GET("/devices", handlers.GetDevicesByUser(db))
+
 		// retrieve activity events for specific user account
 		api.GET("/activities", handlers.GetActivitiesByUserHandler(db))
 		// api.GET(

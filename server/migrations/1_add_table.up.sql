@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS devices
     user_id        uuid NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
     status         varchar(50) DEFAULT 'pending',
     battery_level  smallint,
-    last_synced_at timestamptz DEFAULT CURRENT_TIMESTAMP,
-    paired_at      timestamptz DEFAULT CURRENT_TIMESTAMP
+    last_synced_at timestamptz,
+    paired_at      timestamptz
 );
 
 CREATE TABLE IF NOT EXISTS habit_rules
