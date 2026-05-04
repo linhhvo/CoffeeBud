@@ -140,7 +140,6 @@ const DevicePairPopup: React.FC<DevicePairPopupProps> = (
                     <div className="flex items-center gap-3">
                         {/* Blinking scan indicator */}
                         <span className="relative flex h-2.5 w-2.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
                             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
                         </span>
                         <h2 className="text-base font-semibold text-zinc-100 tracking-wide">

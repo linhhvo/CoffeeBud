@@ -1,15 +1,15 @@
-import {useEffect} from "react";
-import {useWebSocket} from "./WebSocketProvider";
+import { useEffect } from "react";
+import { useWebSocket } from "./WebSocketProvider";
 
-export const useWebSocketEvent = <T>(
-    eventType: string,
-    callback: (payload: T) => void,
-) => {
-    const {subscribe} = useWebSocket();
+export function useWebSocketEvent(
+    eventType: WsEventTypes | WsEventTypes[],
+    callback: (payload: any) => void,
+) {
+    const { subscribe } = useWebSocket();
 
     useEffect(() => {
-        const unsubscribe = subscribe(eventType, callback);
-
-        return unsubscribe;
-    }, [eventType, callback, subscribe]);
-};
+        const types = Array.isArray(eventType) ? eventType : [eventType];
+        const unsubscribers = types.map((type) => subscribe(type, callback));
+        return () => unsubscribers.forEach((fn) => fn()); // clean up callbacks when component unmounts
+    }, [eventType, callback]);
+}

@@ -120,7 +120,7 @@ const DeviceManagementPage: React.FC = () => {
         });
     }, []);
 
-    const handlePairingConfirmed = useCallback((payload: Device) => {
+    const handleDeviceUpdate = useCallback((payload: Device) => {
         setConnectedDevices((prev) =>
             prev.map((d) =>
                 d.device_id === payload.device_id ? createDevice(payload) : d
@@ -128,7 +128,11 @@ const DeviceManagementPage: React.FC = () => {
         );
     }, []);
 
-    useWebSocketEvent(WsEventTypes.DEVICE_PAIRED, handlePairingConfirmed);
+    // update device info on UI when server updates device data
+    useWebSocketEvent(
+        [WsEventTypes.DEVICE_UPDATED, WsEventTypes.DEVICE_PAIRED],
+        handleDeviceUpdate,
+    );
 
     const handleRemove = async (deviceId: string) => {
         setRemovingIds((prev) => new Set(prev).add(deviceId));
