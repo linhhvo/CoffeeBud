@@ -2,11 +2,10 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { authService } from "../apis/auth.service.ts";
 
-const LoginPage: React.FC = () => {
+const RegisterPage: React.FC = () => {
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [displayMsg, setDisplayMsg] = useState<string>("");
-
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -19,11 +18,11 @@ const LoginPage: React.FC = () => {
             await authService.register({ username, password });
             setDisplayMsg("Account created. Please log in.");
         } catch (error) {
-            if (error instanceof Error) {
-                setDisplayMsg(error.message);
-            } else {
-                setDisplayMsg("An unexpected network error occurred.");
-            }
+            setDisplayMsg(
+                error instanceof Error
+                    ? error.message
+                    : "Server can't process account registration request",
+            );
         } finally {
             setIsSubmitting(false);
         }
@@ -38,7 +37,6 @@ const LoginPage: React.FC = () => {
             <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
                 <form
                     onSubmit={handleSubmit}
-                    method="POST"
                     className="space-y-6"
                 >
                     <div>
@@ -50,11 +48,11 @@ const LoginPage: React.FC = () => {
                         </label>
                         <div className="mt-2">
                             <input
+                                autoFocus
                                 id="username"
                                 name="username"
-                                onChange={(
-                                    e: React.ChangeEvent<HTMLInputElement>,
-                                ) => setUsername(e.target.value)}
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                                 required
                                 className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-emerald-700 sm:text-sm/6"
                             />
@@ -76,9 +74,8 @@ const LoginPage: React.FC = () => {
                                 type="password"
                                 name="password"
                                 required
-                                onChange={(
-                                    e: React.ChangeEvent<HTMLInputElement>,
-                                ) => setPassword(e.target.value)}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-emerald-700 sm:text-sm/6"
                             />
                         </div>
@@ -89,7 +86,8 @@ const LoginPage: React.FC = () => {
                     <div>
                         <button
                             type="submit"
-                            className="cursor-pointer flex w-full justify-center rounded-md bg-emerald-900 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-emerald-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+                            disabled={isSubmitting}
+                            className="cursor-pointer flex w-full justify-center rounded-md bg-emerald-900 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
                         >
                             {isSubmitting ? "Registering..." : "Register"}
                         </button>
@@ -108,4 +106,4 @@ const LoginPage: React.FC = () => {
         </div>
     );
 };
-export default LoginPage;
+export default RegisterPage;
