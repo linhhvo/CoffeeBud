@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import type { Device } from "../apis/types.ts";
+import type { Device } from "./types.ts";
 import { useWebSocketEvent } from "../websocket/useWebSocketEvent.ts";
 import { WsEventTypes } from "../websocket/types.ts";
 import { deviceService } from "../apis/device.service.ts";
@@ -14,6 +14,7 @@ interface DeviceEntry {
 
 interface DevicePairPopupProps {
     onClose: () => void;
+    onPairingInitiated?: (device: Device) => void;
 }
 
 const StatusBadge: React.FC<{ status: PairingStatus; errorMessage?: string }> =
@@ -65,7 +66,9 @@ const StatusBadge: React.FC<{ status: PairingStatus; errorMessage?: string }> =
         return null;
     };
 
-const DevicePairPopup: React.FC<DevicePairPopupProps> = ({ onClose }) => {
+const DevicePairPopup: React.FC<DevicePairPopupProps> = (
+    { onClose, onPairingInitiated },
+) => {
     const [devices, setDevices] = useState<DeviceEntry[]>([]);
 
     const handleNewDevice = useCallback((payload: Device) => {
@@ -101,12 +104,15 @@ const DevicePairPopup: React.FC<DevicePairPopupProps> = ({ onClose }) => {
             const data = await deviceService.pair(deviceId);
 
             if (!data.success) {
-                throw new Error(data.message ?? "Pairing request failed");
+                throw new Error(data.error ?? "Pairing request failed");
             }
+
+            onPairingInitiated?.(data.data);
         } catch (error) {
             const message = error instanceof Error
                 ? error.message
                 : "Server can't process pairing request";
+
             setDevices((prev) =>
                 prev.map((d) =>
                     d.id === deviceId
@@ -120,7 +126,7 @@ const DevicePairPopup: React.FC<DevicePairPopupProps> = ({ onClose }) => {
     return (
         /* Backdrop */
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-sm"
             onClick={(e) => e.target === e.currentTarget && onClose()}
         >
             {/* Panel */}

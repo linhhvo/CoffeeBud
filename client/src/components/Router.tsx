@@ -3,7 +3,7 @@ import {createBrowserRouter} from "react-router-dom";
 import RegisterPage from "./RegisterPage.tsx";
 import Layout from "./Layout.tsx";
 import DashboardPage from "./DashboardPage.tsx";
-import SettingsPage from "./SettingsPage.tsx";
+import DeviceManagementPage from "./DeviceManagementPage.tsx";
 import ProtectedRoute from "./ProtectedRoute.tsx";
 
 export const router = createBrowserRouter([
@@ -17,7 +17,7 @@ export const router = createBrowserRouter([
                 Component: ProtectedRoute,
                 children: [
                     { path: "dashboard", Component: DashboardPage },
-                    { path: "settings", Component: SettingsPage },
+                    {path: "settings", Component: DeviceManagementPage},
                 ],
             },
         ],

@@ -12,4 +12,9 @@ export const deviceService = {
             method: "DELETE",
         });
     },
+    getAll: () => {
+        return apiClient<ApiResponse>(`/devices`, {
+            method: "GET",
+        });
+    },
 };
