@@ -45,7 +45,7 @@ func main() {
 
 	/** ROUTES FOR PHYSICAL DEVICE INTERACTION **/
 	api.POST("/sync/:deviceId", handlers.AddDeviceHandler(wsHub, db)) // pair new device
-	api.PUT("/sync/:deviceId", handlers.SyncDataHandler(db))
+	api.PUT("/sync/:deviceId", handlers.SyncDataHandler(wsHub, db))
 
 	/** ROUTES FOR CLIENT INTERACTION **/
 	// websocket endpoint

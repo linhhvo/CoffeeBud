@@ -4,6 +4,7 @@ import (
 	"coffee-bud/internal/middleware"
 	"coffee-bud/internal/models"
 	"coffee-bud/internal/repositories"
+	"coffee-bud/internal/websocket"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -13,19 +14,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SyncDataHandler(db *sql.DB) gin.HandlerFunc {
+func SyncDataHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 		var json []models.ActivityEvent
 
 		var device models.Device
 
+		// bind device Id
 		if err := c.ShouldBindUri(&device); err != nil {
 			c.Status(http.StatusBadRequest)
 			c.Error(err)
 			return
 		}
 
+		// bind battery level
 		if err := c.ShouldBindQuery(&device); err != nil {
 			c.Status(http.StatusBadRequest)
 			c.Error(err)
@@ -49,11 +52,16 @@ func SyncDataHandler(db *sql.DB) gin.HandlerFunc {
 		rulesChanged, err := repositories.HasPendingRuleChanges(ctx, db, device.DeviceId)
 
 		// update device info
-		_, err = repositories.UpdateDevice(ctx, db, device)
+		device, err = repositories.UpdateDevice(ctx, db, device)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.Error(err)
 			return
+		}
+
+		hub.Broadcast <- models.WebSocketPayload{
+			EventType: "DEVICE_UPDATED",
+			EventData: device,
 		}
 
 		// parse list of activities
