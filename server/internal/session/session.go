@@ -30,14 +30,14 @@ func SetCookie(c *gin.Context, userId uuid.UUID) error {
 		Secure:   true,
 		HttpOnly: true,
 		MaxAge:   3600,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteNoneMode,
 	}
 
 	authFlagCookie := http.Cookie{
 		Name:     "is_authenticated",
 		Value:    "true",
 		Path:     "/",
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteNoneMode,
 		Secure:   true,
 		MaxAge:   3600,
 	}
@@ -65,7 +65,7 @@ func ClearSessions(c *gin.Context, tokenId string) {
 		Path:     "/",
 		Secure:   true,
 		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteNoneMode,
 		MaxAge:   -1,
 	}
 
@@ -74,7 +74,7 @@ func ClearSessions(c *gin.Context, tokenId string) {
 		Value:    "",
 		Path:     "/",
 		Secure:   true,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteNoneMode,
 		MaxAge:   -1,
 	}
 

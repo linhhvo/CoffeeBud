@@ -33,13 +33,15 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = (
     const reconnectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
     const reconnectAttempts = useRef(0);
     const isMounted = useRef(true);
+    const isAuthenticatedRef = useRef(isAuthenticated);
     const MAX_RECONNECT_ATTEMPTS = 10;
 
     useEffect(() => {
         isMounted.current = true;
+        isAuthenticatedRef.current = isAuthenticated;
 
         // if user is not logged in, close the connection if opened
-        if (!isAuthenticated) {
+        if (!isAuthenticatedRef.current) {
             if (ws.current) {
                 ws.current.close();
                 ws.current = null;
@@ -84,7 +86,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = (
                 console.log("WebSocket connection closed");
 
                 // do not reattempt if component has been unmounted or user has logged out
-                if (!isMounted.current || !isAuthenticated) return;
+                if (!isMounted.current || !isAuthenticatedRef.current) return;
 
                 // try to reconnect with exponential backoff
                 if (reconnectAttempts.current < MAX_RECONNECT_ATTEMPTS) {
