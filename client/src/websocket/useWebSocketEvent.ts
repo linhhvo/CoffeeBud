@@ -1,11 +1,12 @@
-import { useEffect } from "react";
-import { useWebSocket } from "./WebSocketProvider";
+import {useEffect} from "react";
+import {useWebSocket} from "./WebSocketProvider";
+import type {WsEventType} from "./types";
 
 export function useWebSocketEvent(
-    eventType: WsEventTypes | WsEventTypes[],
+    eventType: WsEventType | WsEventType[],
     callback: (payload: any) => void,
 ) {
-    const { subscribe } = useWebSocket();
+    const {subscribe} = useWebSocket();
 
     useEffect(() => {
         const types = Array.isArray(eventType) ? eventType : [eventType];

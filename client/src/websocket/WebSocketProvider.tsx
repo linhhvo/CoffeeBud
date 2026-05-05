@@ -1,13 +1,6 @@
-import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
-import type { WsEventMsg } from "./types";
-import { WsEventTypes } from "./types";
-import { useAuth } from "../context/AuthContext.tsx";
+import React, {createContext, useContext, useEffect, useRef, useState,} from "react";
+import type {WsEventMsg, WsEventType} from "./types";
+import {useAuth} from "../context/AuthContext.tsx";
 
 type Listener = (payload: any) => void;
 
@@ -18,17 +11,18 @@ export type ConnectionState =
     | "failed";
 
 interface WebSocketContextType {
-    send: (type: WsEventTypes, payload: any) => boolean;
-    subscribe: (eventType: WsEventTypes, callback: Listener) => () => void;
+    send: (type: WsEventType, payload: any) => boolean;
+    subscribe: (eventType: WsEventType, callback: Listener) => () => void;
     connectionState: ConnectionState;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
+const wsUrl = import.meta.env.VITE_WS_URL;
 
 export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = (
-    { children },
+    {children},
 ) => {
-    const { isAuthenticated } = useAuth();
+    const {isAuthenticated} = useAuth();
 
     const [connectionState, setConnectionState] = useState<ConnectionState>(
         "disconnected",
@@ -59,7 +53,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = (
 
         const connect = () => {
             setConnectionState("connecting");
-            ws.current = new WebSocket("ws://localhost:8080/ws");
+            ws.current = new WebSocket(wsUrl);
 
             ws.current.onopen = () => {
                 setConnectionState("connected");
@@ -125,16 +119,16 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = (
         };
     }, [isAuthenticated]);
 
-    const send = (type: WsEventTypes, payload: any): boolean => {
+    const send = (type: WsEventType, payload: any): boolean => {
         if (ws.current?.readyState === WebSocket.OPEN) {
-            ws.current.send(JSON.stringify({ type, payload }));
+            ws.current.send(JSON.stringify({type, payload}));
             return true;
         }
         console.warn("WebSocket is not open, message dropped:", type);
         return false;
     };
 
-    const subscribe = (eventType: WsEventTypes, callback: Listener) => {
+    const subscribe = (eventType: WsEventType, callback: Listener) => {
         if (!listeners.current.has(eventType)) {
             listeners.current.set(eventType, new Set());
         }
@@ -146,7 +140,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = (
     };
 
     return (
-        <WebSocketContext.Provider value={{ send, subscribe, connectionState }}>
+        <WebSocketContext.Provider value={{send, subscribe, connectionState}}>
             {children}
         </WebSocketContext.Provider>
     );
