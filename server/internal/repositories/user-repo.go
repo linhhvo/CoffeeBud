@@ -45,7 +45,7 @@ func GetUser(
 
 	row := db.QueryRowContext(
 		ctx,
-		"SELECT * FROM users WHERE username = $1",
+		"SELECT user_id, username, password FROM users WHERE username = $1",
 		data.Username,
 	)
 
@@ -53,7 +53,6 @@ func GetUser(
 		&foundUser.UserId,
 		&foundUser.Username,
 		&foundUser.Password,
-		&foundUser.CreatedTime,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

@@ -45,7 +45,7 @@ func main() {
 
 	/** ROUTES FOR PHYSICAL DEVICE INTERACTION **/
 	api.POST("/sync/:deviceId", handlers.AddDeviceHandler(wsHub, db)) // pair new device
-	api.PUT("/sync/:deviceId", handlers.SyncDataHandler(db))
+	api.PUT("/sync/:deviceId", handlers.SyncDataHandler(wsHub, db))
 
 	/** ROUTES FOR CLIENT INTERACTION **/
 	// websocket endpoint
@@ -67,6 +67,9 @@ func main() {
 
 		// disconnect a device from user account
 		api.DELETE("/devices/:deviceId", handlers.RemoveDeviceHandler(db))
+
+		// get a list of devices connected to user account
+		api.GET("/devices", handlers.GetDevicesByUser(db))
 
 		// retrieve activity events for specific user account
 		api.GET("/activities", handlers.GetActivitiesByUserHandler(db))

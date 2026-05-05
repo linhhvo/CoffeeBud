@@ -16,7 +16,7 @@ func AddActivity(
 ) (models.ActivityEvent, error) {
 	var newActivity models.ActivityEvent
 
-	device, err := GetDevice(ctx, db, data.DeviceId)
+	device, err := GetDeviceById(ctx, db, data.DeviceId)
 	if err != nil {
 		return newActivity, err
 	}

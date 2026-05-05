@@ -51,14 +51,14 @@ const Navbar: React.FC = () => {
                         },
                         rounded-md px-3 py-2 text-sm font-medium`}
                 >
-                    Settings
+                    Devices
                 </NavLink>
             </div>
 
             <div>
                 <button
                     onClick={handleLogout}
-                    className="cursor-pointer px-3 py-2 bg-emerald-800 rounded-md hover:bg-emerald-700 transition-colors text-sm text-olive-300 font-medium"
+                    className="cursor-pointer px-3 py-2 bg-zinc-800 rounded-md hover:bg-zinc-700 transition-colors text-sm text-olive-300 font-medium"
                 >
                     Logout
                 </button>

@@ -6,14 +6,21 @@ import React, {
     useState,
 } from "react";
 import type { WsEventMsg } from "./types";
+import { WsEventTypes } from "./types";
 import { useAuth } from "../context/AuthContext.tsx";
 
 type Listener = (payload: any) => void;
 
+export type ConnectionState =
+    | "connecting"
+    | "connected"
+    | "disconnected"
+    | "failed";
+
 interface WebSocketContextType {
-    send: (type: string, payload: any) => void;
-    subscribe: (eventType: string, callback: Listener) => () => void;
-    isConnected: boolean; // New state exposed to components
+    send: (type: WsEventTypes, payload: any) => boolean;
+    subscribe: (eventType: WsEventTypes, callback: Listener) => () => void;
+    connectionState: ConnectionState;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
@@ -23,17 +30,21 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = (
 ) => {
     const { isAuthenticated } = useAuth();
 
-    const [isConnected, setIsConnected] = useState(false);
+    const [connectionState, setConnectionState] = useState<ConnectionState>(
+        "disconnected",
+    );
     const ws = useRef<WebSocket | null>(null);
     const listeners = useRef<Map<string, Set<Listener>>>(new Map());
 
-    const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
+    const reconnectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
     const reconnectAttempts = useRef(0);
+    const isMounted = useRef(true);
     const MAX_RECONNECT_ATTEMPTS = 10;
 
     useEffect(() => {
-        let isMounted = true;
+        isMounted.current = true;
 
+        // if user is not logged in, close the connection if opened
         if (!isAuthenticated) {
             if (ws.current) {
                 ws.current.close();
@@ -42,28 +53,28 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = (
             if (reconnectTimeout.current) {
                 clearTimeout(reconnectTimeout.current);
             }
-            setIsConnected(false);
+            setConnectionState("disconnected");
             return;
         }
+
         const connect = () => {
+            setConnectionState("connecting");
             ws.current = new WebSocket("ws://localhost:8080/ws");
 
             ws.current.onopen = () => {
-                setIsConnected(true);
-                reconnectAttempts.current = 0; // Reset attempts on successful connection
+                setConnectionState("connected");
+                reconnectAttempts.current = 0;
                 console.log("Connected to the WebSocket server");
             };
 
             ws.current.onmessage = (event) => {
                 try {
                     const data: WsEventMsg = JSON.parse(event.data);
-
                     console.log(data);
 
                     const eventListeners = listeners.current.get(
                         data.event_type,
                     );
-
                     if (eventListeners) {
                         eventListeners.forEach((callback) =>
                             callback(data.event_data)
@@ -75,23 +86,25 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = (
             };
 
             ws.current.onclose = () => {
-                setIsConnected(false);
-                console.log("close websocket connection");
+                setConnectionState("disconnected");
+                console.log("WebSocket connection closed");
 
-                if (
-                    isMounted &&
-                    isAuthenticated &&
-                    reconnectAttempts.current < MAX_RECONNECT_ATTEMPTS
-                ) {
+                // do not reattempt if component has been unmounted or user has logged out
+                if (!isMounted.current || !isAuthenticated) return;
+
+                // try to reconnect with exponential backoff
+                if (reconnectAttempts.current < MAX_RECONNECT_ATTEMPTS) {
                     const timeout = Math.min(
                         10000,
                         1000 * Math.pow(2, reconnectAttempts.current),
                     );
-
                     reconnectTimeout.current = setTimeout(() => {
                         reconnectAttempts.current += 1;
                         connect();
                     }, timeout);
+                } else {
+                    setConnectionState("failed");
+                    console.warn("WebSocket max reconnect attempts reached");
                 }
             };
 
@@ -103,7 +116,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = (
         connect();
 
         return () => {
-            isMounted = false;
+            isMounted.current = false;
 
             if (reconnectTimeout.current) {
                 clearTimeout(reconnectTimeout.current);
@@ -112,13 +125,16 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = (
         };
     }, [isAuthenticated]);
 
-    const send = (type: string, payload: any) => {
+    const send = (type: WsEventTypes, payload: any): boolean => {
         if (ws.current?.readyState === WebSocket.OPEN) {
             ws.current.send(JSON.stringify({ type, payload }));
+            return true;
         }
+        console.warn("WebSocket is not open, message dropped:", type);
+        return false;
     };
 
-    const subscribe = (eventType: string, callback: Listener) => {
+    const subscribe = (eventType: WsEventTypes, callback: Listener) => {
         if (!listeners.current.has(eventType)) {
             listeners.current.set(eventType, new Set());
         }
@@ -130,7 +146,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = (
     };
 
     return (
-        <WebSocketContext.Provider value={{ send, subscribe, isConnected }}>
+        <WebSocketContext.Provider value={{ send, subscribe, connectionState }}>
             {children}
         </WebSocketContext.Provider>
     );

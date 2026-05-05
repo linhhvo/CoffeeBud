@@ -1,11 +1,12 @@
 export interface WsEventMsg {
-    event_type: string;
-    event_data: T;
+    event_type: WsEventTypes;
+    event_data: any;
 }
 
 export enum WsEventTypes {
     NEW_DEVICE = "NEW_DEVICE",
-    UPDATE_DEVICE = "UPDATE_DEVICE",
-    UPDATE_DASHBOARD = "UPDATE_DASHBOARD",
-    UPDATE_PET = "UPDATE_PET",
+    DEVICE_PAIRED = "DEVICE_PAIRED",
+    DEVICE_UPDATED = "DEVICE_UPDATED",
+    DASHBOARD_UPDATED = "DASHBOARD_UPDATED",
+    PET_UPDATED = "PET_UPDATED",
 }
