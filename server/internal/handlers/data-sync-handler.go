@@ -83,6 +83,12 @@ func SyncDataHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 		}
 
 		// TODO: get pet mood based on new data
+		_, err = repositories.CalculateMood(ctx, db, device.UserId)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			c.Error(err)
+			return
+		}
 
 		// TODO: get pet name and avatar
 
