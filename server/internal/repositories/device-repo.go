@@ -117,6 +117,8 @@ func GetDeviceByUser(ctx context.Context, db *sql.DB, userId uuid.UUID) ([]model
 		return devices, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		var device models.Device
 		err := rows.Scan(
@@ -134,6 +136,15 @@ func GetDeviceByUser(ctx context.Context, db *sql.DB, userId uuid.UUID) ([]model
 		devices = append(devices, device)
 	}
 
+	if err := rows.Close(); err != nil {
+		return devices, fmt.Errorf("error closing database rows: %v", err)
+	}
+
+	// last error encountered by Rows.Scan
+	if err := rows.Err(); err != nil {
+		return devices, err
+	}
+
 	return devices, nil
 }
 
@@ -141,40 +152,29 @@ func DeleteDevice(
 	ctx context.Context,
 	db *sql.DB,
 	deviceId string,
-) (models.Device, error) {
-	var deletedDevice models.Device
-
-	row := db.QueryRowContext(
+) error {
+	result, err := db.ExecContext(
 		ctx,
-		"DELETE FROM devices WHERE device_id=$1 RETURNING device_id, user_id, status,battery_level, last_synced_at, paired_at",
+		"DELETE FROM devices WHERE device_id=$1",
 		deviceId,
 	)
 
-	err := row.Scan(
-		&deletedDevice.DeviceId,
-		&deletedDevice.UserId,
-		&deletedDevice.Status,
-		&deletedDevice.BatteryLevel,
-		&deletedDevice.LastSyncTime,
-		&deletedDevice.PairedTime,
-	)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return deletedDevice, ErrNoDevice
-		}
-		return deletedDevice, fmt.Errorf(
-			"error scanning returned row after deleting device: %v",
-			err,
-		)
+		return err
 	}
 
-	_, err = GetDeviceById(ctx, db, deviceId)
-	if errors.Is(err, ErrNoDevice) {
-		return deletedDevice, nil
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
 	}
 
-	return deletedDevice, fmt.Errorf(
-		"error getting device after deleting: %v",
-		err,
-	)
+	if rows == 0 {
+		return ErrNoDevice
+	}
+
+	if rows != 1 {
+		return fmt.Errorf("expected signle row affected, got %d rows affected", rows)
+	}
+
+	return nil
 }

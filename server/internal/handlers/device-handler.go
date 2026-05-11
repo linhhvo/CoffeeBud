@@ -139,7 +139,7 @@ func RemoveDeviceHandler(db *sql.DB) gin.HandlerFunc {
 
 		log.Println("remove device \"", device.DeviceId, "\"")
 
-		device, err := repositories.DeleteDevice(ctx, db, device.DeviceId)
+		err := repositories.DeleteDevice(ctx, db, device.DeviceId)
 		if err != nil {
 			if errors.Is(err, repositories.ErrNoDevice) {
 				c.Status(http.StatusNotFound)
@@ -151,7 +151,7 @@ func RemoveDeviceHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		middleware.SuccessResponse(c, 200, device)
+		middleware.SuccessResponse(c, 200, nil)
 	}
 
 }

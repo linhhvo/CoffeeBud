@@ -5,7 +5,6 @@ import (
 	"coffee-bud/internal/handlers"
 	"coffee-bud/internal/middleware"
 	"coffee-bud/internal/session"
-	"coffee-bud/internal/validators"
 	"coffee-bud/internal/websocket"
 	"fmt"
 	"log"
@@ -52,7 +51,7 @@ func main() {
 
 	router.Use(middleware.ErrorHandler())
 
-	validators.ConfigCustomValidators()
+	// validators.ConfigCustomValidators()
 
 	api := router.Group("/api")
 

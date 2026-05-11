@@ -68,12 +68,12 @@ func AddDefaultHabitRule(
 	db *sql.DB,
 	userId uuid.UUID,
 ) error {
-	var id uuid.UUID
-	err := db.QueryRowContext(
+	_, err := db.ExecContext(
 		ctx,
-		"INSERT INTO habit_rules (user_id) VALUES ($1) RETURNING user_id",
+		"INSERT INTO habit_rules (user_id) VALUES ($1)",
 		userId,
-	).Scan(&id)
+	)
+
 	if err != nil {
 		return err
 	}

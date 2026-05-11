@@ -25,7 +25,7 @@ type Device struct {
 type ActivityEvent struct {
 	DeviceId     string    `uri:"deviceId" json:"device_id"`
 	UserId       uuid.UUID `json:"user_id"`
-	ActivityType string    `json:"type" binding:"required,validActivityType"`
+	ActivityType string    `json:"type" binding:"required,oneof=water coffee break"`
 	Timestamp    time.Time `json:"timestamp" binding:"required"`
 }
 
@@ -35,6 +35,13 @@ type HabitRule struct {
 	WaterInterval  int       `json:"water_interval"`
 	CoffeeLimit    int       `json:"coffee_limit"`
 	BreakInterval  int       `json:"break_interval"`
+	LastUpdateTime time.Time `json:"last_update_time"`
+}
+
+type PetState struct {
+	UserId         uuid.UUID `json:"user_id"`
+	AvatarUrl      string    `json:"avatar_url"`
+	Mood           string    `json:"mood" binding:"oneof=happy neutral sad"`
 	LastUpdateTime time.Time `json:"last_update_time"`
 }
 
