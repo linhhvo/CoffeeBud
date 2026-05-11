@@ -42,7 +42,7 @@ const Navbar: React.FC = () => {
                     Dashboard
                 </NavLink>
                 <NavLink
-                    to="/settings"
+                    to="/devices"
                     className={({ isActive }) =>
                         ` ${
                             isActive
