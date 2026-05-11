@@ -27,6 +27,7 @@ func GetHabitRuleByUser(
 		&rule.WaterInterval,
 		&rule.CoffeeLimit,
 		&rule.BreakInterval,
+		&rule.LastUpdateTime,
 	)
 	if err != nil {
 		return rule, err
@@ -53,7 +54,13 @@ func GetHabitRuleByDevice(
 		return rule, ErrNoDevice
 	}
 
-	return GetHabitRuleByUser(ctx, db, userId)
+	rule, err = GetHabitRuleByUser(ctx, db, userId)
+	if err != nil {
+		return rule, err
+	}
+
+	rule.DeviceId = deviceId
+	return rule, nil
 }
 
 func AddDefaultHabitRule(

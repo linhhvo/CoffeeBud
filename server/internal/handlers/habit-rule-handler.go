@@ -24,7 +24,7 @@ func GetHabitRuleByUserHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		rule, err := repositories.GetHabitRuleByUser(ctx, db, userId.(uuid.UUID))
+		rules, err := repositories.GetHabitRuleByUser(ctx, db, userId.(uuid.UUID))
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				c.Status(http.StatusNotFound)
@@ -37,7 +37,30 @@ func GetHabitRuleByUserHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		middleware.SuccessResponse(c, 200, rule)
+		middleware.SuccessResponse(c, 200, rules)
+	}
+}
+
+func GetHabitRuleByDeviceHandler(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		deviceId := c.Param("deviceId")
+
+		rules, err := repositories.GetHabitRuleByDevice(ctx, db, deviceId)
+		if err != nil {
+			if errors.Is(err, repositories.ErrNoDevice) {
+				c.Status(http.StatusNotFound)
+				c.Error(errors.New("device doesn't exist"))
+				return
+			}
+
+			c.Status(http.StatusInternalServerError)
+			c.Error(err)
+			return
+		}
+
+		middleware.SuccessResponse(c, 200, rules)
 	}
 }
 

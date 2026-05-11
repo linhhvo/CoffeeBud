@@ -9,16 +9,15 @@ import (
 	"coffee-bud/internal/websocket"
 	"fmt"
 	"log"
-	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	// if err := godotenv.Load("./.env", "../.env"); err != nil {
-	// 	log.Fatalf("error loading environments: %v", err.Error())
-	// }
+	if err := godotenv.Load("./.env", "../.env"); err != nil {
+		log.Fatalf("error loading environments: %v", err.Error())
+	}
 
 	session.Init()
 
@@ -38,18 +37,18 @@ func main() {
 	// gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-	router.Use(
-		cors.New(
-			cors.Config{
-				AllowOrigins:     []string{"https://coffeebud-client.fly.dev"},
-				AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
-				AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-				ExposeHeaders:    []string{"Content-Length"},
-				AllowCredentials: true,
-				MaxAge:           12 * time.Hour,
-			},
-		),
-	)
+	// router.Use(
+	// 	cors.New(
+	// 		cors.Config{
+	// 			AllowOrigins:     []string{"https://coffeebud-client.fly.dev"},
+	// 			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+	// 			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+	// 			ExposeHeaders:    []string{"Content-Length"},
+	// 			AllowCredentials: true,
+	// 			MaxAge:           12 * time.Hour,
+	// 		},
+	// 	),
+	// )
 
 	router.Use(middleware.ErrorHandler())
 
@@ -60,6 +59,7 @@ func main() {
 	/** ROUTES FOR PHYSICAL DEVICE INTERACTION **/
 	api.POST("/sync/:deviceId", handlers.AddDeviceHandler(wsHub, db)) // pair new device
 	api.PUT("/sync/:deviceId", handlers.SyncDataHandler(wsHub, db))
+	api.GET("/sync/:deviceId/habit-rules", handlers.GetHabitRuleByDeviceHandler(db))
 
 	/** ROUTES FOR CLIENT INTERACTION **/
 	// websocket endpoint
