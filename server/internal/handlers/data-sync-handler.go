@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -74,7 +75,7 @@ func SyncDataHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 		// add activity events
 		for _, data := range json {
 			data.DeviceId = device.DeviceId
-			_, err := repositories.AddActivity(ctx, db, data)
+			err := repositories.AddActivity(ctx, db, data)
 			if err != nil {
 				c.Status(http.StatusInternalServerError)
 				c.Error(fmt.Errorf("failed to add activity -- %v", err.Error()))
@@ -83,7 +84,10 @@ func SyncDataHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 		}
 
 		// TODO: get pet mood based on new data
-		_, err = repositories.CalculateMood(ctx, db, device.UserId)
+		// this should run every hour whenever data sync happens
+		// webapp can either calculate pet mood based on data sent from device
+		// or delegate the calculation to device and only store mood history for data analytics
+		_, err = repositories.CalculateMood(ctx, db, device.UserId, time.Now())
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.Error(err)

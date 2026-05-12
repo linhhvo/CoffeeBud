@@ -4,3 +4,6 @@ CREATE TABLE IF NOT EXISTS pet_mood_history
     mood      varchar(50),
     timestamp timestamptz DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE activity_events
+    ADD COLUMN interval_since_last int;
