@@ -14,12 +14,12 @@ func GetHabitRuleByUser(
 	ctx context.Context,
 	db *sql.DB,
 	userId uuid.UUID,
-) (models.HabitRule, error) {
-	var rule models.HabitRule
+) (models.Config, error) {
+	var rule models.Config
 
 	row := db.QueryRowContext(
 		ctx,
-		"SELECT * FROM habit_rules WHERE user_id = $1",
+		"SELECT * FROM configs WHERE user_id = $1",
 		userId,
 	)
 	err := row.Scan(
@@ -28,6 +28,8 @@ func GetHabitRuleByUser(
 		&rule.CoffeeLimit,
 		&rule.BreakInterval,
 		&rule.LastUpdateTime,
+		&rule.WakeUpTime,
+		&rule.SleepTime,
 	)
 	if err != nil {
 		return rule, err
@@ -40,8 +42,8 @@ func GetHabitRuleByDevice(
 	ctx context.Context,
 	db *sql.DB,
 	deviceId string,
-) (models.HabitRule, error) {
-	var rule models.HabitRule
+) (models.Config, error) {
+	var rule models.Config
 
 	var userId uuid.UUID
 
@@ -68,10 +70,13 @@ func AddDefaultHabitRule(
 	db *sql.DB,
 	userId uuid.UUID,
 ) error {
+	wakeupTime, _ := time.Parse(time.TimeOnly, "08:00:00")
+	sleepTime, _ := time.Parse(time.TimeOnly, "11:00:00")
+
 	_, err := db.ExecContext(
 		ctx,
-		"INSERT INTO habit_rules (user_id) VALUES ($1)",
-		userId,
+		"INSERT INTO configs (user_id, wakeup_time, sleep_time) VALUES ($1, $2, $3)",
+		userId, wakeupTime, sleepTime,
 	)
 
 	if err != nil {
@@ -83,51 +88,39 @@ func AddDefaultHabitRule(
 func UpdateHabitRule(
 	ctx context.Context,
 	db *sql.DB,
-	data models.HabitRule,
-) (models.HabitRule, error) {
-	var rule models.HabitRule
-
-	row := db.QueryRowContext(
+	data models.Config,
+) error {
+	_, err := db.ExecContext(
 		ctx,
-		"UPDATE habit_rules SET water_interval_minutes=$1, coffee_limit=$2, break_interval_minutes=$3, last_updated=CURRENT_TIMESTAMP WHERE user_id=$4 RETURNING user_id,water_interval_minutes, coffee_limit, break_interval_minutes",
+		"UPDATE configs SET water_interval_minutes=$1, coffee_limit=$2, break_interval_minutes=$3, last_updated=CURRENT_TIMESTAMP, wakeup_time=$4, sleep_time=$5 WHERE user_id=$6",
 		data.WaterInterval,
 		data.CoffeeLimit,
 		data.BreakInterval,
+		data.WakeUpTime,
+		data.SleepTime,
 		data.UserId,
-	)
-
-	err := row.Scan(
-		&rule.UserId,
-		&rule.WaterInterval,
-		&rule.CoffeeLimit,
-		&rule.BreakInterval,
 	)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			row := db.QueryRowContext(
+			_, err := db.ExecContext(
 				ctx,
-				"INSERT INTO habit_rules (user_id, water_interval_minutes, coffee_limit, break_interval_minutes) VALUES ($1, $2, $3, $4) RETURNING user_id, water_interval_minutes, coffee_limit, break_interval_minutes",
+				"INSERT INTO configs (user_id, water_interval_minutes, coffee_limit, break_interval_minutes, wakeup_time, sleep_time) VALUES ($1, $2, $3, $4, $5, $6)",
 				data.UserId,
 				data.WaterInterval,
 				data.CoffeeLimit,
 				data.BreakInterval,
-			)
-
-			err = row.Scan(
-				&rule.UserId,
-				&rule.WaterInterval,
-				&rule.CoffeeLimit,
-				&rule.BreakInterval,
+				data.WakeUpTime,
+				data.SleepTime,
 			)
 			if err != nil {
-				return rule, err
+				return err
 			}
 		}
-		return rule, err
+		return err
 	}
 
-	return rule, nil
+	return nil
 }
 
 func HasPendingRuleChanges(
@@ -144,7 +137,7 @@ func HasPendingRuleChanges(
 
 	row := db.QueryRowContext(
 		ctx,
-		"SELECT last_updated FROM habit_rules WHERE user_id = $1",
+		"SELECT last_updated FROM configs WHERE user_id = $1",
 		userId,
 	)
 

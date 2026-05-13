@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"coffee-bud/internal/middleware"
-	"coffee-bud/internal/models"
 	"coffee-bud/internal/repositories"
 	"database/sql"
 	"errors"
@@ -68,14 +67,6 @@ func UpdateHabitRuleHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		var json models.HabitRule
-
-		if err := c.ShouldBindJSON(&json); err != nil {
-			c.Status(http.StatusBadRequest)
-			c.Error(err)
-			return
-		}
-
 		userId, exists := c.Get("userId")
 		if !exists {
 			c.Status(http.StatusUnauthorized)
@@ -83,14 +74,27 @@ func UpdateHabitRuleHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		json.UserId = userId.(uuid.UUID)
+		config, err := repositories.GetHabitRuleByUser(ctx, db, userId.(uuid.UUID))
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			c.Status(http.StatusInternalServerError)
+			c.Error(fmt.Errorf("error getting config for this user: %v", err))
+			return
+		}
 
-		rule, err := repositories.UpdateHabitRule(ctx, db, json)
+		if err := c.ShouldBindJSON(&config); err != nil {
+			c.Status(http.StatusBadRequest)
+			c.Error(err)
+			return
+		}
+
+		config.UserId = userId.(uuid.UUID)
+
+		err = repositories.UpdateHabitRule(ctx, db, config)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.Error(fmt.Errorf("failed to update habit rule -- %v", err.Error()))
 			return
 		}
-		middleware.SuccessResponse(c, 201, rule)
+		middleware.SuccessResponse(c, 201, nil)
 	}
 }

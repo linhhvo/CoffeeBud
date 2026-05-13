@@ -30,13 +30,15 @@ type ActivityEvent struct {
 	IntervalSeconds int       `json:"interval_since_last"`
 }
 
-type HabitRule struct {
-	UserId         uuid.UUID `json:"user_id"`
-	DeviceId       string    `json:"device_id"`
-	WaterInterval  int       `json:"water_interval"`
-	CoffeeLimit    int       `json:"coffee_limit"`
-	BreakInterval  int       `json:"break_interval"`
-	LastUpdateTime time.Time `json:"last_update_time"`
+type Config struct {
+	UserId         uuid.UUID  `json:"user_id"`
+	DeviceId       string     `json:"device_id"`
+	WaterInterval  int        `json:"water_interval"`
+	CoffeeLimit    int        `json:"coffee_limit"`
+	BreakInterval  int        `json:"break_interval"`
+	LastUpdateTime time.Time  `json:"last_update_time"`
+	WakeUpTime     *time.Time `json:"wakeup_time"`
+	SleepTime      *time.Time `json:"sleep_time"`
 }
 
 type PetState struct {

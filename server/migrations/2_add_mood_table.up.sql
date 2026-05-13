@@ -7,3 +7,10 @@ CREATE TABLE IF NOT EXISTS pet_mood_history
 
 ALTER TABLE activity_events
     ADD COLUMN interval_since_last int;
+
+ALTER TABLE habit_rules
+    RENAME TO configs;
+
+ALTER TABLE configs
+    ADD wakeup_time time,
+    ADD sleep_time  time;
