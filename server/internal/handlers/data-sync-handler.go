@@ -50,7 +50,7 @@ func SyncDataHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 		}
 
 		// check to see if there are changes to habit rules to notify device
-		rulesChanged, err := repositories.HasPendingRuleChanges(ctx, db, device.DeviceId)
+		configChanged, err := repositories.HasPendingConfigChanges(ctx, db, device.DeviceId)
 
 		// update device info
 		device, err = repositories.UpdateDevice(ctx, db, device)
@@ -96,7 +96,7 @@ func SyncDataHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 
 		// TODO: get pet name and avatar
 
-		c.Header("Rules-Need-Update", strconv.Itoa(rulesChanged))
+		c.Header("Rules-Need-Update", strconv.Itoa(configChanged))
 		middleware.SuccessResponse(c, 200, nil)
 	}
 }

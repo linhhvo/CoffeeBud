@@ -58,7 +58,7 @@ func main() {
 	/** ROUTES FOR PHYSICAL DEVICE INTERACTION **/
 	api.POST("/sync/:deviceId", handlers.AddDeviceHandler(wsHub, db)) // pair new device
 	api.PUT("/sync/:deviceId", handlers.SyncDataHandler(wsHub, db))
-	api.GET("/sync/:deviceId/habit-rules", handlers.GetHabitRuleByDeviceHandler(db))
+	api.GET("/sync/:deviceId/habit-rules", handlers.GetConfigByDeviceHandler(db))
 
 	/** ROUTES FOR CLIENT INTERACTION **/
 	// websocket endpoint
@@ -88,10 +88,10 @@ func main() {
 		api.GET("/activities", handlers.GetActivitiesByUserHandler(db))
 
 		// retrieve habit rules for specific user account
-		api.GET("/habit-rules", handlers.GetHabitRuleByUserHandler(db))
+		api.GET("/habit-rules", handlers.GetConfigByUserHandler(db))
 
 		// update habit rules
-		api.POST("/habit-rules", handlers.UpdateHabitRuleHandler(db))
+		api.POST("/habit-rules", handlers.UpdateConfigHandler(db))
 
 		// get daily stat
 		api.GET("/stat/daily", handlers.GetDailyStatHandler(db))

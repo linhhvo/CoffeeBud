@@ -68,50 +68,65 @@ func CalculateMood(
 	// stores each habit rule state: true if goal is met and false if goal is not met
 	states := make(map[string]bool)
 
+	// get user habit rules
+	config, err := GetConfigByUser(ctx, db, userId)
+	if err != nil {
+		return pet, err
+	}
+
 	startTime := time.Date(
 		targetTime.Year(),
 		targetTime.Month(),
 		targetTime.Day(),
-		0,
-		0,
-		0,
-		0,
+		config.WakeUpTime.Hour(),
+		config.WakeUpTime.Minute(),
+		config.WakeUpTime.Second(),
+		config.WakeUpTime.Nanosecond(),
 		targetTime.Location(),
 	)
-	endTime := startTime.Add(24 * time.Hour)
 
-	// get user habit rules
-	rules, err := GetHabitRuleByUser(ctx, db, userId)
+	endTime := time.Date(
+		targetTime.Year(),
+		targetTime.Month(),
+		targetTime.Day(),
+		config.SleepTime.Hour(),
+		config.SleepTime.Minute(),
+		config.SleepTime.Second(),
+		config.SleepTime.Nanosecond(),
+		targetTime.Location(),
+	)
 
 	// check coffee intake
 	coffeeActivities, err := GetActivitiesByTypeTime(ctx, db, userId, "coffee", startTime, endTime)
 	if err != nil {
 		return pet, err
 	}
-	states["coffee"] = len(coffeeActivities) < rules.CoffeeLimit
+	states["coffee"] = len(coffeeActivities) < config.CoffeeLimit
 
 	// check water intake
 	waterActivity, err := GetLatestActivityByType(ctx, db, "water", userId, targetTime)
 	if err != nil {
+		// if there is no water recorded during the active period, it fails to meet the target goal
 		if errors.Is(err, sql.ErrNoRows) {
-			states["water"] = true
+			states["water"] = false
 		} else {
 			return pet, err
 		}
 	} else {
-		states["water"] = (waterActivity.IntervalSeconds / 60) < rules.WaterInterval
+		states["water"] = (waterActivity.IntervalSeconds / 60) < config.WaterInterval
 	}
 
 	// check break
 	breakActivity, err := GetLatestActivityByType(ctx, db, "break", userId, targetTime)
 	if err != nil {
+		// if there is no break recorded during the active period, it fails to meet the target goal
 		if errors.Is(err, sql.ErrNoRows) {
-			states["break"] = true
+			states["break"] = false
 		} else {
 			return pet, err
 		}
 	} else {
-		states["break"] = (breakActivity.IntervalSeconds / 60) < rules.BreakInterval
+		states["break"] = (breakActivity.IntervalSeconds / 60) < config.BreakInterval
 	}
 
 	count := 0

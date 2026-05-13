@@ -4,6 +4,7 @@ import (
 	"coffee-bud/internal/models"
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
 
@@ -14,15 +15,39 @@ func GetDailyStat(
 	ctx context.Context,
 	db *sql.DB,
 	userId uuid.UUID,
-	date time.Time,
+	targetTime time.Time,
 ) (models.DailyStats, error) {
 	var stat models.DailyStats
 
-	startTime := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
-	endTime := startTime.Add(24 * time.Hour)
+	config, err := GetConfigByUser(ctx, db, userId)
+	if err != nil {
+		return stat, fmt.Errorf("error geting config for this user: %v", err)
+	}
+
+	startTime := time.Date(
+		targetTime.Year(),
+		targetTime.Month(),
+		targetTime.Day(),
+		config.WakeUpTime.Hour(),
+		config.WakeUpTime.Minute(),
+		config.WakeUpTime.Second(),
+		config.WakeUpTime.Nanosecond(),
+		targetTime.Location(),
+	)
+
+	endTime := time.Date(
+		targetTime.Year(),
+		targetTime.Month(),
+		targetTime.Day(),
+		config.SleepTime.Hour(),
+		config.SleepTime.Minute(),
+		config.SleepTime.Second(),
+		config.SleepTime.Nanosecond(),
+		targetTime.Location(),
+	)
 
 	stat.UserId = userId
-	stat.Date = date
+	stat.Date = targetTime
 
 	// get total coffee intake in the given date
 	coffee, err := GetActivitiesByTypeTime(ctx, db, userId, "coffee", startTime, endTime)
@@ -36,14 +61,20 @@ func GetDailyStat(
 	if err != nil {
 		return stat, err
 	}
+
 	intervalSum := 0
+	// if there are break activities, add up the intervals to calculate average
 	if len(breaks) > 0 {
 		for _, b := range breaks {
 			intervalSum += b.IntervalSeconds
 		}
 		stat.Break = intervalSum / len(breaks)
-	} else {
-		stat.Break = 0
+	} else { // if there are no break activities, calculate the interval since wakeup time only
+		if time.Now().After(startTime) {
+			stat.Break = int(time.Now().Sub(startTime).Seconds())
+		} else {
+			stat.Break = 0
+		}
 	}
 
 	// get average break interval
@@ -52,13 +83,18 @@ func GetDailyStat(
 		return stat, err
 	}
 	intervalSum = 0
+	// if there are water activities, add up the intervals to calculate average
 	if len(waters) > 0 {
 		for _, w := range waters {
 			intervalSum += w.IntervalSeconds
 		}
 		stat.Water = intervalSum / len(waters)
-	} else {
-		stat.Water = 0
+	} else { // if there are no water activities, calculate the interval since wakeup time only
+		if time.Now().After(startTime) {
+			stat.Water = int(time.Now().Sub(startTime).Seconds())
+		} else {
+			stat.Water = 0
+		}
 	}
 
 	moods, err := GetMoodsByDate(ctx, db, userId, startTime, endTime)

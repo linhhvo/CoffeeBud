@@ -19,12 +19,28 @@ func AddActivity(ctx context.Context, db *sql.DB, data models.ActivityEvent) err
 
 	userId := device.UserId
 
+	config, err := GetConfigByUser(ctx, db, userId)
+	if err != nil {
+		return err
+	}
+
 	var interval float64
 	// get the latest activity before this activity
 	latest, err := GetLatestActivityByType(ctx, db, data.ActivityType, userId, data.Timestamp)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			interval = 0
+			startTime := time.Date(
+				data.Timestamp.Year(),
+				data.Timestamp.Month(),
+				data.Timestamp.Day(),
+				config.WakeUpTime.Hour(),
+				config.WakeUpTime.Minute(),
+				config.WakeUpTime.Second(),
+				config.WakeUpTime.Nanosecond(),
+				data.Timestamp.Location(),
+			)
+
+			interval = data.Timestamp.Sub(startTime).Seconds()
 		} else {
 			return err
 		}

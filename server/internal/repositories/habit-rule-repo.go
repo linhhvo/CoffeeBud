@@ -10,12 +10,12 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetHabitRuleByUser(
+func GetConfigByUser(
 	ctx context.Context,
 	db *sql.DB,
 	userId uuid.UUID,
 ) (models.Config, error) {
-	var rule models.Config
+	var config models.Config
 
 	row := db.QueryRowContext(
 		ctx,
@@ -23,27 +23,27 @@ func GetHabitRuleByUser(
 		userId,
 	)
 	err := row.Scan(
-		&rule.UserId,
-		&rule.WaterInterval,
-		&rule.CoffeeLimit,
-		&rule.BreakInterval,
-		&rule.LastUpdateTime,
-		&rule.WakeUpTime,
-		&rule.SleepTime,
+		&config.UserId,
+		&config.WaterInterval,
+		&config.CoffeeLimit,
+		&config.BreakInterval,
+		&config.LastUpdateTime,
+		&config.WakeUpTime,
+		&config.SleepTime,
 	)
 	if err != nil {
-		return rule, err
+		return config, err
 	}
 
-	return rule, nil
+	return config, nil
 }
 
-func GetHabitRuleByDevice(
+func GetConfigByDevice(
 	ctx context.Context,
 	db *sql.DB,
 	deviceId string,
 ) (models.Config, error) {
-	var rule models.Config
+	var config models.Config
 
 	var userId uuid.UUID
 
@@ -53,19 +53,19 @@ func GetHabitRuleByDevice(
 		deviceId,
 	).Scan(&userId)
 	if errors.Is(err, sql.ErrNoRows) {
-		return rule, ErrNoDevice
+		return config, ErrNoDevice
 	}
 
-	rule, err = GetHabitRuleByUser(ctx, db, userId)
+	config, err = GetConfigByUser(ctx, db, userId)
 	if err != nil {
-		return rule, err
+		return config, err
 	}
 
-	rule.DeviceId = deviceId
-	return rule, nil
+	config.DeviceId = deviceId
+	return config, nil
 }
 
-func AddDefaultHabitRule(
+func AddDefaultConfig(
 	ctx context.Context,
 	db *sql.DB,
 	userId uuid.UUID,
@@ -85,7 +85,7 @@ func AddDefaultHabitRule(
 	return nil
 }
 
-func UpdateHabitRule(
+func UpdateConfig(
 	ctx context.Context,
 	db *sql.DB,
 	data models.Config,
@@ -123,7 +123,7 @@ func UpdateHabitRule(
 	return nil
 }
 
-func HasPendingRuleChanges(
+func HasPendingConfigChanges(
 	ctx context.Context,
 	db *sql.DB,
 	deviceId string,

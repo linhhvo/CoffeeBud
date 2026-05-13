@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetHabitRuleByUserHandler(db *sql.DB) gin.HandlerFunc {
+func GetConfigByUserHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
@@ -23,7 +23,7 @@ func GetHabitRuleByUserHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		rules, err := repositories.GetHabitRuleByUser(ctx, db, userId.(uuid.UUID))
+		config, err := repositories.GetConfigByUser(ctx, db, userId.(uuid.UUID))
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				c.Status(http.StatusNotFound)
@@ -36,17 +36,17 @@ func GetHabitRuleByUserHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		middleware.SuccessResponse(c, 200, rules)
+		middleware.SuccessResponse(c, 200, config)
 	}
 }
 
-func GetHabitRuleByDeviceHandler(db *sql.DB) gin.HandlerFunc {
+func GetConfigByDeviceHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
 		deviceId := c.Param("deviceId")
 
-		rules, err := repositories.GetHabitRuleByDevice(ctx, db, deviceId)
+		config, err := repositories.GetConfigByDevice(ctx, db, deviceId)
 		if err != nil {
 			if errors.Is(err, repositories.ErrNoDevice) {
 				c.Status(http.StatusNotFound)
@@ -59,11 +59,11 @@ func GetHabitRuleByDeviceHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		middleware.SuccessResponse(c, 200, rules)
+		middleware.SuccessResponse(c, 200, config)
 	}
 }
 
-func UpdateHabitRuleHandler(db *sql.DB) gin.HandlerFunc {
+func UpdateConfigHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
@@ -74,7 +74,7 @@ func UpdateHabitRuleHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		config, err := repositories.GetHabitRuleByUser(ctx, db, userId.(uuid.UUID))
+		config, err := repositories.GetConfigByUser(ctx, db, userId.(uuid.UUID))
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			c.Status(http.StatusInternalServerError)
 			c.Error(fmt.Errorf("error getting config for this user: %v", err))
@@ -89,7 +89,7 @@ func UpdateHabitRuleHandler(db *sql.DB) gin.HandlerFunc {
 
 		config.UserId = userId.(uuid.UUID)
 
-		err = repositories.UpdateHabitRule(ctx, db, config)
+		err = repositories.UpdateConfig(ctx, db, config)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.Error(fmt.Errorf("failed to update habit rule -- %v", err.Error()))
