@@ -21,3 +21,21 @@ export function createDevice(rawData: any): Device {
         paired_time: rawData.paired_time ? new Date(rawData.paired_time) : null,
     };
 }
+
+export interface Config {
+    water_interval?: number | null;
+    coffee_limit?: number | null;
+    break_interval?: number | null;
+    wakeup_time?: string | null;
+    sleep_time?: string | null;
+}
+
+export function createConfig(rawData: any): Config {
+    return {
+        water_interval: rawData.water_interval,
+        coffee_limit: rawData.coffee_limit,
+        break_interval: rawData.break_interval,
+        wakeup_time: rawData.wakeup_time,
+        sleep_time: rawData.sleep_time,
+    };
+}

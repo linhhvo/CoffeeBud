@@ -6,6 +6,7 @@ import DashboardPage from "./DashboardPage.tsx";
 import DeviceManagementPage from "./DeviceManagementPage.tsx";
 import React from "react";
 import {useAuth} from "../context/AuthContext.tsx";
+import ConfigPage from "./ConfigPage.tsx";
 
 const ProtectedRoute: React.FC = () => {
     const { isAuthenticated } = useAuth();
@@ -51,6 +52,7 @@ export const router = createBrowserRouter([
                 children: [
                     { path: "dashboard", Component: DashboardPage },
                     { path: "devices", Component: DeviceManagementPage },
+                    {path: "configs", Component: ConfigPage},
                 ],
             },
         ],
