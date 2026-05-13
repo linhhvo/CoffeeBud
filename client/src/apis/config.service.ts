@@ -1,4 +1,5 @@
 import type { Config } from "../components/types.ts";
+import type { ApiResponse } from "./types.ts";
 import { apiClient } from "./client.ts";
 
 export const configService = {

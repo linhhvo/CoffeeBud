@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { configService } from "../apis/config.service.ts";
+import type { Config } from "./types.ts";
 import { createConfig } from "./types.ts";
 
 function SaveStatus(
@@ -116,12 +117,12 @@ function NumericConfigFields({
     const decrement = () => {
         const newValue = Math.max(min, value - step);
         onChange(newValue);
-        setInputValue(newValue);
+        setInputValue(String(newValue));
     };
     const increment = () => {
         const newValue = Math.min(max, value + step);
         onChange(newValue);
-        setInputValue(newValue);
+        setInputValue(String(newValue));
     };
 
     return (
@@ -195,7 +196,7 @@ function NumericConfigFields({
 }
 
 const ConfigPage: React.FC = () => {
-    const [configs, setconfigs] = useState<configs | null>(null);
+    const [configs, setconfigs] = useState<Config | null>(null);
     const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [saveState, setSaveState] = useState<
         "idle" | "saving" | "saved" | "error"
@@ -211,6 +212,10 @@ const ConfigPage: React.FC = () => {
     }, []);
 
     const handleSave = async () => {
+        if (configs === null) {
+            return;
+        }
+
         setSaveState("saving");
         if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
 
@@ -252,7 +257,7 @@ const ConfigPage: React.FC = () => {
                                     max={100}
                                     onChange={(v) =>
                                         setconfigs((r) => ({
-                                            ...r,
+                                            ...r as Config,
                                             coffee_limit: v,
                                         }))}
                                 />
@@ -266,7 +271,7 @@ const ConfigPage: React.FC = () => {
                                     step={5}
                                     onChange={(v) =>
                                         setconfigs((r) => ({
-                                            ...r,
+                                            ...r as Config,
                                             break_interval: v,
                                         }))}
                                 />
@@ -280,7 +285,7 @@ const ConfigPage: React.FC = () => {
                                     step={5}
                                     onChange={(v) =>
                                         setconfigs((r) => ({
-                                            ...r,
+                                            ...r as Config,
                                             water_interval: v,
                                         }))}
                                 />
@@ -290,7 +295,7 @@ const ConfigPage: React.FC = () => {
                                     value={configs?.wakeup_time}
                                     onChange={(v) =>
                                         setconfigs((r) => ({
-                                            ...r,
+                                            ...r as Config,
                                             wakeup_time: v,
                                         }))}
                                 />
@@ -300,7 +305,7 @@ const ConfigPage: React.FC = () => {
                                     value={configs?.sleep_time}
                                     onChange={(v) =>
                                         setconfigs((r) => ({
-                                            ...r,
+                                            ...r as Config,
                                             sleep_time: v,
                                         }))}
                                 />
@@ -317,7 +322,7 @@ const ConfigPage: React.FC = () => {
                     <SaveStatus state={saveState} />
                     <button
                         onClick={handleSave}
-                        disabled={saveState === "saving"}
+                        disabled={saveState === "saving" || !configs}
                         className="
                             bg-emerald-800 hover:bg-emerald-700 active:bg-emerald-700
                             disabled:opacity-50 disabled:cursor-not-allowed

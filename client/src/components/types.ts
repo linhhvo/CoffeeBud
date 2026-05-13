@@ -23,11 +23,11 @@ export function createDevice(rawData: any): Device {
 }
 
 export interface Config {
-    water_interval?: number | null;
-    coffee_limit?: number | null;
-    break_interval?: number | null;
-    wakeup_time?: string | null;
-    sleep_time?: string | null;
+    water_interval: number;
+    coffee_limit: number;
+    break_interval: number;
+    wakeup_time: string;
+    sleep_time: string;
 }
 
 export function createConfig(rawData: any): Config {
