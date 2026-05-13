@@ -1,7 +1,7 @@
 import {clearAuthFlag} from "../utils/cookie.ts";
 import {router} from "../components/Router.tsx";
 
-const BASE_URL = "http://localhost:8080/api"; // Using the proxy path we set up earlier
+const apiUrl = import.meta.env.VITE_API_URL;
 
 export async function apiClient<T>(
     endpoint: string,
@@ -16,7 +16,7 @@ export async function apiClient<T>(
         credentials: "include",
     };
 
-    const response = await fetch(`${BASE_URL}${endpoint}`, config);
+    const response = await fetch(`${apiUrl}${endpoint}`, config);
 
     if (response.status === 401) {
         clearAuthFlag();

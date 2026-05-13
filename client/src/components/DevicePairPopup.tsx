@@ -1,8 +1,9 @@
-import React, { useCallback, useState } from "react";
-import type { Device } from "./types.ts";
-import { useWebSocketEvent } from "../websocket/useWebSocketEvent.ts";
-import { WsEventTypes } from "../websocket/types.ts";
-import { deviceService } from "../apis/device.service.ts";
+import React, {useCallback, useState} from "react";
+import type {Device} from "./types.ts";
+import {createDevice} from "./types";
+import {useWebSocketEvent} from "../websocket/useWebSocketEvent.ts";
+import {WsEventTypes} from "../websocket/types.ts";
+import {deviceService} from "../apis/device.service.ts";
 
 type PairingStatus = "idle" | "pending" | "confirmed" | "error";
 
@@ -19,15 +20,16 @@ interface DevicePairPopupProps {
 
 const StatusBadge: React.FC<{ status: PairingStatus; errorMessage?: string }> =
     ({
-        status,
-        errorMessage,
-    }) => {
+         status,
+         errorMessage,
+     }) => {
         if (status === "pending") {
             return (
                 <div className="flex items-center gap-2 text-amber-400 text-xs font-mono">
                     <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+                        <span
+                            className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"/>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"/>
                     </span>
                     Press button on device to confirm
                 </div>
@@ -67,7 +69,7 @@ const StatusBadge: React.FC<{ status: PairingStatus; errorMessage?: string }> =
     };
 
 const DevicePairPopup: React.FC<DevicePairPopupProps> = (
-    { onClose, onPairingInitiated },
+    {onClose, onPairingInitiated},
 ) => {
     const [devices, setDevices] = useState<DeviceEntry[]>([]);
 
@@ -75,7 +77,7 @@ const DevicePairPopup: React.FC<DevicePairPopupProps> = (
         setDevices((prev) => {
             // Avoid duplicate entries
             if (prev.some((d) => d.id === payload.device_id)) return prev;
-            return [...prev, { id: payload.device_id, status: "idle" }];
+            return [...prev, {id: payload.device_id, status: "idle"}];
         });
     }, []);
 
@@ -84,7 +86,7 @@ const DevicePairPopup: React.FC<DevicePairPopupProps> = (
     const handlePairingConfirmed = useCallback((payload: Device) => {
         setDevices((prev) =>
             prev.map((d) =>
-                d.id === payload.device_id ? { ...d, status: "confirmed" } : d
+                d.id === payload.device_id ? {...d, status: "confirmed"} : d
             )
         );
     }, []);
@@ -95,7 +97,7 @@ const DevicePairPopup: React.FC<DevicePairPopupProps> = (
         setDevices((prev) =>
             prev.map((d) =>
                 d.id === deviceId
-                    ? { ...d, status: "pending", errorMessage: undefined }
+                    ? {...d, status: "pending", errorMessage: undefined}
                     : d
             )
         );
@@ -107,7 +109,7 @@ const DevicePairPopup: React.FC<DevicePairPopupProps> = (
                 throw new Error(data.error ?? "Pairing request failed");
             }
 
-            onPairingInitiated?.(data.data);
+            onPairingInitiated?.(createDevice(data.data));
         } catch (error) {
             const message = error instanceof Error
                 ? error.message
@@ -116,7 +118,7 @@ const DevicePairPopup: React.FC<DevicePairPopupProps> = (
             setDevices((prev) =>
                 prev.map((d) =>
                     d.id === deviceId
-                        ? { ...d, status: "error", errorMessage: message }
+                        ? {...d, status: "error", errorMessage: message}
                         : d
                 )
             );
@@ -136,11 +138,13 @@ const DevicePairPopup: React.FC<DevicePairPopupProps> = (
                     rounded-2xl shadow-2xl overflow-hidden
                 ">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+                <div
+                    className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
                     <div className="flex items-center gap-3">
                         {/* Blinking scan indicator */}
                         <span className="relative flex h-2.5 w-2.5">
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                            <span
+                                className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"/>
                         </span>
                         <h2 className="text-base font-semibold text-zinc-100 tracking-wide">
                             Available Devices
@@ -172,7 +176,8 @@ const DevicePairPopup: React.FC<DevicePairPopupProps> = (
                     {devices.length === 0
                         ? (
                             /* Empty state */
-                            <div className="flex flex-col items-center justify-center py-10 gap-3 text-zinc-500">
+                            <div
+                                className="flex flex-col items-center justify-center py-10 gap-3 text-zinc-500">
                                 <svg
                                     className="w-10 h-10 animate-pulse"
                                     fill="none"

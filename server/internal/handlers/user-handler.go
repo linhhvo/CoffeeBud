@@ -52,16 +52,19 @@ func RegisterUserHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		err = repositories.AddDefaultHabitRule(ctx, db, newUser.UserId)
+		err = repositories.AddDefaultConfig(ctx, db, newUser.UserId)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.Error(
-				fmt.Errorf(
-					"failed to add default habit rules -- %v",
-					err.Error(),
-				),
+				fmt.Errorf("error adding default habit rules: %v", err.Error()),
 			)
 			return
+		}
+
+		err = repositories.AddDefaultPet(ctx, db, newUser.UserId)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			c.Error(fmt.Errorf("error adding a default pet: %v", err.Error()))
 		}
 
 		middleware.SuccessResponse(c, 201, newUser)

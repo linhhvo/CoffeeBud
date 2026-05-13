@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"coffee-bud/internal/middleware"
-	"coffee-bud/internal/models"
 	"coffee-bud/internal/repositories"
 	"database/sql"
 	"errors"
@@ -13,33 +12,33 @@ import (
 	"github.com/google/uuid"
 )
 
-func AddActivityHandler(db *sql.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
-		var json models.ActivityEvent
-
-		if err := c.ShouldBindJSON(&json); err != nil {
-			c.Status(http.StatusBadRequest)
-			c.Error(err)
-			return
-		}
-
-		activity, err := repositories.AddActivity(ctx, db, json)
-		if err != nil {
-			if errors.Is(err, repositories.ErrNoDevice) {
-				c.Status(http.StatusNotFound)
-				c.Error(err)
-				return
-			}
-
-			c.Status(http.StatusInternalServerError)
-			c.Error(err)
-			return
-		}
-
-		middleware.SuccessResponse(c, 201, activity)
-	}
-}
+// func AddActivityHandler(db *sql.DB) gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		ctx := c.Request.Context()
+// 		var json models.ActivityEvent
+//
+// 		if err := c.ShouldBindJSON(&json); err != nil {
+// 			c.Status(http.StatusBadRequest)
+// 			c.Error(err)
+// 			return
+// 		}
+//
+// 		activity, err := repositories.AddActivity(ctx, db, json)
+// 		if err != nil {
+// 			if errors.Is(err, repositories.ErrNoDevice) {
+// 				c.Status(http.StatusNotFound)
+// 				c.Error(err)
+// 				return
+// 			}
+//
+// 			c.Status(http.StatusInternalServerError)
+// 			c.Error(err)
+// 			return
+// 		}
+//
+// 		middleware.SuccessResponse(c, 201, activity)
+// 	}
+// }
 
 // func GetAllActivitiesHandler(db *sql.DB) gin.HandlerFunc {
 // 	return func(c *gin.Context) {

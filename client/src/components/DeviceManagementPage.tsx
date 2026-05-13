@@ -1,12 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import DevicePairPopup from "./DevicePairPopup.tsx";
-import { deviceService } from "../apis/device.service.ts";
-import { useWebSocketEvent } from "../websocket/useWebSocketEvent.ts";
-import { WsEventTypes } from "../websocket/types.ts";
-import type { Device } from "./types.ts";
-import { createDevice } from "./types.ts";
-
-type DeviceStatus = "pending" | "confirmed";
+import {deviceService} from "../apis/device.service.ts";
+import {useWebSocketEvent} from "../websocket/useWebSocketEvent.ts";
+import {WsEventTypes} from "../websocket/types.ts";
+import type {Device, DeviceStatus} from "./types.ts";
+import {createDevice} from "./types.ts";
 
 function formatDateTime(date: Date | null): string {
     if (!date || !isFinite(date.getTime()) || date.getFullYear() <= 1) {
@@ -23,7 +21,7 @@ function formatDateTime(date: Date | null): string {
     }).format(date);
 }
 
-function BatteryIcon({ level }: { level: number | null }) {
+function BatteryIcon({level}: { level: number | null }) {
     if (level === null) {
         return <span className="text-zinc-600 text-xs font-mono">—</span>;
     }
@@ -31,8 +29,8 @@ function BatteryIcon({ level }: { level: number | null }) {
     const color = level > 60
         ? "text-emerald-400"
         : level > 25
-        ? "text-amber-400"
-        : "text-red-400";
+            ? "text-amber-400"
+            : "text-red-400";
     const bars = Math.round((level / 100) * 4); // 0–4 filled segments
 
     return (
@@ -83,20 +81,23 @@ function BatteryIcon({ level }: { level: number | null }) {
     );
 }
 
-function StatusPill({ status }: { status: DeviceStatus }) {
+function StatusPill({status}: { status: DeviceStatus }) {
     if (status === "confirmed") {
         return (
-            <span className="inline-flex items-center gap-1.5 bg-emerald-900/40 border border-emerald-700/50 text-emerald-400 text-xs font-mono px-2 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+            <span
+                className="inline-flex items-center gap-1.5 bg-emerald-900/40 border border-emerald-700/50 text-emerald-400 text-xs font-mono px-2 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"/>
                 Connected
             </span>
         );
     }
     return (
-        <span className="inline-flex items-center gap-1.5 bg-amber-900/30 border border-amber-700/40 text-amber-400 text-xs font-mono px-2 py-0.5 rounded-full">
+        <span
+            className="inline-flex items-center gap-1.5 bg-amber-900/30 border border-amber-700/40 text-amber-400 text-xs font-mono px-2 py-0.5 rounded-full">
             <span className="relative flex w-1.5 h-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                <span className="relative inline-flex rounded-full w-1.5 h-1.5 bg-amber-500" />
+                <span
+                    className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"/>
+                <span className="relative inline-flex rounded-full w-1.5 h-1.5 bg-amber-500"/>
             </span>
             Pending
         </span>
@@ -114,7 +115,9 @@ const DeviceManagementPage: React.FC = () => {
         deviceService.getAll().then((res) => {
             console.log(res);
             if (res?.data) {
-                const devices = res.data.map(createDevice);
+                const devices = Array.isArray(res.data)
+                    ? res.data.map(createDevice)
+                    : [createDevice(res.data)];
                 setConnectedDevices(devices);
             }
         });
@@ -218,9 +221,11 @@ const DeviceManagementPage: React.FC = () => {
                                     "
                                     >
                                         {/* Top row: ID + status + remove */}
-                                        <div className="flex items-start justify-between gap-4 mb-3">
+                                        <div
+                                            className="flex items-start justify-between gap-4 mb-3">
                                             <div className="flex items-center gap-3 min-w-0">
-                                                <span className="font-mono text-sm text-zinc-200 truncate">
+                                                <span
+                                                    className="font-mono text-sm text-zinc-200 truncate">
                                                     {device.device_id}
                                                 </span>
                                                 <StatusPill
@@ -288,7 +293,8 @@ const DeviceManagementPage: React.FC = () => {
                                         </div>
 
                                         {/* Bottom row: metadata */}
-                                        <div className="grid grid-cols-3 gap-4 pt-3 border-t border-zinc-800/80">
+                                        <div
+                                            className="grid grid-cols-3 gap-4 pt-3 border-t border-zinc-800/80">
                                             <div>
                                                 <p className="text-xs text-zinc-600 mb-1 uppercase tracking-widest">
                                                     Battery
@@ -302,7 +308,8 @@ const DeviceManagementPage: React.FC = () => {
                                                     : (
                                                         <BatteryIcon
                                                             level={device
-                                                                .battery_level}
+                                                                    .battery_level ??
+                                                                null}
                                                         />
                                                     )}
                                             </div>
@@ -312,7 +319,8 @@ const DeviceManagementPage: React.FC = () => {
                                                 </p>
                                                 <p className="text-xs text-zinc-400 font-mono">
                                                     {formatDateTime(
-                                                        device.paired_time,
+                                                        device.paired_time ??
+                                                        null,
                                                     )}
                                                 </p>
                                             </div>
@@ -322,7 +330,8 @@ const DeviceManagementPage: React.FC = () => {
                                                 </p>
                                                 <p className="text-xs text-zinc-400 font-mono">
                                                     {formatDateTime(
-                                                        device.last_sync_time,
+                                                        device.last_sync_time ??
+                                                        null,
                                                     )}
                                                 </p>
                                             </div>
@@ -341,9 +350,11 @@ const DeviceManagementPage: React.FC = () => {
                     onPairingInitiated={(device: Device) => {
                         setConnectedDevices((prev) => {
                             if (
-                                prev.some((d) => d.id === device.device_id)
+                                prev.some((d) =>
+                                    d.device_id === device.device_id
+                                )
                             ) return prev;
-                            return [...prev, createDevice(device)];
+                            return [...prev, device];
                         });
                     }}
                 />

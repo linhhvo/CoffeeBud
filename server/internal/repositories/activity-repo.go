@@ -2,83 +2,69 @@ package repositories
 
 import (
 	"coffee-bud/internal/models"
+	"coffee-bud/internal/utils"
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 )
 
-func AddActivity(
-	ctx context.Context,
-	db *sql.DB,
-	data models.ActivityEvent,
-) (models.ActivityEvent, error) {
-	var newActivity models.ActivityEvent
-
+func AddActivity(ctx context.Context, db *sql.DB, data models.ActivityEvent) error {
 	device, err := GetDeviceById(ctx, db, data.DeviceId)
 	if err != nil {
-		return newActivity, err
+		return err
 	}
 
 	userId := device.UserId
 
-	row := db.QueryRowContext(
+	config, err := GetConfigByUser(ctx, db, userId)
+	if err != nil {
+		return err
+	}
+
+	var interval float64
+	// get the latest activity before this activity
+	latest, err := GetLatestActivityByType(ctx, db, data.ActivityType, userId, data.Timestamp)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			startTime := utils.GetDateTime(data.Timestamp, config.WakeUpTime)
+
+			interval = data.Timestamp.Sub(startTime).Seconds()
+		} else {
+			return err
+		}
+	} else {
+		interval = data.Timestamp.Sub(latest.Timestamp).Seconds()
+	}
+
+	result, err := db.ExecContext(
 		ctx,
-		"INSERT INTO activity_events (device_id, user_id, activity_type, timestamp) VALUES ($1, $2, $3, $4) RETURNING device_id, user_id, activity_type, timestamp",
+		"INSERT INTO activity_events (device_id, user_id, activity_type, timestamp, interval_since_last) VALUES ($1, $2, $3, $4, $5)",
 		data.DeviceId,
 		userId,
 		data.ActivityType,
 		data.Timestamp,
+		interval,
 	)
 
-	err = row.Scan(
-		&newActivity.DeviceId,
-		&newActivity.UserId,
-		&newActivity.ActivityType,
-		&newActivity.Timestamp,
-	)
 	if err != nil {
-		return newActivity, err
+		return err
 	}
 
-	return newActivity, nil
-}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
 
-// func GetAllActivities(
-// 	ctx context.Context,
-// 	db *sql.DB,
-// ) ([]models.AcitivityEvent, error) {
-// 	var foundActivities []models.AcitivityEvent
-//
-// 	rows, err := db.QueryContext(ctx, "SELECT * FROM activity_events")
-//
-// 	if err != nil {
-// 		return foundActivities, err
-// 	}
-// 	defer rows.Close()
-//
-// 	for rows.Next() {
-// 		var activity models.AcitivityEvent
-// 		err = rows.Scan(
-// 			&activity.Timestamp,
-// 			&activity.DeviceId,
-// 			&activity.UserId,
-// 			&activity.ActionType,
-// 		)
-// 		if err != nil {
-// 			return foundActivities, err
-// 		}
-//
-// 		foundActivities = append(foundActivities, activity)
-// 	}
-//
-// 	if err := rows.Err(); err != nil {
-// 		return foundActivities, err
-// 	}
-//
-// 	return foundActivities, nil
-// }
+	if rows != 1 {
+		return fmt.Errorf("expected signle row affected, got %d rows affected", rows)
+	}
+
+	return nil
+}
 
 func GetActivitiesByUser(
 	ctx context.Context,
@@ -127,4 +113,90 @@ func GetActivitiesByUser(
 	}
 
 	return foundActivities, nil
+}
+
+func GetActivitiesByTypeTime(
+	ctx context.Context,
+	db *sql.DB,
+	userId uuid.UUID,
+	activityType string,
+	startTime time.Time, endTime time.Time,
+) ([]models.ActivityEvent, error) {
+	var activities []models.ActivityEvent
+
+	rows, err := db.QueryContext(
+		ctx,
+		"SELECT * FROM activity_events WHERE user_id=$1 AND activity_type=$2 AND timestamp >= $3 AND timestamp < $4 ORDER BY timestamp DESC",
+		userId,
+		activityType,
+		startTime,
+		endTime,
+	)
+	if err != nil {
+		return activities, fmt.Errorf("error getting %s activities: %v", activityType, err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var activity models.ActivityEvent
+		err = rows.Scan(
+			&activity.Timestamp,
+			&activity.DeviceId,
+			&activity.UserId,
+			&activity.ActivityType,
+			&activity.IntervalSeconds,
+		)
+		if err != nil {
+			return activities, fmt.Errorf("error getting %s activities: %v", activityType, err)
+		}
+
+		activities = append(activities, activity)
+	}
+
+	if err = rows.Close(); err != nil {
+		return activities, fmt.Errorf("error closing activity events database rows: %v", err)
+	}
+
+	// last error encountered by Rows.Scan
+	if err := rows.Err(); err != nil {
+		return activities, err
+	}
+
+	return activities, nil
+}
+
+func GetLatestActivityByType(
+	ctx context.Context,
+	db *sql.DB,
+	activityType string,
+	userId uuid.UUID,
+	endTime time.Time,
+) (models.ActivityEvent, error) {
+	var activity models.ActivityEvent
+
+	row := db.QueryRowContext(
+		ctx,
+		"SELECT * FROM activity_events WHERE user_id=$1 AND activity_type=$2 AND timestamp < $3 ORDER BY timestamp DESC LIMIT 1",
+		userId,
+		activityType,
+		endTime,
+	)
+
+	err := row.Scan(
+		&activity.Timestamp,
+		&activity.DeviceId,
+		&activity.UserId,
+		&activity.ActivityType,
+		&activity.IntervalSeconds,
+	)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return activity, err
+		}
+		return activity, fmt.Errorf("error getting most recent activity: %v", err)
+	}
+
+	return activity, nil
 }

@@ -1,11 +1,12 @@
 import LoginPage from "./LoginPage.tsx";
-import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
+import {createBrowserRouter, Navigate, Outlet} from "react-router-dom";
 import RegisterPage from "./RegisterPage.tsx";
 import Layout from "./Layout.tsx";
 import DashboardPage from "./DashboardPage.tsx";
 import DeviceManagementPage from "./DeviceManagementPage.tsx";
 import React from "react";
-import { useAuth } from "../context/AuthContext.tsx";
+import {useAuth} from "../context/AuthContext.tsx";
+import ConfigPage from "./ConfigPage.tsx";
 
 const ProtectedRoute: React.FC = () => {
     const { isAuthenticated } = useAuth();
@@ -50,7 +51,8 @@ export const router = createBrowserRouter([
                 Component: ProtectedRoute,
                 children: [
                     { path: "dashboard", Component: DashboardPage },
-                    { path: "settings", Component: DeviceManagementPage },
+                    { path: "devices", Component: DeviceManagementPage },
+                    {path: "configs", Component: ConfigPage},
                 ],
             },
         ],

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -35,7 +36,8 @@ func AddDeviceHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 		}
 
 		// check if device is already in the system
-		_, err := repositories.GetDeviceById(ctx, db, device.DeviceId)
+		// var err error
+		dbDevice, err := repositories.GetDeviceById(ctx, db, device.DeviceId)
 
 		if err != nil {
 			if errors.Is(err, repositories.ErrNoDevice) {
@@ -57,7 +59,14 @@ func AddDeviceHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		// if device is already paired
+		// if device has already been claimed by a user account
+		if dbDevice.Status == "confirmed" {
+			c.Status(http.StatusConflict)
+			c.Error(errors.New("device has already been claimed by a user"))
+			return
+		}
+
+		// if pairing process started but pending device confirmation
 		device.Status = "confirmed"
 		device, err = repositories.UpdateDevice(ctx, db, device)
 		if err != nil {
@@ -97,7 +106,17 @@ func PairDeviceHandler(db *sql.DB) gin.HandlerFunc {
 
 		pairing, err := repositories.AddDevice(ctx, db, data)
 		if err != nil {
-			c.Status(http.StatusNotFound)
+			if errors.Is(err, repositories.ErrNoUser) {
+				c.Status(http.StatusNotFound)
+				c.Error(err)
+				return
+			} else if strings.Contains(err.Error(), "duplicate key") {
+				c.Status(http.StatusConflict)
+				c.Error(errors.New("device has already been claimed by another user"))
+				return
+			}
+
+			c.Status(http.StatusInternalServerError)
 			c.Error(err)
 			return
 		}
@@ -120,7 +139,7 @@ func RemoveDeviceHandler(db *sql.DB) gin.HandlerFunc {
 
 		log.Println("remove device \"", device.DeviceId, "\"")
 
-		device, err := repositories.DeleteDevice(ctx, db, device.DeviceId)
+		err := repositories.DeleteDevice(ctx, db, device.DeviceId)
 		if err != nil {
 			if errors.Is(err, repositories.ErrNoDevice) {
 				c.Status(http.StatusNotFound)
@@ -132,7 +151,7 @@ func RemoveDeviceHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		middleware.SuccessResponse(c, 200, device)
+		middleware.SuccessResponse(c, 200, nil)
 	}
 
 }

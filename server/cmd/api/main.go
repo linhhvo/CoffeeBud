@@ -5,19 +5,19 @@ import (
 	"coffee-bud/internal/handlers"
 	"coffee-bud/internal/middleware"
 	"coffee-bud/internal/session"
-	"coffee-bud/internal/validators"
 	"coffee-bud/internal/websocket"
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	if err := godotenv.Load("./.env", "../.env"); err != nil {
-		log.Fatalf("error loading environments: %v", err.Error())
-	}
+	// if err := godotenv.Load("./.env", "../.env"); err != nil {
+	// 	log.Fatalf("error loading environments: %v", err.Error())
+	// }
 
 	session.Init()
 
@@ -37,15 +37,29 @@ func main() {
 	// gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
+	router.Use(
+		cors.New(
+			cors.Config{
+				AllowOrigins:     []string{"https://coffeebud-client.fly.dev"},
+				AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+				AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+				ExposeHeaders:    []string{"Content-Length"},
+				AllowCredentials: true,
+				MaxAge:           12 * time.Hour,
+			},
+		),
+	)
+
 	router.Use(middleware.ErrorHandler())
 
-	validators.ConfigCustomValidators()
+	// validators.ConfigCustomValidators()
 
 	api := router.Group("/api")
 
 	/** ROUTES FOR PHYSICAL DEVICE INTERACTION **/
 	api.POST("/sync/:deviceId", handlers.AddDeviceHandler(wsHub, db)) // pair new device
 	api.PUT("/sync/:deviceId", handlers.SyncDataHandler(wsHub, db))
+	api.GET("/sync/:deviceId/configs", handlers.GetConfigByDeviceHandler(db))
 
 	/** ROUTES FOR CLIENT INTERACTION **/
 	// websocket endpoint
@@ -73,16 +87,15 @@ func main() {
 
 		// retrieve activity events for specific user account
 		api.GET("/activities", handlers.GetActivitiesByUserHandler(db))
-		// api.GET(
-		// 	"/users/:userId/activities",
-		// 	handlers.GetActivitiesByUserHandler(db),
-		// )
 
-		// retrieve habit rules for specific user account
-		api.GET("/habit-rules", handlers.GetHabitRuleByUserHandler(db))
+		// retrieve configs for specific user account
+		api.GET("/configs", handlers.GetConfigByUserHandler(db))
 
-		// update habit rules
-		api.POST("/habit-rules", handlers.UpdateHabitRuleHandler(db))
+		// update configs
+		api.POST("/configs", handlers.UpdateConfigHandler(db))
+
+		// get daily stat
+		api.GET("/stat/daily", handlers.GetDailyStatHandler(db))
 	}
 
 	if err := router.Run(":8080"); err != nil {

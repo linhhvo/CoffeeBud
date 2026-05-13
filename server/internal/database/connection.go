@@ -15,8 +15,8 @@ import (
 func ConnectDatabase() *sql.DB {
 	dbUrl := os.Getenv("DATABASE_URL")
 
-	migratePath := "file://migrations"
-	// migratePath := "file:///usr/local/bin/migrations"
+	// migratePath := "file://migrations"
+	migratePath := "file:///usr/local/bin/migrations"
 
 	db, err := sql.Open("postgres", dbUrl)
 	if err != nil {
