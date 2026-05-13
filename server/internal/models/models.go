@@ -50,3 +50,12 @@ type WebSocketPayload struct {
 	EventType string `json:"event_type"`
 	EventData any    `json:"event_data"`
 }
+
+type DailyStats struct {
+	UserId uuid.UUID `json:"user_id"`
+	Date   time.Time `json:"date"`
+	Coffee int       `json:"coffee"` // total number of coffee
+	Break  int       `json:"break"`  // average break interval
+	Water  int       `json:"water"`  // average water interval
+	Mood   string    `json:"mood"`   // average mood
+}

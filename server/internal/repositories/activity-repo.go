@@ -137,6 +137,7 @@ func GetActivitiesByTypeTime(
 			&activity.DeviceId,
 			&activity.UserId,
 			&activity.ActivityType,
+			&activity.IntervalSeconds,
 		)
 		if err != nil {
 			return activities, fmt.Errorf("error getting %s activities: %v", activityType, err)

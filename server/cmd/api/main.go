@@ -86,16 +86,15 @@ func main() {
 
 		// retrieve activity events for specific user account
 		api.GET("/activities", handlers.GetActivitiesByUserHandler(db))
-		// api.GET(
-		// 	"/users/:userId/activities",
-		// 	handlers.GetActivitiesByUserHandler(db),
-		// )
 
 		// retrieve habit rules for specific user account
 		api.GET("/habit-rules", handlers.GetHabitRuleByUserHandler(db))
 
 		// update habit rules
 		api.POST("/habit-rules", handlers.UpdateHabitRuleHandler(db))
+
+		// get daily stat
+		api.GET("/stat/daily", handlers.GetDailyStatHandler(db))
 	}
 
 	if err := router.Run(":8080"); err != nil {

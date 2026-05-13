@@ -4,69 +4,95 @@ import (
 	"coffee-bud/internal/models"
 	"context"
 	"database/sql"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-// calculate pet mood after data sync
-
-func CalculateMood(
+func GetDailyStat(
 	ctx context.Context,
 	db *sql.DB,
 	userId uuid.UUID,
-) (models.PetState, error) {
-	var pet models.PetState
+	date time.Time,
+) (models.DailyStats, error) {
+	var stat models.DailyStats
 
-	// stores each habit rule state: true if goal is met and false if goal is not met
-	states := make(map[string]bool)
+	startTime := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+	endTime := startTime.Add(24 * time.Hour)
 
-	// time period is the current date
-	now := time.Now()
-	startTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	stat.UserId = userId
+	stat.Date = date
 
-	// get user habit rules
-	rules, err := GetHabitRuleByUser(ctx, db, userId)
-
-	// check coffee intake
-	coffeeActivities, err := GetActivitiesByTypeTime(ctx, db, userId, "coffee", startTime, now)
+	// get total coffee intake in the given date
+	coffee, err := GetActivitiesByTypeTime(ctx, db, userId, "coffee", startTime, endTime)
 	if err != nil {
-		return pet, err
+		return stat, err
 	}
-	states["coffee"] = len(coffeeActivities) < rules.CoffeeLimit
+	stat.Coffee = len(coffee)
 
-	// check water intake
-	waterActivity, err := GetMostRecentActivityByType(ctx, db, "water", userId)
+	// get average break interval
+	breaks, err := GetActivitiesByTypeTime(ctx, db, userId, "break", startTime, endTime)
 	if err != nil {
-		return pet, err
+		return stat, err
 	}
-	states["water"] = now.Sub(waterActivity.Timestamp).Minutes() < float64(rules.WaterInterval)
+	intervalSum := 0
+	if len(breaks) > 0 {
+		for _, b := range breaks {
+			intervalSum += b.IntervalSeconds
+		}
+		stat.Break = intervalSum / len(breaks)
+	} else {
+		stat.Break = 0
+	}
 
-	// check break
-	breakActivity, err := GetMostRecentActivityByType(ctx, db, "break", userId)
+	// get average break interval
+	waters, err := GetActivitiesByTypeTime(ctx, db, userId, "water", startTime, endTime)
 	if err != nil {
-		return pet, err
+		return stat, err
 	}
-	states["break"] = now.Sub(breakActivity.Timestamp).Minutes() < float64(rules.BreakInterval)
+	intervalSum = 0
+	if len(waters) > 0 {
+		for _, w := range waters {
+			intervalSum += w.IntervalSeconds
+		}
+		stat.Water = intervalSum / len(waters)
+	} else {
+		stat.Water = 0
+	}
 
-	count := 0
-	for _, v := range states {
-		if !v {
-			count++
+	moods, err := GetMoodsByDate(ctx, db, userId, startTime, endTime)
+	if err != nil {
+		return stat, err
+	}
+
+	moodMap := make(map[string]int)
+
+	for _, m := range moods {
+		switch m {
+		case "happy":
+			moodMap[m] += 3
+		case "neutral":
+			moodMap[m] += 2
+		case "sad":
+			moodMap[m] += 1
 		}
 	}
 
-	var mood string
-	switch count {
-	case 0:
-		mood = "happy"
-	case 3:
-		mood = "sad"
-	default:
-		mood = "neutral"
+	moodSum := 0
+	for k, v := range moodMap {
+		log.Println(k, " - ", v)
+		moodSum += v
 	}
 
-	pet, err = UpdateMood(ctx, db, userId, mood)
+	avg := float64(moodSum) / float64(len(moods))
+	if avg >= 2.5 {
+		stat.Mood = "happy"
+	} else if avg >= 1.5 {
+		stat.Mood = "neutral"
+	} else {
+		stat.Mood = "sad"
+	}
 
-	return pet, nil
+	return stat, nil
 }

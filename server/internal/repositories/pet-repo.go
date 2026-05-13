@@ -4,7 +4,9 @@ import (
 	"coffee-bud/internal/models"
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -51,4 +53,128 @@ func AddDefaultPet(ctx context.Context, db *sql.DB, userId uuid.UUID) error {
 	}
 	return nil
 
+}
+
+// calculate pet mood after data sync
+
+func CalculateMood(
+	ctx context.Context,
+	db *sql.DB,
+	userId uuid.UUID,
+	targetTime time.Time,
+) (models.PetState, error) {
+	var pet models.PetState
+
+	// stores each habit rule state: true if goal is met and false if goal is not met
+	states := make(map[string]bool)
+
+	startTime := time.Date(
+		targetTime.Year(),
+		targetTime.Month(),
+		targetTime.Day(),
+		0,
+		0,
+		0,
+		0,
+		targetTime.Location(),
+	)
+	endTime := startTime.Add(24 * time.Hour)
+
+	// get user habit rules
+	rules, err := GetHabitRuleByUser(ctx, db, userId)
+
+	// check coffee intake
+	coffeeActivities, err := GetActivitiesByTypeTime(ctx, db, userId, "coffee", startTime, endTime)
+	if err != nil {
+		return pet, err
+	}
+	states["coffee"] = len(coffeeActivities) < rules.CoffeeLimit
+
+	// check water intake
+	waterActivity, err := GetLatestActivityByType(ctx, db, "water", userId, targetTime)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			states["water"] = true
+		} else {
+			return pet, err
+		}
+	} else {
+		states["water"] = (waterActivity.IntervalSeconds / 60) < rules.WaterInterval
+	}
+
+	// check break
+	breakActivity, err := GetLatestActivityByType(ctx, db, "break", userId, targetTime)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			states["break"] = true
+		} else {
+			return pet, err
+		}
+	} else {
+		states["break"] = (breakActivity.IntervalSeconds / 60) < rules.BreakInterval
+	}
+
+	count := 0
+	for _, v := range states {
+		if !v {
+			count++
+		}
+	}
+
+	var mood string
+	switch count {
+	case 0:
+		mood = "happy"
+	case 3:
+		mood = "sad"
+	default:
+		mood = "neutral"
+	}
+
+	pet, err = UpdateMood(ctx, db, userId, mood)
+
+	return pet, nil
+}
+
+func GetMoodsByDate(
+	ctx context.Context,
+	db *sql.DB,
+	userId uuid.UUID,
+	startTime time.Time,
+	endTime time.Time,
+) ([]string, error) {
+	var moods []string
+
+	rows, err := db.QueryContext(
+		ctx,
+		"SELECT mood FROM pet_mood_history WHERE user_id=$1 AND timestamp >= $2 AND timestamp < $3",
+		userId,
+		startTime,
+		endTime,
+	)
+	if err != nil {
+		return moods, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var mood string
+		err = rows.Scan(&mood)
+		if err != nil {
+			return moods, fmt.Errorf("error getting mood history: %v", err)
+		}
+		moods = append(moods, mood)
+	}
+
+	if err = rows.Close(); err != nil {
+		return moods, fmt.Errorf("error closing mood history database rows: %v", err)
+	}
+
+	// last error encountered by Rows.Scan
+	if err := rows.Err(); err != nil {
+		return moods, err
+	}
+
+	return moods, nil
 }
