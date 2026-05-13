@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"coffee-bud/internal/models"
+	"coffee-bud/internal/utils"
 	"context"
 	"database/sql"
 	"fmt"
@@ -24,27 +25,8 @@ func GetDailyStat(
 		return stat, fmt.Errorf("error geting config for this user: %v", err)
 	}
 
-	startTime := time.Date(
-		targetTime.Year(),
-		targetTime.Month(),
-		targetTime.Day(),
-		config.WakeUpTime.Hour(),
-		config.WakeUpTime.Minute(),
-		config.WakeUpTime.Second(),
-		config.WakeUpTime.Nanosecond(),
-		targetTime.Location(),
-	)
-
-	endTime := time.Date(
-		targetTime.Year(),
-		targetTime.Month(),
-		targetTime.Day(),
-		config.SleepTime.Hour(),
-		config.SleepTime.Minute(),
-		config.SleepTime.Second(),
-		config.SleepTime.Nanosecond(),
-		targetTime.Location(),
-	)
+	startTime := utils.GetDateTime(targetTime, config.WakeUpTime)
+	endTime := utils.GetDateTime(targetTime, config.SleepTime)
 
 	stat.UserId = userId
 	stat.Date = targetTime

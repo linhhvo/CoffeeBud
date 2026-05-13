@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"coffee-bud/internal/models"
+	"coffee-bud/internal/utils"
 	"context"
 	"database/sql"
 	"errors"
@@ -29,16 +30,7 @@ func AddActivity(ctx context.Context, db *sql.DB, data models.ActivityEvent) err
 	latest, err := GetLatestActivityByType(ctx, db, data.ActivityType, userId, data.Timestamp)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			startTime := time.Date(
-				data.Timestamp.Year(),
-				data.Timestamp.Month(),
-				data.Timestamp.Day(),
-				config.WakeUpTime.Hour(),
-				config.WakeUpTime.Minute(),
-				config.WakeUpTime.Second(),
-				config.WakeUpTime.Nanosecond(),
-				data.Timestamp.Location(),
-			)
+			startTime := utils.GetDateTime(data.Timestamp, config.WakeUpTime)
 
 			interval = data.Timestamp.Sub(startTime).Seconds()
 		} else {

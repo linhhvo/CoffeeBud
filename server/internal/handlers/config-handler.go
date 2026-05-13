@@ -27,12 +27,12 @@ func GetConfigByUserHandler(db *sql.DB) gin.HandlerFunc {
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				c.Status(http.StatusNotFound)
-				c.Error(errors.New("habit rule is not set"))
+				c.Error(errors.New("config is not set"))
 				return
 			}
 
 			c.Status(http.StatusNotFound)
-			c.Error(fmt.Errorf("failed to retrieve habit rules -- %v", err.Error()))
+			c.Error(fmt.Errorf("failed to retrieve configs -- %v", err.Error()))
 			return
 		}
 
@@ -92,7 +92,7 @@ func UpdateConfigHandler(db *sql.DB) gin.HandlerFunc {
 		err = repositories.UpdateConfig(ctx, db, config)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
-			c.Error(fmt.Errorf("failed to update habit rule -- %v", err.Error()))
+			c.Error(fmt.Errorf("failed to update config -- %v", err.Error()))
 			return
 		}
 		middleware.SuccessResponse(c, 201, nil)

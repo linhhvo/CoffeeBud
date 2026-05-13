@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"coffee-bud/internal/models"
+	"coffee-bud/internal/utils"
 	"context"
 	"database/sql"
 	"errors"
@@ -74,27 +75,8 @@ func CalculateMood(
 		return pet, err
 	}
 
-	startTime := time.Date(
-		targetTime.Year(),
-		targetTime.Month(),
-		targetTime.Day(),
-		config.WakeUpTime.Hour(),
-		config.WakeUpTime.Minute(),
-		config.WakeUpTime.Second(),
-		config.WakeUpTime.Nanosecond(),
-		targetTime.Location(),
-	)
-
-	endTime := time.Date(
-		targetTime.Year(),
-		targetTime.Month(),
-		targetTime.Day(),
-		config.SleepTime.Hour(),
-		config.SleepTime.Minute(),
-		config.SleepTime.Second(),
-		config.SleepTime.Nanosecond(),
-		targetTime.Location(),
-	)
+	startTime := utils.GetDateTime(targetTime, config.WakeUpTime)
+	endTime := utils.GetDateTime(targetTime, config.SleepTime)
 
 	// check coffee intake
 	coffeeActivities, err := GetActivitiesByTypeTime(ctx, db, userId, "coffee", startTime, endTime)
