@@ -33,6 +33,20 @@ func GetDateTime(dataTimestamp time.Time, configTime *time.Time) time.Time {
 		dataTimestamp.Day(),
 		configTime.Hour(),
 		configTime.Minute(), 0, 0,
-		dataTimestamp.Location(),
+		time.Local,
 	)
+}
+
+func GetWeekDates(targetDate time.Time) []time.Time {
+	weekday := int(targetDate.Weekday())
+	if weekday == 0 {
+		weekday = 7 // Sunday
+	}
+	monday := targetDate.AddDate(0, 0, -(weekday - 1))
+
+	week := make([]time.Time, 7)
+	for i := range week {
+		week[i] = monday.AddDate(0, 0, i)
+	}
+	return week
 }

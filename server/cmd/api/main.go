@@ -96,6 +96,9 @@ func main() {
 
 		// get daily stat
 		api.GET("/stat/daily", handlers.GetDailyStatHandler(db))
+
+		// get weekly stat
+		api.GET("/stat/weekly", handlers.GetWeeklyStatHandler(db))
 	}
 
 	if err := router.Run(":8080"); err != nil {

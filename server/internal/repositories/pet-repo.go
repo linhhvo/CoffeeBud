@@ -85,8 +85,8 @@ func CalculateMood(
 	}
 	states["coffee"] = len(coffeeActivities) < config.CoffeeLimit
 
-	// check water intake
-	waterActivity, err := GetLatestActivityByType(ctx, db, "water", userId, targetTime)
+	// check water interval
+	waterActivity, err := GetLatestActivityByType(ctx, db, "water", userId, startTime, endTime)
 	if err != nil {
 		// if there is no water recorded during the active period, it fails to meet the target goal
 		if errors.Is(err, sql.ErrNoRows) {
@@ -98,8 +98,8 @@ func CalculateMood(
 		states["water"] = (waterActivity.IntervalSeconds / 60) < config.WaterInterval
 	}
 
-	// check break
-	breakActivity, err := GetLatestActivityByType(ctx, db, "break", userId, targetTime)
+	// check break interval
+	breakActivity, err := GetLatestActivityByType(ctx, db, "break", userId, startTime, endTime)
 	if err != nil {
 		// if there is no break recorded during the active period, it fails to meet the target goal
 		if errors.Is(err, sql.ErrNoRows) {

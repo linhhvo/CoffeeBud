@@ -25,13 +25,20 @@ func AddActivity(ctx context.Context, db *sql.DB, data models.ActivityEvent) err
 		return err
 	}
 
+	startTime := utils.GetDateTime(data.Timestamp, config.WakeUpTime)
+
 	var interval float64
-	// get the latest activity before this activity
-	latest, err := GetLatestActivityByType(ctx, db, data.ActivityType, userId, data.Timestamp)
+	// get the latest activity before this activity in the same day
+	latest, err := GetLatestActivityByType(
+		ctx,
+		db,
+		data.ActivityType,
+		userId,
+		startTime,
+		data.Timestamp,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			startTime := utils.GetDateTime(data.Timestamp, config.WakeUpTime)
-
 			interval = data.Timestamp.Sub(startTime).Seconds()
 		} else {
 			return err
@@ -171,15 +178,16 @@ func GetLatestActivityByType(
 	db *sql.DB,
 	activityType string,
 	userId uuid.UUID,
-	endTime time.Time,
+	startTime time.Time, endTime time.Time,
 ) (models.ActivityEvent, error) {
 	var activity models.ActivityEvent
 
 	row := db.QueryRowContext(
 		ctx,
-		"SELECT * FROM activity_events WHERE user_id=$1 AND activity_type=$2 AND timestamp < $3 ORDER BY timestamp DESC LIMIT 1",
+		"SELECT * FROM activity_events WHERE user_id=$1 AND activity_type=$2 AND timestamp >= $3 AND  timestamp < $4 ORDER BY timestamp DESC LIMIT 1",
 		userId,
 		activityType,
+		startTime,
 		endTime,
 	)
 

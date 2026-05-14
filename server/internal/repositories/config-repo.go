@@ -71,7 +71,7 @@ func AddDefaultConfig(
 	userId uuid.UUID,
 ) error {
 	wakeupTime, _ := time.Parse(time.TimeOnly, "08:00:00")
-	sleepTime, _ := time.Parse(time.TimeOnly, "11:00:00")
+	sleepTime, _ := time.Parse(time.TimeOnly, "23:00:00")
 
 	_, err := db.ExecContext(
 		ctx,
