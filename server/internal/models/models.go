@@ -27,7 +27,7 @@ type ActivityEvent struct {
 	UserId          uuid.UUID `json:"user_id"`
 	ActivityType    string    `json:"type" binding:"required,oneof=water coffee break"`
 	Timestamp       time.Time `json:"timestamp" binding:"required"`
-	IntervalSeconds int       `json:"interval_since_last"`
+	IntervalMinutes int       `json:"interval_since_last"`
 }
 
 type Config struct {

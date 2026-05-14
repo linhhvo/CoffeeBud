@@ -33,7 +33,7 @@ func GetDailyStatHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		dailyStat, err = repositories.GetDailyStat(ctx, db, userId.(uuid.UUID), requestedTime)
+		dailyStat, err = repositories.CalculateMood(ctx, db, userId.(uuid.UUID), requestedTime)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.Error(fmt.Errorf("error getting daily stat: %v", err))

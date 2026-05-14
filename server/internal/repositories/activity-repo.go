@@ -38,13 +38,13 @@ func AddActivity(ctx context.Context, db *sql.DB, data models.ActivityEvent) err
 		data.Timestamp,
 	)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			interval = data.Timestamp.Sub(startTime).Seconds()
+		if errors.Is(err, sql.ErrNoRows) { // if no activity since the start of the day
+			interval = data.Timestamp.Sub(startTime).Minutes()
 		} else {
 			return err
 		}
 	} else {
-		interval = data.Timestamp.Sub(latest.Timestamp).Seconds()
+		interval = data.Timestamp.Sub(latest.Timestamp).Minutes()
 	}
 
 	result, err := db.ExecContext(
@@ -152,7 +152,7 @@ func GetActivitiesByTypeTime(
 			&activity.DeviceId,
 			&activity.UserId,
 			&activity.ActivityType,
-			&activity.IntervalSeconds,
+			&activity.IntervalMinutes,
 		)
 		if err != nil {
 			return activities, fmt.Errorf("error getting %s activities: %v", activityType, err)
@@ -178,7 +178,8 @@ func GetLatestActivityByType(
 	db *sql.DB,
 	activityType string,
 	userId uuid.UUID,
-	startTime time.Time, endTime time.Time,
+	startTime time.Time,
+	endTime time.Time,
 ) (models.ActivityEvent, error) {
 	var activity models.ActivityEvent
 
@@ -196,7 +197,7 @@ func GetLatestActivityByType(
 		&activity.DeviceId,
 		&activity.UserId,
 		&activity.ActivityType,
-		&activity.IntervalSeconds,
+		&activity.IntervalMinutes,
 	)
 
 	if err != nil {
