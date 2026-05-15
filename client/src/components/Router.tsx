@@ -2,7 +2,7 @@ import LoginPage from "./UserAuthPage/LoginPage.tsx";
 import {createBrowserRouter, Navigate, Outlet} from "react-router-dom";
 import RegisterPage from "./UserAuthPage/RegisterPage.tsx";
 import Layout from "./Layout.tsx";
-import DashboardPage from "./DashboardPage.tsx";
+import DashboardPage from "./DashboardPage/DashboardPage.tsx";
 import DeviceManagementPage from "./DevicePage/DeviceManagementPage.tsx";
 import React from "react";
 import {useAuth} from "../context/AuthContext.tsx";
