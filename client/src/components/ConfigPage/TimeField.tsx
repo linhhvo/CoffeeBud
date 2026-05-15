@@ -27,7 +27,7 @@ export function TimeField({
         bg-zinc-800 border border-zinc-700
         hover:border-emerald-700/50 focus:border-emerald-600
         focus:outline-none focus:ring-1 focus:ring-emerald-600/40
-        rounded-lg py-0.5
+        rounded-md py-0.5
         transition-colors
         [appearance:textfield]
         [&::-webkit-outer-spin-button]:appearance-none

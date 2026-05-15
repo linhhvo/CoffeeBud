@@ -12,17 +12,17 @@ export function DeviceItem({device, isRemoving, handleRemove}: {
     device: Device; isRemoving: boolean; handleRemove: (deviceId: string) => void
 }) {
     return (<div key={device.device_id} className="group relative bg-zinc-900 border border-zinc-800 hover:border-zinc-700
-                       rounded-2xl px-5 py-4 transition-colors">
+                       rounded-xl px-5 py-4 transition-colors">
         {/* Top row: ID + status + remove */}
         <div className="flex items-start justify-between gap-4 mb-3">
             <div className="flex items-center gap-3 min-w-0">
-                <span className="font-mono text-sm text-zinc-200 truncate">
+                <span className="text-sm text-stone-200 truncate">
                     {device.device_id}
                 </span>
                 <StatusPill status={device.status}/>
             </div>
 
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-3 shrink-0">
                 {/* Remove button */}
                 <button disabled={isRemoving} onClick={() => handleRemove(device.device_id)} className=" flex items-center gap-1.5 text-zinc-500 hover:text-red-400
                                     text-xs font-medium transition-all cursor-pointer disabled:opacity-40
@@ -35,19 +35,19 @@ export function DeviceItem({device, isRemoving, handleRemove}: {
         {/* Bottom row: metadata */}
         <div className="grid grid-cols-3 gap-4 pt-3 border-t border-zinc-800/80">
             <div>
-                <p className="text-xs text-zinc-600 mb-1 uppercase tracking-widest">
+                <p className="text-xs text-stone-500 mb-1 uppercase tracking-widest">
                     Battery </p>{device.status === "pending" ? (<p className="pl-1 text-xs text-zinc-400 font-mono">
                 — </p>) : (<BatteryIcon level={device.battery_level ?? null}/>)}
             </div>
             <div>
-                <p className="text-xs text-zinc-600 mb-1 uppercase tracking-widest">
+                <p className="text-xs text-stone-500 mb-1 uppercase tracking-widest">
                     Paired </p>
                 <p className="text-xs text-zinc-400 font-mono">
                     {formatDateTime(device.paired_time ?? null)}
                 </p>
             </div>
             <div>
-                <p className="text-xs text-zinc-600 mb-1 uppercase tracking-widest">
+                <p className="text-xs text-stone-500 mb-1 uppercase tracking-widest">
                     Last Sync </p>
                 <p className="text-xs text-zinc-400 font-mono">
                     {formatDateTime(device.last_sync_time ?? null)}

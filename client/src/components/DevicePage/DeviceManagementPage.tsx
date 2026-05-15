@@ -46,15 +46,15 @@ const DeviceManagementPage: React.FC = () => {
         }
     };
 
-    return (<div className="min-h-screen text-zinc-100">
+    return (<div className="min-h-[calc(100vh-3.75rem)] pt-25 text-zinc-100 px-4 py-8 md:px-8">
         {/* ── Page content ── */}
-        <div className="max-w-3xl mx-auto px-6 py-12">
+        <div className="max-w-5xl mx-auto">
             {/* Section header */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h2 className="text-lg font-semibold text-zinc-100 tracking-wide">
+                    <h2 className="text-xl font-semibold text-zinc-100 tracking-wide">
                         Devices </h2>
-                    <p className="text-sm text-zinc-500 mt-0.5">
+                    <p className="text-sm text-stone-400 mt-0.5">
                         {connectedDevices.length === 0 ? "No devices connected yet" : `${connectedDevices.length} device${connectedDevices.length !== 1 ? "s" : ""} registered`}
                     </p>
                 </div>

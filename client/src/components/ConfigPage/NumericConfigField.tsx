@@ -44,7 +44,7 @@ export function NumericConfigField({
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
             <button onClick={decrement} disabled={value <= min} className="
-                        w-7 h-7 rounded-lg
+                        w-7 h-7 rounded-md
                         bg-zinc-800 hover:bg-emerald-900/60
                         border border-zinc-700 hover:border-emerald-700/50
                         text-zinc-300 hover:text-emerald-300
@@ -67,7 +67,7 @@ export function NumericConfigField({
                             bg-zinc-800 border border-zinc-700
                             hover:border-emerald-700/50 focus:border-emerald-600
                             focus:outline-none focus:ring-1 focus:ring-emerald-600/40
-                            rounded-lg py-0.5
+                            rounded-md py-0.5
                             transition-colors
                             [appearance:textfield]
                             [&::-webkit-outer-spin-button]:appearance-none
@@ -75,7 +75,7 @@ export function NumericConfigField({
                         "/> <span className="text-xs text-zinc-500 w-6">{unit}</span>
             </div>
             <button onClick={increment} disabled={value >= max} className="
-                        w-7 h-7 rounded-lg
+                        w-7 h-7 rounded-md
                         bg-zinc-800 hover:bg-emerald-900/60
                         border border-zinc-700 hover:border-emerald-700/50
                         text-zinc-300 hover:text-emerald-300

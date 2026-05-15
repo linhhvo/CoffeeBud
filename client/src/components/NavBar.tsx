@@ -21,7 +21,8 @@ const Navbar: React.FC = () => {
         }
     };
 
-    return (<nav className="flex items-center justify-between p-4 bg-emerald-800/50 text-white shadow-md">
+    return (<nav
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 bg-[#0F3F32] text-white shadow-md h-15">
         <div className="flex items-center gap-x-6">
             <img src={icon} alt="coffee icon" className="w-8 h-8 ml-2 object-contain"/>
             <NavLink to="/dashboard"

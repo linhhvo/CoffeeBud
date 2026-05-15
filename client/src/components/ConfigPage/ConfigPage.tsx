@@ -39,16 +39,14 @@ const ConfigPage: React.FC = () => {
         }
     };
 
-    return (<div className="min-h-screen  text-zinc-100">
-        <div className="max-w-3xl mx-auto px-6 py-12">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h2 className="text-lg font-semibold text-zinc-100 tracking-wide">
-                        Configurations </h2>
-                </div>
+    return (<div className="min-h-[calc(100vh-3.75rem)] pt-25 text-zinc-100 px-4 py-8 md:px-8">
+        <div className="max-w-5xl mx-auto">
+            <div className="flex items-center justify-between gap-4 mb-6 h-9">
+                <h2 className="text-xl font-semibold text-zinc-100 tracking-wide">
+                    Configurations </h2>
             </div>
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4 mb-4 backdrop-blur-sm">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-4 mb-4 backdrop-blur-sm">
                 <p className="text-[13px] uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-5">
                     Habit Rules </p>
                 {configs ? (<div>
