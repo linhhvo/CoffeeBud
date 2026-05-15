@@ -3,8 +3,8 @@ import DevicePairPopup from "./DevicePairPopup.tsx";
 import {deviceService} from "../../apis/device.service.ts";
 import {useWebSocketEvent} from "../../websocket/useWebSocketEvent.ts";
 import {WsEventTypes} from "../../websocket/types.ts";
-import type {Device} from "../types.ts";
-import {createDevice} from "../types.ts";
+import type {Device} from "./types.ts";
+import {createDevice} from "./types.ts";
 import {Button} from "../UI/Button.tsx";
 import {DeviceItem} from "./DeviceItem.tsx";
 

@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {configService} from "../../apis/config.service.ts";
-import type {Config} from "../types.ts";
-import {createConfig} from "../types.ts";
+import type {Config} from "./types.ts";
+import {createConfig} from "./types.ts";
 import {NumericConfigField} from "./NumericConfigField.tsx";
 import {TimeField} from "./TimeField.tsx";
 import {SaveStatus} from "./SaveStatus.tsx";

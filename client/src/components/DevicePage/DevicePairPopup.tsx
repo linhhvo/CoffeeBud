@@ -1,6 +1,6 @@
 import React, {useCallback, useState} from "react";
-import type {Device} from "../types.ts";
-import {createDevice} from "../types.ts";
+import type {Device} from "./types.ts";
+import {createDevice} from "./types.ts";
 import {useWebSocketEvent} from "../../websocket/useWebSocketEvent.ts";
 import {WsEventTypes} from "../../websocket/types.ts";
 import {deviceService} from "../../apis/device.service.ts";

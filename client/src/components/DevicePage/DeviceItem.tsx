@@ -1,4 +1,4 @@
-import type {Device} from "../types.ts";
+import type {Device} from "./types.ts";
 import {StatusPill} from "./StatusPill.tsx";
 import {BatteryIcon} from "./BatteryIcon.tsx";
 import {formatDateTime} from "../../utils/helpers.ts";

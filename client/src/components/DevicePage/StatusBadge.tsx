@@ -1,3 +1,5 @@
+import React from "react";
+
 const checkIcon = (<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
 </svg>)
@@ -20,7 +22,7 @@ export const StatusBadge: React.FC<{ status: PairingStatus; errorMessage?: strin
     }
 
     if (status === "error") {
-        return (<span className="text-red-400 text-xs font-mono truncate max-w-[180px]">
+        return (<span className="text-red-400 text-xs font-mono truncate max-w-45">
                     {errorMessage ?? "Pairing failed"}
                 </span>);
     }
