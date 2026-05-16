@@ -6,7 +6,6 @@ import {ChartCard} from "./ChartCard.tsx";
 import {type ChartConfig, createDailyStat, type DailyStat} from "./types.ts";
 import {type Config, createConfig} from "../ConfigPage/types.ts";
 
-
 const CHARTS: ChartConfig[] = [{
     key: "break_interval",
     dataKey: "avg_break_interval",
@@ -40,7 +39,7 @@ const CHARTS: ChartConfig[] = [{
     icon: "☕",
     overLabel: "Over limit",
     okLabel: "Within limit",
-},];
+}];
 
 const WEEK_OFFSETS = [0, -1, -2, -3, -4] as const;
 
@@ -76,7 +75,7 @@ const DashboardPage: React.FC = () => {
             .get()
             .then((res) => {
                 if (res.success && res.data) {
-                    setConfig(createConfig(res.data))
+                    setConfig(createConfig(res.data));
                 }
             })
             .catch(() => setError("Failed to load config."));
@@ -107,7 +106,7 @@ const DashboardPage: React.FC = () => {
     const handlePrev = (): void => setWeekOffset((w) => w - 1);
     const handleNext = (): void => setWeekOffset((w) => Math.min(0, w + 1));
 
-    return (<div className="min-h-[calc(100vh-3.75rem)] pt-25 text-zinc-100 px-4 py-8 md:px-8">
+    return (<div className="min-h-[calc(100vh-3.75rem)] text-zinc-100 px-4 py-8 md:px-8">
         <div className="max-w-5xl mx-auto">
             {/* Page header */}
             <div className="h-9 flex flex-row items-center align-middle justify-between gap-4 mb-6">
@@ -116,8 +115,7 @@ const DashboardPage: React.FC = () => {
 
                 {/* Week navigator */}
                 <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
-                    <button onClick={handlePrev}
-                            className="w-9 h-10 flex items-center justify-center text-zinc-300 cursor-pointer
+                    <button onClick={handlePrev} className="w-9 h-10 flex items-center justify-center text-zinc-300 cursor-pointer
                             hover:text-zinc-100 hover:bg-zinc-800 transition-colors text-lg font-light"
                             aria-label="Previous week">
                         ‹
@@ -127,8 +125,7 @@ const DashboardPage: React.FC = () => {
                             {getWeekLabel(weekOffset)}
                         </p>
                     </div>
-                    <button onClick={handleNext} disabled={weekOffset >= 0}
-                            className={`w-9 h-10 flex items-center justify-center text-lg font-light transition-colors 
+                    <button onClick={handleNext} disabled={weekOffset >= 0} className={`w-9 h-10 flex items-center justify-center text-lg font-light transition-colors 
                             ${weekOffset >= 0 ? "text-zinc-800 cursor-not-allowed" : "text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 cursor-pointer"}`}
                             aria-label="Next week">
                         ›
@@ -138,24 +135,22 @@ const DashboardPage: React.FC = () => {
 
             {/* Quick-jump chips */}
             <div className="flex flex-wrap gap-1 mb-6">
-                {WEEK_OFFSETS.map((offset) => (<button key={offset} onClick={() => setWeekOffset(offset)}
-                                                       className={`px-3 py-2 rounded-lg text-sm tracking-wide transition-colors cursor-pointer
+                {WEEK_OFFSETS.map((offset) => (<button key={offset} onClick={() => setWeekOffset(offset)} className={`px-3 py-2 rounded-lg text-sm tracking-wide transition-colors cursor-pointer
                                                        ${weekOffset === offset ? "bg-zinc-700 text-stone-100" : "text-stone-400 hover:text-stone-300 hover:bg-zinc-900"}`}>
                     {offset === 0 ? "This week" : offset === -1 ? "Last week" : `${Math.abs(offset)}w ago`}
                 </button>))}
             </div>
 
-            {/* Body */}
-            {error ? (
-                <p className="text-sm text-red-400 text-center py-16">{error}</p>) : isLoading || config === null ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {CHARTS.map((chart) => (<SkeletonCard key={chart.key} chart={chart}/>))}
-                </div>) : (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {CHARTS.map((chart) => (<ChartCard key={chart.key} chart={chart} data={weekStats}
-                                                   target={config[chart.key as keyof ConfigData]}/>))}
-            </div>)}
+            {/* Body */} {error ? (<p className="text-sm text-red-400 text-center py-16">
+            {error}
+        </p>) : isLoading || config === null ? (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {CHARTS.map((chart) => (<SkeletonCard key={chart.key} chart={chart}/>))}
+        </div>) : (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {CHARTS.map((chart) => (<ChartCard key={chart.key} chart={chart} data={weekStats}
+                                               target={config[chart.key as keyof ConfigData]}/>))}
+        </div>)}
         </div>
     </div>);
-}
+};
 
 export default DashboardPage;

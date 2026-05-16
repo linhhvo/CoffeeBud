@@ -10,7 +10,7 @@ import {DeviceItem} from "./DeviceItem.tsx";
 
 const DeviceManagementPage: React.FC = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
-    const [connectedDevices, setConnectedDevices] = useState<Device[]>([],);
+    const [connectedDevices, setConnectedDevices] = useState<Device[]>([]);
     const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
@@ -46,7 +46,7 @@ const DeviceManagementPage: React.FC = () => {
         }
     };
 
-    return (<div className="min-h-[calc(100vh-3.75rem)] pt-25 text-zinc-100 px-4 py-8 md:px-8">
+    return (<div className="min-h-[calc(100vh-3.75rem)] text-zinc-100 px-4 py-8 md:px-8">
         {/* ── Page content ── */}
         <div className="max-w-5xl mx-auto">
             {/* Section header */}
@@ -61,26 +61,22 @@ const DeviceManagementPage: React.FC = () => {
                 <Button onClick={() => setIsPopupOpen(true)} label={"Connect"} icon={true}/>
             </div>
 
-            {/* ── Device list ── */}
-            {connectedDevices.length === 0 ? <></> : (<div className="space-y-3">
-                {connectedDevices.map((device) => {
-                    const isRemoving = removingIds.has(device.device_id,);
-                    return (<DeviceItem key={device.device_id} device={device} isRemoving={isRemoving}
-                                        handleRemove={handleRemove}/>
-
-                    );
-                })}
-            </div>)}
+            {/* ── Device list ── */} {connectedDevices.length === 0 ? <></> : (<div className="space-y-3">
+            {connectedDevices.map((device) => {
+                const isRemoving = removingIds.has(device.device_id,);
+                return (<DeviceItem key={device.device_id} device={device} isRemoving={isRemoving}
+                                    handleRemove={handleRemove}/>);
+            })}
+        </div>)}
         </div>
 
-        {/* ── Pairing popup ── */}
-        {isPopupOpen && (
-            <DevicePairPopup onClose={() => setIsPopupOpen(false)} onPairingInitiated={(device: Device) => {
-                setConnectedDevices((prev) => {
-                    if (prev.some((d) => d.device_id === device.device_id)) return prev;
-                    return [...prev, device];
-                });
-            }}/>)}
+        {/* ── Pairing popup ── */} {isPopupOpen && (
+        <DevicePairPopup onClose={() => setIsPopupOpen(false)} onPairingInitiated={(device: Device) => {
+            setConnectedDevices((prev) => {
+                if (prev.some((d) => d.device_id === device.device_id)) return prev;
+                return [...prev, device];
+            });
+        }}/>)}
     </div>);
 };
 

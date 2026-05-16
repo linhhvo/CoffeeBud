@@ -39,7 +39,7 @@ const ConfigPage: React.FC = () => {
         }
     };
 
-    return (<div className="min-h-[calc(100vh-3.75rem)] pt-25 text-zinc-100 px-4 py-8 md:px-8">
+    return (<div className="min-h-[calc(100vh-3.75rem)] text-zinc-100 px-4 py-8 md:px-8">
         <div className="max-w-5xl mx-auto">
             <div className="flex items-center justify-between gap-4 mb-6 h-9">
                 <h2 className="text-xl font-semibold text-zinc-100 tracking-wide">
@@ -48,39 +48,39 @@ const ConfigPage: React.FC = () => {
 
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-4 mb-4 backdrop-blur-sm">
                 <p className="text-[13px] uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-5">
-                    Habit Rules </p>
-                {configs ? (<div>
-                    <NumericConfigField label="Coffee Intake Limit" description="Maximum cups of coffee per day"
-                                        value={configs?.coffee_limit} unit="cups" min={0} max={100}
-                                        onChange={(v) => setconfigs((r) => ({
-                                            ...r as Config, coffee_limit: v,
-                                        }))}/>
-                    <NumericConfigField label="Break Interval" description="Reminder frequency to take a break"
-                                        value={configs?.break_interval} unit="min" min={10} max={180} step={5}
-                                        onChange={(v) => setconfigs((r) => ({
-                                            ...r as Config, break_interval: v,
-                                        }))}/>
-                    <NumericConfigField label="Water Interval" description="Reminder frequency to drink water"
-                                        value={configs?.water_interval} unit="min" min={10} max={120} step={5}
-                                        onChange={(v) => setconfigs((r) => ({
-                                            ...r as Config, water_interval: v,
-                                        }))}/>
-                    <TimeField label="Active Time Start" description="The time device starts tracking"
-                               value={configs?.wakeup_time} onChange={(v) => setconfigs((r) => ({
-                        ...r as Config, wakeup_time: v,
-                    }))}/>
-                    <TimeField label="Active Time End" description="The time device stops tracking"
-                               value={configs?.sleep_time} onChange={(v) => setconfigs((r) => ({
-                        ...r as Config, sleep_time: v,
-                    }))}/>
-                </div>) : (<div className="text-center text-zinc-500">
-                    Loading configurations... </div>)}
+                    Habit Rules </p>{configs ? (<div>
+                <NumericConfigField label="Coffee Intake Limit" description="Maximum cups of coffee per day"
+                                    value={configs?.coffee_limit} unit="cups" min={0} max={100}
+                                    onChange={(v) => setconfigs((r) => ({
+                                        ...r as Config, coffee_limit: v,
+                                    }))}/> <NumericConfigField label="Break Interval"
+                                                               description="Reminder frequency to take a break"
+                                                               value={configs?.break_interval} unit="min" min={10}
+                                                               max={180} step={5} onChange={(v) => setconfigs((r) => ({
+                ...r as Config, break_interval: v,
+            }))}/> <NumericConfigField label="Water Interval" description="Reminder frequency to drink water"
+                                       value={configs?.water_interval} unit="min" min={10} max={120} step={5}
+                                       onChange={(v) => setconfigs((r) => ({
+                                           ...r as Config, water_interval: v,
+                                       }))}/> <TimeField label="Active Time Start"
+                                                         description="The time device starts tracking"
+                                                         value={configs?.wakeup_time}
+                                                         onChange={(v) => setconfigs((r) => ({
+                                                             ...r as Config, wakeup_time: v,
+                                                         }))}/> <TimeField label="Active Time End"
+                                                                           description="The time device stops tracking"
+                                                                           value={configs?.sleep_time}
+                                                                           onChange={(v) => setconfigs((r) => ({
+                                                                               ...r as Config, sleep_time: v,
+                                                                           }))}/>
+            </div>) : (<div className="text-center text-zinc-500">
+                Loading configurations... </div>)}
             </div>
 
             <div className="flex items-center justify-end gap-4">
-                <SaveStatus state={saveState}/>
-                <Button onClick={handleSave} disabled={saveState === "saving" || !configs}
-                        label={saveState === "saving" ? "Saving…" : "Save Changes"}/>
+                <SaveStatus state={saveState}/> <Button onClick={handleSave}
+                                                        disabled={saveState === "saving" || !configs}
+                                                        label={saveState === "saving" ? "Saving…" : "Save Changes"}/>
             </div>
         </div>
     </div>);
