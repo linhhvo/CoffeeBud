@@ -5,7 +5,7 @@ type NameType = number | string;
 
 interface ChartTooltipProps {
     active?: boolean;
-    payload?: Array<{ value?: ValueType }>;
+    payload?: Array<{ value?: ValueType; payload?: ChartDayData }>;
     label?: NameType;
     chart: ChartConfig;
 }
@@ -13,7 +13,7 @@ interface ChartTooltipProps {
 export function ChartTooltip({active, payload, chart}: ChartTooltipProps) {
     if (!active || !payload?.length) return null;
 
-    const entry = payload[0]?.payload as ChartDayData
+    const entry = payload[0]?.payload
     const isMissing = entry?.isMissing
 
     return isMissing ? (

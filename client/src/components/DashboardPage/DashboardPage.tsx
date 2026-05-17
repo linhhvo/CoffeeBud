@@ -68,7 +68,7 @@ const DashboardPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     const [config, setConfig] = useState<Config | null>(null);
-    const [weekStats, setWeekStats] = useState<(DailyStat | null)[]>(Array(7).fill(null),);
+    const [weekStats, setWeekStats] = useState<DailyStat[]>(Array(7).fill(null),);
 
     // Fetch config once on mount
     useEffect(() => {
@@ -91,7 +91,7 @@ const DashboardPage: React.FC = () => {
             .getWeekly(getDateForWeek(weekOffset))
             .then((res) => {
                 if (res.success && Array.isArray(res.data)) {
-                    const stats: (DailyStat | null)[] = Array(7).fill(null);
+                    const stats: DailyStat[] = Array(7).fill(null);
                     res.data.forEach((raw: any) => {
                         const stat = createDailyStat(raw);
                         const dayIndex = (stat.date.getDay() + 6) % 7; // Mon=0 ... Sun=6
@@ -149,7 +149,7 @@ const DashboardPage: React.FC = () => {
         </div>) : (<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
             <MoodLineChart data={weekStats}/>
             {CHARTS.map((chart) => (<HabitBarChart key={chart.key} chart={chart} data={weekStats}
-                                                   target={config[chart.key as keyof ConfigData]}/>))}
+                                                   target={config[chart.key as keyof Config] as number}/>))}
         </div>)}
         </div>
     </div>);

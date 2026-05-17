@@ -1,5 +1,5 @@
 import type {DailyStat} from "./types.ts";
-import {CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis,} from "recharts";
+import {CartesianGrid, type DotProps, Line, LineChart, ResponsiveContainer, XAxis, YAxis} from "recharts";
 
 type Mood = "happy" | "neutral" | "sad";
 
@@ -55,8 +55,8 @@ function mixColors(hex1: string, hex2: string, t = 0.5): string {
 export function MoodLineChart({data}: { data: DailyStat[] }) {
     const chartData: MoodDayData[] = data.map((d) => ({
         day: d.date.toLocaleDateString("en-GB", {day: "numeric", month: "numeric"}),
-        mood: d.avg_mood,
-        value: d.avg_mood != null ? MOOD_VALUE[d.avg_mood] : null,
+        mood: d.avg_mood as Mood,
+        value: d.avg_mood != null ? MOOD_VALUE[d.avg_mood as Mood] : null,
     }));
 
     const hasData = chartData.some((d) => d.value != null);
@@ -124,12 +124,11 @@ export function MoodLineChart({data}: { data: DailyStat[] }) {
                 <Line
                     type="monotone"
                     dataKey="value"
-                    // stroke="#71717a"
                     stroke="url(#moodGradient)"
                     strokeWidth={3}
                     connectNulls
                     dot={false}
-                    activeDot={(props) => <MoodDot key={props.index} {...props} />}
+                    activeDot={(props: DotProps) => <MoodDot key={props.index} {...props} />}
                 />
             </LineChart>
         </ResponsiveContainer>)}

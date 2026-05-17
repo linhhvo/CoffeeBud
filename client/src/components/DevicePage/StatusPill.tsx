@@ -1,5 +1,4 @@
 import type {DeviceStatus} from "./types.ts";
-import React from "react";
 
 export function StatusPill({status}: { status: DeviceStatus }) {
     if (status === "confirmed") {

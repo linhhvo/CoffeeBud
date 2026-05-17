@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import {useState} from "react";
 
 export function NumericConfigField({
                                        label, description, value, unit, min, max, step = 1, onChange,

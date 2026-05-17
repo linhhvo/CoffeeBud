@@ -1,4 +1,11 @@
 export type DeviceStatus = "pending" | "confirmed";
+export type PairingStatus = "idle" | "pending" | "confirmed" | "error";
+
+export interface DeviceEntry {
+    id: string;
+    status: PairingStatus;
+    errorMessage?: string;
+}
 
 export interface Device {
     device_id: string;

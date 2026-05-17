@@ -1,18 +1,10 @@
 import React, {useCallback, useState} from "react";
-import type {Device} from "./types.ts";
+import type {Device, DeviceEntry} from "./types.ts";
 import {createDevice} from "./types.ts";
 import {useWebSocketEvent} from "../../websocket/useWebSocketEvent.ts";
 import {WsEventTypes} from "../../websocket/types.ts";
 import {deviceService} from "../../apis/device.service.ts";
 import {PairDeviceItem} from "./PairDeviceItem.tsx";
-
-type PairingStatus = "idle" | "pending" | "confirmed" | "error";
-
-interface DeviceEntry {
-    id: string;
-    status: PairingStatus;
-    errorMessage?: string;
-}
 
 interface DevicePairPopupProps {
     onClose: () => void;
