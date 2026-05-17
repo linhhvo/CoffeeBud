@@ -1,6 +1,4 @@
-import type {ChartConfig} from "./types.ts";
-
-const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+import {type ChartConfig, DAY_LABELS} from "./types.ts";
 
 export function SkeletonCard({chart}: { chart: ChartConfig }) {
     return (<div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 h-80 flex flex-col gap-3">

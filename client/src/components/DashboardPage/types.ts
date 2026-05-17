@@ -1,43 +1,23 @@
-type DataKey = "breaks" | "water" | "coffee";
-type TargetKey = "breakTarget" | "waterTarget" | "coffeeTarget";
+export const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export interface ChartConfig {
-    key: DataKey;
+    key: string;
+    dataKey: string;
     label: string;
     unit: string;
-    targetKey: TargetKey;
     colorOver: string;
     colorOk: string;
     description: string;
     icon: string;
     overLabel: string;
     okLabel: string;
-    higherIsBetter: boolean;
-}
-
-export interface DayData {
-    day: string;
-    breaks: number | null;
-    water: number | null;
-    coffee: number | null;
 }
 
 export interface ChartDayData {
-    day: string;
-    value: number | null;
-}
-
-export interface Targets {
-    breakTarget: number;
-    waterTarget: number;
-    coffeeTarget: number;
-}
-
-// API response shapes
-export interface ConfigData {
-    break_interval: number;
-    water_interval: number;
-    coffee_limit: number;
+    weekDay: string;
+    date: string,
+    value: number;
+    isMissing: boolean;
 }
 
 export interface DailyStat {

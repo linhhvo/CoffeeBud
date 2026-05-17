@@ -2,9 +2,10 @@ import React, {useEffect, useState} from "react";
 import {statService} from "../../apis/stat.service.ts";
 import {configService} from "../../apis/config.service.ts";
 import {SkeletonCard} from "./SkeletonCard.tsx";
-import {ChartCard} from "./ChartCard.tsx";
+import {HabitBarChart} from "./HabitBarChart.tsx";
 import {type ChartConfig, createDailyStat, type DailyStat} from "./types.ts";
 import {type Config, createConfig} from "../ConfigPage/types.ts";
+import {MoodLineChart} from "./MoodLineChart.tsx";
 
 const CHARTS: ChartConfig[] = [{
     key: "break_interval",
@@ -107,7 +108,7 @@ const DashboardPage: React.FC = () => {
     const handleNext = (): void => setWeekOffset((w) => Math.min(0, w + 1));
 
     return (<div className="min-h-[calc(100vh-3.75rem)] text-zinc-100 px-4 py-8 md:px-8">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-screen mx-auto flex flex-col">
             {/* Page header */}
             <div className="h-9 flex flex-row items-center align-middle justify-between gap-4 mb-6">
                 <h2 className="text-xl font-semibold tracking-wide text-zinc-100">
@@ -143,11 +144,12 @@ const DashboardPage: React.FC = () => {
 
             {/* Body */} {error ? (<p className="text-sm text-red-400 text-center py-16">
             {error}
-        </p>) : isLoading || config === null ? (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        </p>) : isLoading || config === null ? (<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {CHARTS.map((chart) => (<SkeletonCard key={chart.key} chart={chart}/>))}
-        </div>) : (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {CHARTS.map((chart) => (<ChartCard key={chart.key} chart={chart} data={weekStats}
-                                               target={config[chart.key as keyof ConfigData]}/>))}
+        </div>) : (<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+            <MoodLineChart data={weekStats}/>
+            {CHARTS.map((chart) => (<HabitBarChart key={chart.key} chart={chart} data={weekStats}
+                                                   target={config[chart.key as keyof ConfigData]}/>))}
         </div>)}
         </div>
     </div>);
