@@ -158,7 +158,7 @@ const DashboardPage: React.FC = () => {
             {/* Body */} {error ? (<p className="text-sm text-red-400 text-center py-16">
             {error}
         </p>) : isLoading || config === null ? (<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {CHARTS.map((chart) => (<SkeletonCard key={chart.key} chart={chart}/>))}
+            {CHARTS.map((chart) => (<SkeletonCard key={chart.key}/>))}
         </div>) : (<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
             <MoodLineChart data={weekStats}/>
             {CHARTS.map((chart) => (<HabitBarChart key={chart.key} chart={chart} data={weekStats}

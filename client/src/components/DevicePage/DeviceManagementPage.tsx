@@ -47,37 +47,37 @@ const DeviceManagementPage: React.FC = () => {
     };
 
     return (<div className="min-h-[calc(100vh-3.75rem)] text-zinc-100 px-4 py-8 md:px-8">
-        {/* ── Page content ── */}
-        <div className="max-w-5xl mx-auto">
-            {/* Section header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h2 className="text-xl font-semibold text-zinc-100 tracking-wide">
-                        Devices </h2>
-                    <p className="text-sm text-stone-400 mt-0.5">
-                        {connectedDevices.length === 0 ? "No devices connected yet" : `${connectedDevices.length} device${connectedDevices.length !== 1 ? "s" : ""} registered`}
-                    </p>
+            {/* ── Page content ── */}
+            <div className="max-w-5xl mx-auto">
+                {/* Section header */}
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 className="text-xl font-semibold text-zinc-100 tracking-wide">
+                            Devices </h2>
+                        <p className="text-sm text-stone-400 mt-0.5">
+                            {connectedDevices.length === 0 ? "No devices connected yet" : `${connectedDevices.length} device${connectedDevices.length !== 1 ? "s" : ""} registered`}
+                        </p>
+                    </div>
+                    <Button onClick={() => setIsPopupOpen(true)} label={"Connect"} icon={true}/>
                 </div>
-                <Button onClick={() => setIsPopupOpen(true)} label={"Connect"} icon={true}/>
+
+                {/* ── Device list ── */} {connectedDevices.length === 0 ? <></> : (<div className="space-y-3">
+                    {connectedDevices.map((device) => {
+                        const isRemoving = removingIds.has(device.device_id,);
+                        return (
+                            <DeviceItem key={device.device_id} device={device} isRemoving={isRemoving} handleRemove={handleRemove}/>);
+                    })}
+                </div>)}
             </div>
 
-            {/* ── Device list ── */} {connectedDevices.length === 0 ? <></> : (<div className="space-y-3">
-            {connectedDevices.map((device) => {
-                const isRemoving = removingIds.has(device.device_id,);
-                return (<DeviceItem key={device.device_id} device={device} isRemoving={isRemoving}
-                                    handleRemove={handleRemove}/>);
-            })}
-        </div>)}
-        </div>
-
-        {/* ── Pairing popup ── */} {isPopupOpen && (
-        <DevicePairPopup onClose={() => setIsPopupOpen(false)} onPairingInitiated={(device: Device) => {
-            setConnectedDevices((prev) => {
-                if (prev.some((d) => d.device_id === device.device_id)) return prev;
-                return [...prev, device];
-            });
-        }}/>)}
-    </div>);
+            {/* ── Pairing popup ── */} {isPopupOpen && (
+            <DevicePairPopup onClose={() => setIsPopupOpen(false)} onPairingInitiated={(device: Device) => {
+                setConnectedDevices((prev) => {
+                    if (prev.some((d) => d.device_id === device.device_id)) return prev;
+                    return [...prev, device];
+                });
+            }}/>)}
+        </div>);
 };
 
 export default DeviceManagementPage;

@@ -3,7 +3,6 @@ import {CartesianGrid, type DotProps, Line, LineChart, ResponsiveContainer, XAxi
 import happyFace from "../../assets/happy.png"
 import neutralFace from "../../assets/neutral.png"
 import sadFace from "../../assets/sad.png"
-import React from "react";
 
 type Mood = "happy" | "neutral" | "sad";
 
@@ -117,12 +116,11 @@ export function MoodLineChart({data}: { data: DailyStat[] }) {
                 <YAxis
                     axisLine={false}
                     tickLine={false} domain={[-0.1, 2.1]}
-                    ticks={[0, 1, 2]}
-                    width={50} tick={(props) => {
+                    ticks={[0, 1, 2]} width={50} tick={(props: any) => {
                     const mood = MOOD_LABEL[props.payload.value as number];
                     if (!mood) return <g/>;
                     return (
-                        <image href={MOOD_EMOJI[mood]} x={props.x - 20} y={props.y - 15} alt="mood icon" className="w-6 h-6 object-contain"/>);
+                        <image href={MOOD_EMOJI[mood]} x={props.x - 20} y={props.y - 15} aria-label="mood icon" className="w-6 h-6 object-contain"/>);
                 }}
                 />
                 <Line
