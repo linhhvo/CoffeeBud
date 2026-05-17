@@ -59,7 +59,7 @@ func CalculateAvgInterval(
 		// if there are no activities, calculate the interval since wakeup time
 		if utils.IsSameDate(time.Now(), endTime) && time.Now().Before(endTime) {
 			log.Println("start time ", startTime)
-			*avgInterval = int(time.Since(startTime))
+			*avgInterval = int(time.Since(startTime).Minutes())
 		} else {
 			avgInterval = nil
 		}

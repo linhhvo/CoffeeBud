@@ -103,12 +103,12 @@ func UpdateMood(
 	db *sql.DB,
 	userId uuid.UUID,
 	targetTime time.Time,
-) (models.PetState, error) {
+) (models.PetState, models.DailyStats, error) {
 	var pet models.PetState
 
 	stat, err := CalculateMood(ctx, db, userId, targetTime)
 	if err != nil {
-		return pet, fmt.Errorf("error calculating mood: %v", err)
+		return pet, stat, fmt.Errorf("error calculating mood: %v", err)
 	}
 
 	row := db.QueryRowContext(
@@ -120,7 +120,7 @@ func UpdateMood(
 
 	err = row.Scan(&pet.UserId, &pet.AvatarUrl, &pet.Mood, &pet.LastUpdateTime)
 	if err != nil {
-		return pet, err
+		return pet, stat, err
 	}
 
 	_, err = db.ExecContext(
@@ -130,9 +130,9 @@ func UpdateMood(
 		stat.Mood,
 	)
 	if err != nil {
-		return pet, fmt.Errorf("error adding mood to history: %v", err)
+		return pet, stat, fmt.Errorf("error adding mood to history: %v", err)
 
 	}
 
-	return pet, nil
+	return pet, stat, nil
 }

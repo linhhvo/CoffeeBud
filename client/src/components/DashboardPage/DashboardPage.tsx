@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {statService} from "../../apis/stat.service.ts";
 import {configService} from "../../apis/config.service.ts";
 import {SkeletonCard} from "./SkeletonCard.tsx";
@@ -6,6 +6,8 @@ import {HabitBarChart} from "./HabitBarChart.tsx";
 import {type ChartConfig, createDailyStat, type DailyStat} from "./types.ts";
 import {type Config, createConfig} from "../ConfigPage/types.ts";
 import {MoodLineChart} from "./MoodLineChart.tsx";
+import {useWebSocketEvent} from "../../websocket/useWebSocketEvent.ts";
+import {WsEventTypes} from "../../websocket/types.ts";
 
 const CHARTS: ChartConfig[] = [{
     key: "break_interval",
@@ -103,6 +105,20 @@ const DashboardPage: React.FC = () => {
 
     const handlePrev = (): void => setWeekOffset((w) => w - 1);
     const handleNext = (): void => setWeekOffset((w) => Math.min(0, w + 1));
+
+    const handleDataUpdate = useCallback((payload: DailyStat) => {
+        console.log(payload)
+        const stat = createDailyStat(payload);
+        const dayIndex = (stat.date.getDay() + 6) % 7;
+
+        setWeekStats((prev) => {
+            const updated = [...prev];
+            updated[dayIndex] = stat;
+            return updated;
+        });
+    }, []);
+
+    useWebSocketEvent(WsEventTypes.DATA_UPDATED, handleDataUpdate);
 
     return (<div className="min-h-[calc(100vh-3.75rem)] text-zinc-100 px-4 py-8 md:px-8">
         <div className="max-w-screen mx-auto flex flex-col">
