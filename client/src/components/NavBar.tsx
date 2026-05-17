@@ -1,12 +1,12 @@
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import {NavLink, useNavigate} from "react-router-dom";
 import icon from "../assets/icon.png";
-import { authService } from "../apis/auth.service.ts";
-import { useAuth } from "../context/AuthContext.tsx";
+import {authService} from "../apis/auth.service.ts";
+import {useAuth} from "../context/AuthContext.tsx";
 
 const Navbar: React.FC = () => {
     const navigate = useNavigate();
-    const { setLoggedOut } = useAuth();
+    const {setLoggedOut} = useAuth();
 
     const handleLogout = async () => {
         try {
@@ -21,62 +21,23 @@ const Navbar: React.FC = () => {
         }
     };
 
-    return (
-        <nav className="flex items-center justify-between p-4 bg-emerald-800/50 text-white shadow-md">
+    return (<nav className="flex items-center justify-between p-4 bg-[#0F3F32] text-white shadow-md h-15">
             <div className="flex items-center gap-x-6">
-                <img
-                    src={icon}
-                    alt="coffee icon"
-                    className="w-8 h-8 ml-2 object-contain"
-                />
-                <NavLink
-                    to="/dashboard"
-                    className={({ isActive }) =>
-                        ` ${
-                            isActive
-                                ? "bg-gray-950/50 text-white"
-                                : "text-gray-300 hover:bg-white/5 hover:text-white"
-                        },
-                        rounded-md px-3 py-2 text-sm font-medium`}
-                >
-                    Dashboard
-                </NavLink>
-                <NavLink
-                    to="/devices"
-                    className={({ isActive }) =>
-                        ` ${
-                            isActive
-                                ? "bg-gray-950/50 text-white"
-                                : "text-gray-300 hover:bg-white/5 hover:text-white"
-                        },
-                        rounded-md px-3 py-2 text-sm font-medium`}
-                >
-                    Devices
-                </NavLink>
-                <NavLink
-                    to="/configs"
-                    className={({ isActive }) =>
-                        ` ${
-                            isActive
-                                ? "bg-gray-950/50 text-white"
-                                : "text-gray-300 hover:bg-white/5 hover:text-white"
-                        },
-                        rounded-md px-3 py-2 text-sm font-medium`}
-                >
-                    Configs
-                </NavLink>
+                <img src={icon} alt="coffee icon" className="w-8 h-8 ml-2 object-contain"/>
+                <NavLink to="/dashboard" className={({isActive}) => ` ${isActive ? "bg-gray-950/50 text-white" : "text-gray-300 hover:bg-white/5 hover:text-white"},
+                        rounded-md px-3 py-2 text-sm font-medium`}> Dashboard </NavLink>{" "}
+                <NavLink to="/devices" className={({isActive}) => ` ${isActive ? "bg-gray-950/50 text-white" : "text-gray-300 hover:bg-white/5 hover:text-white"},
+                        rounded-md px-3 py-2 text-sm font-medium`}> Devices </NavLink>{" "}
+                <NavLink to="/configs" className={({isActive}) => ` ${isActive ? "bg-gray-950/50 text-white" : "text-gray-300 hover:bg-white/5 hover:text-white"},
+                        rounded-md px-3 py-2 text-sm font-medium`}> Configs </NavLink>
             </div>
 
             <div>
-                <button
-                    onClick={handleLogout}
-                    className="cursor-pointer px-3 py-2 bg-zinc-800 rounded-md hover:bg-zinc-700 transition-colors text-sm text-olive-300 font-medium"
-                >
+                <button onClick={handleLogout} className="cursor-pointer px-3 py-2 bg-zinc-800 rounded-md hover:bg-zinc-700 transition-colors text-sm text-olive-300 font-medium">
                     Logout
                 </button>
             </div>
-        </nav>
-    );
+        </nav>);
 };
 
 export default Navbar;

@@ -29,7 +29,6 @@ func SetCookie(c *gin.Context, userId uuid.UUID) error {
 		Path:     "/",
 		Secure:   true,
 		HttpOnly: true,
-		MaxAge:   3600,
 		SameSite: http.SameSiteNoneMode,
 	}
 
@@ -39,7 +38,6 @@ func SetCookie(c *gin.Context, userId uuid.UUID) error {
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 		Secure:   true,
-		MaxAge:   3600,
 	}
 
 	c.SetCookieData(&jwtCookie)

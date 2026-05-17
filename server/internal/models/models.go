@@ -27,7 +27,7 @@ type ActivityEvent struct {
 	UserId          uuid.UUID `json:"user_id"`
 	ActivityType    string    `json:"type" binding:"required,oneof=water coffee break"`
 	Timestamp       time.Time `json:"timestamp" binding:"required"`
-	IntervalSeconds int       `json:"interval_since_last"`
+	IntervalMinutes int       `json:"interval_since_last"`
 }
 
 type Config struct {
@@ -56,8 +56,8 @@ type WebSocketPayload struct {
 type DailyStats struct {
 	UserId uuid.UUID `json:"user_id"`
 	Date   time.Time `json:"date"`
-	Coffee int       `json:"coffee"` // total number of coffee
-	Break  int       `json:"break"`  // average break interval
-	Water  int       `json:"water"`  // average water interval
-	Mood   string    `json:"mood"`   // average mood
+	Coffee int       `json:"total_coffee"`       // total number of coffee
+	Break  *int      `json:"avg_break_interval"` // average break interval
+	Water  *int      `json:"avg_water_interval"` // average water interval
+	Mood   string    `json:"avg_mood"`           // average mood
 }

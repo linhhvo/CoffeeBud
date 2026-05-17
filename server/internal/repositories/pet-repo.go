@@ -5,47 +5,11 @@ import (
 	"coffee-bud/internal/utils"
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
-
-func UpdateMood(
-	ctx context.Context,
-	db *sql.DB,
-	userId uuid.UUID,
-	mood string,
-) (models.PetState, error) {
-
-	var pet models.PetState
-
-	row := db.QueryRowContext(
-		ctx,
-		"UPDATE pet_states SET current_mood=$1, last_updated=CURRENT_TIMESTAMP WHERE user_id=$2 RETURNING user_id, avatar_id, current_mood, last_updated",
-		mood,
-		userId,
-	)
-
-	err := row.Scan(&pet.UserId, &pet.AvatarUrl, &pet.Mood, &pet.LastUpdateTime)
-	if err != nil {
-		return pet, err
-	}
-
-	_, err = db.ExecContext(
-		ctx,
-		"INSERT INTO pet_mood_history (user_id, mood) VALUES ($1, $2)",
-		userId,
-		mood,
-	)
-	if err != nil {
-		return pet, fmt.Errorf("error adding mood to history: %v", err)
-
-	}
-
-	return pet, nil
-}
 
 func AddDefaultPet(ctx context.Context, db *sql.DB, userId uuid.UUID) error {
 	_, err := db.ExecContext(ctx, "INSERT INTO pet_states (user_id) VALUES ($1)", userId)
@@ -63,52 +27,56 @@ func CalculateMood(
 	db *sql.DB,
 	userId uuid.UUID,
 	targetTime time.Time,
-) (models.PetState, error) {
-	var pet models.PetState
+) (models.DailyStats, error) {
+	var stat models.DailyStats
 
-	// stores each habit rule state: true if goal is met and false if goal is not met
-	states := make(map[string]bool)
+	stat.Date = targetTime
 
 	// get user habit rules
 	config, err := GetConfigByUser(ctx, db, userId)
 	if err != nil {
-		return pet, err
+		return stat, err
 	}
 
 	startTime := utils.GetDateTime(targetTime, config.WakeUpTime)
 	endTime := utils.GetDateTime(targetTime, config.SleepTime)
 
+	// if attemp to calculate mood before start of the day, return because there is no data to calculate
+	if time.Now().Before(startTime) {
+		return stat, nil
+	}
+
+	if time.Now().Before(endTime) {
+		endTime = time.Now()
+	}
+
+	// stores each habit rule state: true if goal is met and false if goal is not met
+	states := make(map[string]bool)
+
 	// check coffee intake
 	coffeeActivities, err := GetActivitiesByTypeTime(ctx, db, userId, "coffee", startTime, endTime)
 	if err != nil {
-		return pet, err
+		return stat, err
 	}
-	states["coffee"] = len(coffeeActivities) < config.CoffeeLimit
+	states["coffee"] = len(coffeeActivities) <= config.CoffeeLimit
+	stat.Coffee = len(coffeeActivities)
 
-	// check water intake
-	waterActivity, err := GetLatestActivityByType(ctx, db, "water", userId, targetTime)
-	if err != nil {
-		// if there is no water recorded during the active period, it fails to meet the target goal
-		if errors.Is(err, sql.ErrNoRows) {
-			states["water"] = false
-		} else {
-			return pet, err
-		}
+	// check avg break interval
+	avgBreakInterval := CalculateAvgInterval(ctx, db, userId, "break", startTime, endTime)
+	if avgBreakInterval != nil {
+		states["break"] = *avgBreakInterval <= config.BreakInterval
+		stat.Break = avgBreakInterval
 	} else {
-		states["water"] = (waterActivity.IntervalSeconds / 60) < config.WaterInterval
+		states["break"] = false
 	}
 
-	// check break
-	breakActivity, err := GetLatestActivityByType(ctx, db, "break", userId, targetTime)
-	if err != nil {
-		// if there is no break recorded during the active period, it fails to meet the target goal
-		if errors.Is(err, sql.ErrNoRows) {
-			states["break"] = false
-		} else {
-			return pet, err
-		}
+	// check avg water interval
+	avgWaterInterval := CalculateAvgInterval(ctx, db, userId, "water", startTime, endTime)
+	if avgWaterInterval != nil {
+		states["water"] = *avgWaterInterval <= config.WaterInterval
+		stat.Water = avgWaterInterval
 	} else {
-		states["break"] = (breakActivity.IntervalSeconds / 60) < config.BreakInterval
+		states["water"] = false
 	}
 
 	count := 0
@@ -118,60 +86,53 @@ func CalculateMood(
 		}
 	}
 
-	var mood string
 	switch count {
 	case 0:
-		mood = "happy"
+		stat.Mood = "happy"
 	case 3:
-		mood = "sad"
+		stat.Mood = "sad"
 	default:
-		mood = "neutral"
+		stat.Mood = "neutral"
 	}
 
-	pet, err = UpdateMood(ctx, db, userId, mood)
-
-	return pet, nil
+	return stat, nil
 }
 
-func GetMoodsByDate(
+func UpdateMood(
 	ctx context.Context,
 	db *sql.DB,
 	userId uuid.UUID,
-	startTime time.Time,
-	endTime time.Time,
-) ([]string, error) {
-	var moods []string
+	targetTime time.Time,
+) (models.PetState, models.DailyStats, error) {
+	var pet models.PetState
 
-	rows, err := db.QueryContext(
+	stat, err := CalculateMood(ctx, db, userId, targetTime)
+	if err != nil {
+		return pet, stat, fmt.Errorf("error calculating mood: %v", err)
+	}
+
+	row := db.QueryRowContext(
 		ctx,
-		"SELECT mood FROM pet_mood_history WHERE user_id=$1 AND timestamp >= $2 AND timestamp < $3",
+		"UPDATE pet_states SET current_mood=$1, last_updated=CURRENT_TIMESTAMP WHERE user_id=$2 RETURNING user_id, avatar_id, current_mood, last_updated",
+		stat.Mood,
 		userId,
-		startTime,
-		endTime,
+	)
+
+	err = row.Scan(&pet.UserId, &pet.AvatarUrl, &pet.Mood, &pet.LastUpdateTime)
+	if err != nil {
+		return pet, stat, err
+	}
+
+	_, err = db.ExecContext(
+		ctx,
+		"INSERT INTO pet_mood_history (user_id, mood) VALUES ($1, $2)",
+		userId,
+		stat.Mood,
 	)
 	if err != nil {
-		return moods, err
+		return pet, stat, fmt.Errorf("error adding mood to history: %v", err)
+
 	}
 
-	defer rows.Close()
-
-	for rows.Next() {
-		var mood string
-		err = rows.Scan(&mood)
-		if err != nil {
-			return moods, fmt.Errorf("error getting mood history: %v", err)
-		}
-		moods = append(moods, mood)
-	}
-
-	if err = rows.Close(); err != nil {
-		return moods, fmt.Errorf("error closing mood history database rows: %v", err)
-	}
-
-	// last error encountered by Rows.Scan
-	if err := rows.Err(); err != nil {
-		return moods, err
-	}
-
-	return moods, nil
+	return pet, stat, nil
 }

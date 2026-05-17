@@ -1,16 +1,12 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500&family=DM+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-    --text: #6b6375;
-    --text-h: #08060d;
+    --mono: 'DM Mono', 'IBM Plex Mono', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
 
-    --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-    --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-    --mono: ui-monospace, Consolas, monospace;
-
-    font: 18px/145% var(--sans);
-    letter-spacing: 0.18px;
-    color-scheme: light dark;
+    font: 18px/145% var(--mono);
+    color-scheme: dark;
     color: var(--text);
     background: var(--bg);
     font-synthesis: none;
@@ -18,15 +14,23 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #1f1f1e;
+
     @media (max-width: 1024px) {
         font-size: 16px;
     }
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --text: #9ca3af;
-        --text-h: #f3f4f6;
-        --bg: #1f1f1e;
-    }
+h1, h2, h3 {
+    font-family: var(--sans), serif;
+    color: var(--text-h);
+}
+
+
+@theme {
+    --breakpoint-md: 60rem;
+    --breakpoint-xl: 91rem;
+    --breakpoint-2xl: 120rem;
 }
