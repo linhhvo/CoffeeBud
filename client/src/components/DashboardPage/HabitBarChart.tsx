@@ -39,7 +39,6 @@ export function HabitBarChart({chart, data, target}: ChartCardProps) {
         <div className="flex items-start justify-between">
             <div>
                 <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-base leading-none">{chart.icon}</span>
                     <h3 className="text-md font-semibold text-stone-200 tracking-tight">
                         {chart.label}
                     </h3>

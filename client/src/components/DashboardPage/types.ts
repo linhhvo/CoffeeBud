@@ -8,14 +8,13 @@ export interface ChartConfig {
     colorOver: string;
     colorOk: string;
     description: string;
-    icon: string;
     overLabel: string;
     okLabel: string;
 }
 
 export interface ChartDayData {
     weekDay: string;
-    date: string,
+    date: string;
     value: number;
     isMissing: boolean;
 }

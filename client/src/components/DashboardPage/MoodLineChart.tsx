@@ -1,5 +1,9 @@
 import type {DailyStat} from "./types.ts";
 import {CartesianGrid, type DotProps, Line, LineChart, ResponsiveContainer, XAxis, YAxis} from "recharts";
+import happyFace from "../../assets/happy.png"
+import neutralFace from "../../assets/neutral.png"
+import sadFace from "../../assets/sad.png"
+import React from "react";
 
 type Mood = "happy" | "neutral" | "sad";
 
@@ -9,7 +13,7 @@ const MOOD_COLOR: Record<Mood, string> = {
     happy: "#3EA865", neutral: "#8F55A2", sad: "#5578A5",
 };
 const MOOD_EMOJI: Record<Mood, string> = {
-    happy: "😊", neutral: "😐", sad: "😞",
+    happy: happyFace, neutral: neutralFace, sad: sadFace,
 };
 
 interface MoodDayData {
@@ -67,7 +71,6 @@ export function MoodLineChart({data}: { data: DailyStat[] }) {
         <div className="flex items-start justify-between mb-[40px]">
             <div>
                 <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-base leading-none">🧠</span>
                     <h3 className="text-md font-semibold text-stone-200 tracking-tight">
                         Mood
                     </h3>
@@ -92,9 +95,9 @@ export function MoodLineChart({data}: { data: DailyStat[] }) {
                             const prevColor = i > 0 ? MOOD_COLOR[chartData[i - 1].mood] : color
                             const nextColor = i < chartData.length - 1 ? MOOD_COLOR[chartData[i + 1].mood] : color
                             return (<>
-                                <stop offset={offset - 0.06} stopColor={mixColors(prevColor, color, 0.75)}/>
+                                <stop offset={offset - 0.06} stopColor={mixColors(prevColor, color, 0.85)}/>
                                 <stop key={i} offset={offset} stopColor={color}/>
-                                <stop offset={offset + 0.06} stopColor={mixColors(color, nextColor, 0.35)}/>
+                                <stop offset={offset + 0.06} stopColor={mixColors(color, nextColor, 0.45)}/>
                             </>);
                         })}
                     </linearGradient>
@@ -103,23 +106,24 @@ export function MoodLineChart({data}: { data: DailyStat[] }) {
                 <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="rgba(255,255,255,0.04)"
-                    vertical={false}
+                    vertical={false} horizontalValues={[0, 1, 2]}
                 />
                 <XAxis
                     dataKey="day"
                     axisLine={false}
                     tickLine={false}
-                    tick={{fontSize: 13, fill: "#71717a"}}
-                    padding={{left: 30, right: 45}}
+                    tick={{fontSize: 13, fill: "#71717a"}} padding={{left: 30, right: 35}}
                 />
                 <YAxis
                     axisLine={false}
-                    tickLine={false}
-                    domain={[0, 2]}
+                    tickLine={false} domain={[-0.1, 2.1]}
                     ticks={[0, 1, 2]}
-                    width={50}
-                    tickFormatter={(v: number) => MOOD_EMOJI[MOOD_LABEL[v]] ?? ""}
-                    tick={{fontSize: 10, fill: "#71717a"}}
+                    width={50} tick={(props) => {
+                    const mood = MOOD_LABEL[props.payload.value as number];
+                    if (!mood) return <g/>;
+                    return (
+                        <image href={MOOD_EMOJI[mood]} x={props.x - 20} y={props.y - 15} alt="mood icon" className="w-6 h-6 object-contain"/>);
+                }}
                 />
                 <Line
                     type="monotone"

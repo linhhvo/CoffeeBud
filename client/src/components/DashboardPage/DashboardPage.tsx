@@ -15,7 +15,6 @@ const CHARTS: ChartConfig[] = [{
     colorOver: "#f59e0b",
     colorOk: "#10b981",
     description: "Avg minutes between breaks",
-    icon: "⏸",
     overLabel: "Too infrequent",
     okLabel: "Within target",
 }, {
@@ -26,7 +25,6 @@ const CHARTS: ChartConfig[] = [{
     colorOver: "#38bdf8",
     colorOk: "#64748b",
     description: "Avg minutes between drinks",
-    icon: "💧",
     overLabel: "Too infrequent",
     okLabel: "Within target",
 }, {
@@ -37,7 +35,6 @@ const CHARTS: ChartConfig[] = [{
     colorOver: "#f97316",
     colorOk: "#a8a29e",
     description: "Daily cups consumed",
-    icon: "☕",
     overLabel: "Over limit",
     okLabel: "Within limit",
 }];
