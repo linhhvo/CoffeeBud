@@ -1,6 +1,4 @@
-import {
-    Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer, Tooltip, type TooltipProps, XAxis, YAxis
-} from "recharts";
+import {Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {LegendDot} from "./LegendDot.tsx";
 import {ChartTooltip} from "./ChartTooltip.tsx";
 import {type ChartConfig, type ChartDayData, type DailyStat, DAY_LABELS} from "./types.ts";
@@ -87,8 +85,7 @@ export function HabitBarChart({chart, data, target}: ChartCardProps) {
                 domain={[0, maxVal]}
                 width={50}
             />
-            <Tooltip
-                content={(props: TooltipProps<number, string>) => (
+            <Tooltip content={(props: any) => (
                     <ChartTooltip {...props} chart={chart} target={target}/>)}
                 cursor={<CustomCursor/>}/>
             <ReferenceLine

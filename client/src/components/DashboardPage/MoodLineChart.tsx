@@ -1,5 +1,5 @@
 import type {DailyStat} from "./types.ts";
-import {CartesianGrid, type DotProps, Line, LineChart, ResponsiveContainer, XAxis, YAxis} from "recharts";
+import {CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis} from "recharts";
 import happyFace from "../../assets/happy.png"
 import neutralFace from "../../assets/neutral.png"
 import sadFace from "../../assets/sad.png"
@@ -129,8 +129,7 @@ export function MoodLineChart({data}: { data: DailyStat[] }) {
                     stroke="url(#moodGradient)"
                     strokeWidth={3}
                     connectNulls
-                    dot={false}
-                    activeDot={(props: DotProps) => <MoodDot key={props.index} {...props} />}
+                    dot={false} activeDot={(props: any) => <MoodDot key={props.index} {...props} />}
                 />
             </LineChart>
         </ResponsiveContainer>)}
