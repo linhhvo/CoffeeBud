@@ -1,3 +1,9 @@
+# Deployment
+CoffeeBud is hosted at `https://coffeebud-client.fly.dev`
+
+To test the app, log in with username **demo** and password **dtap**
+
+------
 # API Endpoints
 Coffeebud server is \*temporarily\* hosted on Fly.io at `https://coffeebud-server.fly.dev`
 
@@ -62,9 +68,28 @@ curl -X PUT "https://coffeebud-server.fly.dev/api/sync/DEV-0001?battery=80" \
       | `Rules-Need-Update` | "0" or "1" | Habit rules have changed since last sync            |
       | `Pet-Need-Update`   | "0" or "1" | Pet avatar or pet name have changed since last sync | 
 
-### Habit Rules Sync *(wip)*
+### Habit Rules Configuration Sync
 
-- **GET** `/api/sync/:deviceId/habit-rules` 
+- **GET** `/api/sync/:deviceId/configs`
+  - Example response:
+  
+    ```json
+    {
+        "code": 200,
+        "success": true,
+        "data": {
+            "user_id": "4c26836b-9422-407a-93c4-d8d034b5a8c3",
+            "device_id": "device-3",
+            "water_interval": 45,
+            "coffee_limit": 6,
+            "break_interval": 120,
+            "last_update_time": "2026-05-18T08:39:03.249219Z",
+            "wakeup_time": "0000-01-01T09:00:00Z",
+            "sleep_time": "0000-01-01T22:00:00Z",
+            "timezone": "Europe/Helsinki"
+        }
+    }
+    ```
 
 ### Pet Details Sync *(wip)*
 
@@ -76,8 +101,8 @@ curl -X PUT "https://coffeebud-server.fly.dev/api/sync/DEV-0001?battery=80" \
     - Body:
         ```json
         {
-            "username": "user1",
-            "password": "password"
+          "username": "user1",
+          "password": "password"
         }
         ```
     - Response:
@@ -110,12 +135,38 @@ curl -X PUT "https://coffeebud-server.fly.dev/api/sync/DEV-0001?battery=80" \
 - **POST** `/api/auth/logout`
 
 ## Endpoints that require authentication token
+
 ### Device Management
 - **POST** `/api/devices/pair/:deviceId` - Connect device with user account
 - **DELETE** `/api/devices/:deviceId` - Remove device from user account
+
 ### Activity Management
 - **GET** `api/activities` - Get activity events for user
-### Habit Rules Management
-- **GET** `api/habit-rules` - Get habit rules for user
-- **POST** `api/habit-rules` - Update habit rules
-    
+
+### Habit Rules Configuration Management
+- **GET** `api/configs` - Get habit rules for user
+- **POST** `api/configs` - Update habit rules
+
+### Statistics
+- **GET** `api/stat/daily` - Get statistics for the requested date
+  - Query param: `date` - value needs to be in format `YYYY-MM-DD`
+      - Example: `https://coffeebud-server.fly.dev/api/stat/daily?date=2026-05-12`
+  - Example response:
+      ```json
+        {
+            "code": 200,
+            "success": true,
+            "data": {
+                "user_id": "00000000-0000-0000-0000-000000000000",
+                "date": "2026-05-12T00:00:00Z",
+                "total_coffee": 1,
+                "avg_break_interval": 117,
+                "avg_water_interval": 63,
+                "avg_mood": "neutral"
+              }
+        }
+      ```
+- **GET** `api/stat/weekly` - Get statistics for the week including requested date
+  - Query param: `date` - value needs to be in format `YYYY-MM-DD`
+      - Example: `https://coffeebud-server.fly.dev/api/stat/weekly?date=2026-05-12`
+
