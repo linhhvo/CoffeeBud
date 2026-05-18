@@ -128,8 +128,7 @@ export function MoodLineChart({data}: { data: DailyStat[] }) {
                     type="monotone"
                     dataKey="value" stroke={singleColor ?? "url(#moodGradient)"}
                     strokeWidth={3}
-                    connectNulls
-                    dot={false} activeDot={(props: any) => <MoodDot key={props.index} {...props} />}
+                    connectNulls dot={(props: any) => <MoodDot key={props.index} {...props} />} activeDot={false}
                 />
             </LineChart>
         </ResponsiveContainer>)}

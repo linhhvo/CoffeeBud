@@ -26,14 +26,18 @@ func GetTimeComponents(timeStr string) ([]int, error) {
 	return components, nil
 }
 
-func GetDateTime(dataTimestamp time.Time, configTime *time.Time) time.Time {
+func GetDateTime(dataTimestamp time.Time, configTime *time.Time, timezone string) time.Time {
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		return time.Time{}
+	}
 	return time.Date(
 		dataTimestamp.Year(),
 		dataTimestamp.Month(),
 		dataTimestamp.Day(),
 		configTime.Hour(),
 		configTime.Minute(), 0, 0,
-		time.Local,
+		loc,
 	)
 }
 

@@ -10,6 +10,7 @@ type User struct {
 	UserId      uuid.UUID `json:"user_id"`
 	Username    string    `json:"username" binding:"required"`
 	Password    string    `json:"password" binding:"required"`
+	Timezone    string    `json:"timezone"`
 	CreatedTime time.Time `json:"created_at"`
 }
 
@@ -39,6 +40,7 @@ type Config struct {
 	LastUpdateTime time.Time  `json:"last_update_time"`
 	WakeUpTime     *time.Time `json:"wakeup_time"`
 	SleepTime      *time.Time `json:"sleep_time"`
+	Timezone       string     `json:"timezone"`
 }
 
 type PetState struct {

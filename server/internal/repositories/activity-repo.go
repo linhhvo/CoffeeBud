@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -25,7 +26,7 @@ func AddActivity(ctx context.Context, db *sql.DB, data models.ActivityEvent) err
 		return err
 	}
 
-	startTime := utils.GetDateTime(data.Timestamp, config.WakeUpTime)
+	startTime := utils.GetDateTime(data.Timestamp, config.WakeUpTime, config.Timezone)
 
 	var interval float64
 	// get the latest activity before this activity in the same day
@@ -37,14 +38,17 @@ func AddActivity(ctx context.Context, db *sql.DB, data models.ActivityEvent) err
 		startTime,
 		data.Timestamp,
 	)
+	log.Println("activity timestamp: ", data.Timestamp)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) { // if no activity since the start of the day
 			interval = data.Timestamp.Sub(startTime).Minutes()
+			log.Println("no prev activity -- start time ", startTime, " and interval ", interval)
 		} else {
 			return err
 		}
 	} else {
 		interval = data.Timestamp.Sub(latest.Timestamp).Minutes()
+		log.Println("there is prev activity -- interval ", interval)
 	}
 
 	result, err := db.ExecContext(

@@ -4,6 +4,7 @@ export interface Config {
     break_interval: number;
     wakeup_time: string;
     sleep_time: string;
+    timezone: string;
 }
 
 export function createConfig(rawData: any): Config {
@@ -12,6 +13,6 @@ export function createConfig(rawData: any): Config {
         coffee_limit: rawData.coffee_limit,
         break_interval: rawData.break_interval,
         wakeup_time: rawData.wakeup_time,
-        sleep_time: rawData.sleep_time,
+        sleep_time: rawData.sleep_time, timezone: rawData.timezone,
     };
 }

@@ -14,8 +14,10 @@ const RegisterPage: React.FC = () => {
         setDisplayMsg("");
         setIsSubmitting(true);
 
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
         try {
-            await authService.register({username, password});
+            await authService.register({username, password, timezone});
             setDisplayMsg("Account created. Please log in.");
         } catch (error) {
             setDisplayMsg(
