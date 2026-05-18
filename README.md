@@ -1,5 +1,5 @@
 # Deployment
-CoffeeBud is hosted at `https://coffeebud-client.fly.dev`
+The app is hosted at [CoffeeBud](https://coffeebud-client.fly.dev)
 
 To test the app, log in with username **demo** and password **dtap**
 
