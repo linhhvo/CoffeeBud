@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,6 +31,7 @@ func GetConfigByUser(
 		&config.LastUpdateTime,
 		&config.WakeUpTime,
 		&config.SleepTime,
+		&config.Timezone,
 	)
 	if err != nil {
 		return config, err
@@ -69,14 +71,17 @@ func AddDefaultConfig(
 	ctx context.Context,
 	db *sql.DB,
 	userId uuid.UUID,
+	timezone string,
 ) error {
+	log.Println("user timezone: ", timezone)
+
 	wakeupTime, _ := time.Parse(time.TimeOnly, "08:00:00")
 	sleepTime, _ := time.Parse(time.TimeOnly, "23:00:00")
 
 	_, err := db.ExecContext(
 		ctx,
-		"INSERT INTO configs (user_id, wakeup_time, sleep_time) VALUES ($1, $2, $3)",
-		userId, wakeupTime, sleepTime,
+		"INSERT INTO configs (user_id, wakeup_time, sleep_time, timezone) VALUES ($1, $2, $3, $4)",
+		userId, wakeupTime, sleepTime, timezone,
 	)
 
 	if err != nil {
@@ -92,12 +97,13 @@ func UpdateConfig(
 ) error {
 	_, err := db.ExecContext(
 		ctx,
-		"UPDATE configs SET water_interval_minutes=$1, coffee_limit=$2, break_interval_minutes=$3, last_updated=CURRENT_TIMESTAMP, wakeup_time=$4, sleep_time=$5 WHERE user_id=$6",
+		"UPDATE configs SET water_interval_minutes=$1, coffee_limit=$2, break_interval_minutes=$3, last_updated=CURRENT_TIMESTAMP, wakeup_time=$4, sleep_time=$5, timezone=$6 WHERE user_id=$7",
 		data.WaterInterval,
 		data.CoffeeLimit,
 		data.BreakInterval,
 		data.WakeUpTime,
 		data.SleepTime,
+		data.Timezone,
 		data.UserId,
 	)
 
@@ -105,13 +111,14 @@ func UpdateConfig(
 		if errors.Is(err, sql.ErrNoRows) {
 			_, err := db.ExecContext(
 				ctx,
-				"INSERT INTO configs (user_id, water_interval_minutes, coffee_limit, break_interval_minutes, wakeup_time, sleep_time) VALUES ($1, $2, $3, $4, $5, $6)",
+				"INSERT INTO configs (user_id, water_interval_minutes, coffee_limit, break_interval_minutes, wakeup_time, sleep_time, timezone) VALUES ($1, $2, $3, $4, $5, $6, $7)",
 				data.UserId,
 				data.WaterInterval,
 				data.CoffeeLimit,
 				data.BreakInterval,
 				data.WakeUpTime,
 				data.SleepTime,
+				data.Timezone,
 			)
 			if err != nil {
 				return err

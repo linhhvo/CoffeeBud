@@ -8,4 +8,5 @@ export interface ApiResponse {
 export interface UserCredential {
     username: string;
     password: string;
+    timezone?: string;
 }

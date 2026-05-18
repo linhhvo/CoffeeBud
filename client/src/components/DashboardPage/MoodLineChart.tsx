@@ -62,7 +62,9 @@ export function MoodLineChart({data}: { data: DailyStat[] }) {
         value: d.avg_mood != null ? MOOD_VALUE[d.avg_mood as Mood] : null,
     }));
 
-    const hasData = chartData.some((d) => d.value != null);
+    const validMoods = chartData.filter((d) => d.value != null);
+
+    const singleColor = validMoods.length === 1 && validMoods[0].mood ? MOOD_COLOR[validMoods[0].mood] : undefined;
 
     return (<div
         className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col gap-3 hover:border-zinc-700 transition-all duration-200">
@@ -78,30 +80,29 @@ export function MoodLineChart({data}: { data: DailyStat[] }) {
             </div>
         </div>
 
-        {/* Chart */}
-        {!hasData ? (<div className="flex items-center justify-center h-42.5 text-xs text-zinc-700">
+        {/* Chart */} {validMoods.length === 0 ? (
+        <div className="flex items-center justify-center h-42.5 text-xs text-zinc-700">
             No data available
         </div>) : (<ResponsiveContainer width="100%" height={170}>
             <LineChart
                 data={chartData}
                 margin={{top: 4, right: 2, left: -22, bottom: 0}} style={{maxHeight: '100%'}}
             >
-                <defs>
-                    <linearGradient id="moodGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        {chartData.map((d, i) => {
-                            const offset = chartData.length > 1 ? (i / (chartData.length - 1)) : 0;
-                            const color = MOOD_COLOR[d.mood];
-                            const prevColor = i > 0 ? MOOD_COLOR[chartData[i - 1].mood] : color
-                            const nextColor = i < chartData.length - 1 ? MOOD_COLOR[chartData[i + 1].mood] : color
-                            return (<>
-                                <stop offset={offset - 0.06} stopColor={mixColors(prevColor, color, 0.85)}/>
-                                <stop key={i} offset={offset} stopColor={color}/>
-                                <stop offset={offset + 0.06} stopColor={mixColors(color, nextColor, 0.45)}/>
-                            </>);
-                        })}
-                    </linearGradient>
-                </defs>
-
+                {!singleColor && (<defs>
+                        <linearGradient id="moodGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            {chartData.map((d, i) => {
+                                const offset = chartData.length > 1 ? (i / (chartData.length - 1)) : 0;
+                                const color = MOOD_COLOR[d.mood];
+                                const prevColor = i > 0 ? MOOD_COLOR[chartData[i - 1].mood] : color
+                                const nextColor = i < chartData.length - 1 ? MOOD_COLOR[chartData[i + 1].mood] : color
+                                return (<>
+                                    <stop offset={offset - 0.06} stopColor={mixColors(prevColor, color, 0.85)}/>
+                                    <stop key={i} offset={offset} stopColor={color}/>
+                                    <stop offset={offset + 0.06} stopColor={mixColors(color, nextColor, 0.45)}/>
+                                </>);
+                            })}
+                        </linearGradient>
+                    </defs>)}
                 <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="rgba(255,255,255,0.04)"
@@ -125,11 +126,9 @@ export function MoodLineChart({data}: { data: DailyStat[] }) {
                 />
                 <Line
                     type="monotone"
-                    dataKey="value"
-                    stroke="url(#moodGradient)"
+                    dataKey="value" stroke={singleColor ?? "url(#moodGradient)"}
                     strokeWidth={3}
-                    connectNulls
-                    dot={false} activeDot={(props: any) => <MoodDot key={props.index} {...props} />}
+                    connectNulls dot={(props: any) => <MoodDot key={props.index} {...props} />} activeDot={false}
                 />
             </LineChart>
         </ResponsiveContainer>)}

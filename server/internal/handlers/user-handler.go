@@ -52,7 +52,7 @@ func RegisterUserHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		err = repositories.AddDefaultConfig(ctx, db, newUser.UserId)
+		err = repositories.AddDefaultConfig(ctx, db, newUser.UserId, json.Timezone)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.Error(

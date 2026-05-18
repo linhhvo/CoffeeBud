@@ -38,8 +38,8 @@ func CalculateMood(
 		return stat, err
 	}
 
-	startTime := utils.GetDateTime(targetTime, config.WakeUpTime)
-	endTime := utils.GetDateTime(targetTime, config.SleepTime)
+	startTime := utils.GetDateTime(targetTime, config.WakeUpTime, config.Timezone)
+	endTime := utils.GetDateTime(targetTime, config.SleepTime, config.Timezone)
 
 	// if attemp to calculate mood before start of the day, return because there is no data to calculate
 	if time.Now().Before(startTime) {
@@ -120,7 +120,7 @@ func UpdateMood(
 
 	err = row.Scan(&pet.UserId, &pet.AvatarUrl, &pet.Mood, &pet.LastUpdateTime)
 	if err != nil {
-		return pet, stat, err
+		return pet, stat, fmt.Errorf("error updating pet mood: %v", err)
 	}
 
 	_, err = db.ExecContext(
