@@ -12,3 +12,11 @@ export function formatDateTime(date: Date | null): string {
         timeZoneName: "short",
     }).format(date);
 }
+
+/** Returns the Monday of the week identified by weekOffset relative to today. */
+export function getDateForWeek(weekOffset: number): Date {
+    const now = new Date();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - ((now.getDay() + 6) % 7) + weekOffset * 7);
+    return monday;
+}

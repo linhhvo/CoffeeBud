@@ -7,6 +7,7 @@ export interface ChartConfig {
     unit: string;
     colorOver: string;
     colorOk: string;
+    colorPrevious: string;
     description: string;
     overLabel: string;
     okLabel: string;

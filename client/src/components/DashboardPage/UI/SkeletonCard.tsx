@@ -1,4 +1,4 @@
-import {DAY_LABELS} from "./types.ts";
+import {DAY_LABELS} from "../types.ts";
 
 export function SkeletonCard() {
     return (<div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 h-80 flex flex-col gap-3">

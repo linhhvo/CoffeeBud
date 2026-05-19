@@ -1,7 +1,7 @@
 import {Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
-import {LegendDot} from "./LegendDot.tsx";
+import {LegendDot} from "../UI/LegendDot.tsx";
 import {ChartTooltip} from "./ChartTooltip.tsx";
-import {type ChartConfig, type ChartDayData, type DailyStat, DAY_LABELS} from "./types.ts";
+import {type ChartConfig, type ChartDayData, type DailyStat, DAY_LABELS} from "../types.ts";
 
 interface ChartCardProps {
     chart: ChartConfig;
@@ -25,7 +25,7 @@ export function HabitBarChart({chart, data, target}: ChartCardProps) {
         }
     });
 
-    const hasData = chartData.filter((d) => !d.isMissing)
+    const allValues = chartData.filter((d) => !d.isMissing)
 
     const maxVal = chartData.length ? Math.max(...chartData.map((d) => d.value),
         target) + (chart.unit === "cups" ? 2 : 40) : target + 40
@@ -57,7 +57,7 @@ export function HabitBarChart({chart, data, target}: ChartCardProps) {
             </div>
         </div>
 
-        {/* Chart */} {hasData.length === 0 ? (
+        {/* Chart */} {allValues.length === 0 ? (
         <div className="flex items-center justify-center h-42.5 text-sm text-zinc-600">
             No data available </div>) : (<ResponsiveContainer width="100%" height={170}>
         <BarChart
@@ -96,8 +96,7 @@ export function HabitBarChart({chart, data, target}: ChartCardProps) {
                 label={{value: target, position: "insideTopRight", fontSize: 10, fill: "#a78bfa"}}
             />
             <Bar
-                dataKey="value"
-                radius={[4, 4, 0, 0]}
+                dataKey="value" radius={[3, 3, 0, 0]}
                 barSize={40}
                 label={{position: "top", fontSize: 12}}
             >

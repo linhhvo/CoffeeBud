@@ -1,8 +1,8 @@
-import type {DailyStat} from "./types.ts";
+import type {DailyStat} from "../types.ts";
 import {CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis} from "recharts";
-import happyFace from "../../assets/happy.png"
-import neutralFace from "../../assets/neutral.png"
-import sadFace from "../../assets/sad.png"
+import happyFace from "../../../assets/happy.png"
+import neutralFace from "../../../assets/neutral.png"
+import sadFace from "../../../assets/sad.png"
 
 type Mood = "happy" | "neutral" | "sad";
 

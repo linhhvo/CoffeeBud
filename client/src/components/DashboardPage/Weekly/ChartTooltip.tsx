@@ -1,4 +1,4 @@
-import type {ChartConfig, ChartDayData} from "./types.ts";
+import type {ChartConfig, ChartDayData} from "../types.ts";
 
 type ValueType = number | string | Array<number | string>;
 type NameType = number | string;
