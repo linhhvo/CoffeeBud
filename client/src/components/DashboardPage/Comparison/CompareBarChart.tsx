@@ -17,7 +17,9 @@ interface CompareDay {
 
 function buildCompareData(current: DailyStat[], previous: DailyStat[], key: keyof DailyStat): CompareDay[] {
     return DAY_LABELS.map((day, i) => ({
-        day, current: current[i]?.[key] as number | null ?? null, previous: previous[i]?.[key] as number | null ?? null,
+        day,
+        current: current[i]?.[key] as number | null ?? null,
+        previous: previous[i]?.[key] as number | null ?? null,
     }));
 }
 
@@ -83,11 +85,11 @@ export function CompareBarChart({chart, currentWeek, previousWeek}: CompareCardP
                         name="Last week"
                         radius={[2, 2, 0, 0]}
                         maxBarSize={25}
+                        fill={chart.colorPrevious}
                     >
                         {data.map((_, i) =>
                             (<Cell
                                 key={i}
-                                fill={chart.colorPrevious}
                                 style={{stroke: `${chart.colorPrevious}30`,strokeWidth: 1}}
                                 fillOpacity={0.5}
                             />))
@@ -98,11 +100,11 @@ export function CompareBarChart({chart, currentWeek, previousWeek}: CompareCardP
                         name="This week"
                         radius={[2, 2, 0, 0]}
                         maxBarSize={25}
+                        fill={chart.colorCurrent}
                     >
                         {data.map((_, i) =>
                             (<Cell
                                 key={i}
-                                fill={chart.colorCurrent}
                             />))
                         }
                     </Bar>
