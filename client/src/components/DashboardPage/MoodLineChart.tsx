@@ -89,20 +89,29 @@ export function MoodLineChart({data}: { data: DailyStat[] }) {
                 margin={{top: 4, right: 2, left: -22, bottom: 0}} style={{maxHeight: '100%'}}
             >
                 {!singleColor && (<defs>
-                        <linearGradient id="moodGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            {chartData.map((d, i) => {
-                                const offset = chartData.length > 1 ? (i / (chartData.length - 1)) : 0;
-                                const color = MOOD_COLOR[d.mood];
-                                const prevColor = i > 0 ? MOOD_COLOR[chartData[i - 1].mood] : color
-                                const nextColor = i < chartData.length - 1 ? MOOD_COLOR[chartData[i + 1].mood] : color
-                                return (<>
-                                    <stop offset={offset - 0.06} stopColor={mixColors(prevColor, color, 0.85)}/>
-                                    <stop key={i} offset={offset} stopColor={color}/>
-                                    <stop offset={offset + 0.06} stopColor={mixColors(color, nextColor, 0.45)}/>
-                                </>);
-                            })}
-                        </linearGradient>
-                    </defs>)}
+                    <linearGradient id="moodGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        {validMoods.length <= 2 ? (<>
+                            <stop key={0} offset={0} stopColor={MOOD_COLOR[chartData[0].mood]}/>
+                            <stop key={"n0"} offset={0.06} stopColor={mixColors(MOOD_COLOR[chartData[0].mood],
+                                MOOD_COLOR[chartData[1].mood], 0.45)}/>
+                            <stop key={"p1"} offset={0.94} stopColor={mixColors(MOOD_COLOR[chartData[0].mood],
+                                MOOD_COLOR[chartData[1].mood], 0.85)}/>
+                            <stop key={1} offset={1} stopColor={MOOD_COLOR[chartData[1].mood]}/>
+                        </>) : chartData.map((d, i) => {
+                            const offset = chartData.length > 1 ? (i / (chartData.length - 1)) : 0;
+                            const color = MOOD_COLOR[d.mood];
+                            const prevColor = i > 0 ? MOOD_COLOR[chartData[i - 1].mood] : color
+                            const nextColor = i < chartData.length - 1 ? MOOD_COLOR[chartData[i + 1].mood] : color
+                            return (<>
+                                <stop key={"p" + i} offset={offset - 0.06} stopColor={mixColors(prevColor, color,
+                                    0.85)}/>
+                                <stop key={i} offset={offset} stopColor={color}/>
+                                <stop key={"n" + i} offset={offset + 0.06} stopColor={mixColors(color, nextColor,
+                                    0.45)}/>
+                            </>);
+                        })}
+                    </linearGradient>
+                </defs>)}
                 <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="rgba(255,255,255,0.04)"
@@ -124,11 +133,8 @@ export function MoodLineChart({data}: { data: DailyStat[] }) {
                         <image href={MOOD_EMOJI[mood]} x={props.x - 20} y={props.y - 15} aria-label="mood icon" className="w-6 h-6 object-contain"/>);
                 }}
                 />
-                <Line
-                    type="monotone"
-                    dataKey="value" stroke={singleColor ?? "url(#moodGradient)"}
-                    strokeWidth={3}
-                    connectNulls dot={(props: any) => <MoodDot key={props.index} {...props} />} activeDot={false}
+                <Line type="monotone" dataKey="value" stroke={singleColor ?? "url(#moodGradient)"} strokeWidth={3} connectNulls dot={(props: any) =>
+                    <MoodDot key={props.index} {...props} />} activeDot={false}
                 />
             </LineChart>
         </ResponsiveContainer>)}

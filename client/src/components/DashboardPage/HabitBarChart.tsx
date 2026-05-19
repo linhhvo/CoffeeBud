@@ -28,7 +28,7 @@ export function HabitBarChart({chart, data, target}: ChartCardProps) {
     const hasData = chartData.filter((d) => !d.isMissing)
 
     const maxVal = chartData.length ? Math.max(...chartData.map((d) => d.value),
-        target) + (chart.unit === "cups" ? 2 : 25) : target + 25
+        target) + (chart.unit === "cups" ? 2 : 40) : target + 40
     const overCount = chartData.filter((d) => d.isMissing || d.value > target).length;
 
     return (<div
