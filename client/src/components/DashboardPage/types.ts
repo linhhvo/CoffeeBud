@@ -8,6 +8,7 @@ export interface ChartConfig {
     colorOver: string;
     colorOk: string;
     colorPrevious: string;
+    colorCurrent: string;
     description: string;
     overLabel: string;
     okLabel: string;

@@ -44,32 +44,69 @@ export function CompareBarChart({chart, currentWeek, previousWeek}: CompareCardP
             {/* Legend */}
             <div className="flex flex-wrap gap-x-3 gap-y-1">
                 <LegendDot color={chart.colorPrevious} label="Last week"/>
-                <LegendDot color={chart.colorOk} label="This week"/>
+                <LegendDot color={chart.colorCurrent} label="This week"/>
             </div>
 
-            {/* Chart */} {allValues.length === 0 ? (
+            {/* Chart */}
+            {allValues.length === 0 ? (
             <div className="flex items-center justify-center h-40 text-xs text-zinc-700">
                 No data available </div>) : (
-            <ResponsiveContainer width="100%" height={170}> <BarChart data={data} margin={{
-                top: 4,
-                right: 4,
-                left: -22,
-                bottom: 0
-            }} barCategoryGap="15%" barGap={2}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false}/>
-                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fontSize: 13, fill: "#71717a"}}/>
-                <YAxis axisLine={false} tickLine={false} tick={{
-                    fontSize: 10,
-                    fill: "#71717a"
-                }} allowDecimals={false} domain={[0, maxVal]} width={50}/> <Tooltip content={(props: any) =>
-                <CompareTooltip {...props} unit={chart.unit}/>} cursor={{fill: "rgba(255,255,255,0.03)"}}/>
-                <Bar dataKey="previous" name="Last week" radius={[2, 2, 0, 0]} maxBarSize={25}>
-                    {data.map((_, i) => (<Cell key={i} fill={chart.colorPrevious} style={{
-                        stroke: `${chart.colorOk}30`,
-                        strokeWidth: 1
-                    }}/>))}
-                </Bar> <Bar dataKey="current" name="This week" radius={[2, 2, 0, 0]} maxBarSize={25}>
-                {data.map((_, i) => (<Cell key={i} fill={chart.colorOk} fillOpacity={0.88}/>))}
-            </Bar> </BarChart> </ResponsiveContainer>)}
+            <ResponsiveContainer width="100%" height={170}>
+                <BarChart
+                    data={data}
+                    margin={{top: 4,right: 4,left: -22,bottom: 0}}
+                    barCategoryGap="15%"
+                    barGap={2}>
+                    <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="rgba(255,255,255,0.04)"
+                        vertical={false}
+                    />
+                    <XAxis
+                        dataKey="day"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{fontSize: 13, fill: "#71717a"}}
+                    />
+                    <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{fontSize: 10,fill: "#71717a"}}
+                        allowDecimals={false}
+                        domain={[0, maxVal]}
+                        width={50}
+                    />
+                        <Tooltip content={(props: any) =>
+                            <CompareTooltip {...props} unit={chart.unit}/>} cursor={{fill: "rgba(255,255,255,0.03)"}}/>
+                    <Bar
+                        dataKey="previous"
+                        name="Last week"
+                        radius={[2, 2, 0, 0]}
+                        maxBarSize={25}
+                    >
+                        {data.map((_, i) =>
+                            (<Cell
+                                key={i}
+                                fill={chart.colorPrevious}
+                                style={{stroke: `${chart.colorPrevious}30`,strokeWidth: 1}}
+                                fillOpacity={0.5}
+                            />))
+                        }
+                    </Bar>
+                    <Bar
+                        dataKey="current"
+                        name="This week"
+                        radius={[2, 2, 0, 0]}
+                        maxBarSize={25}
+                    >
+                        {data.map((_, i) =>
+                            (<Cell
+                                key={i}
+                                fill={chart.colorCurrent}
+                            />))
+                        }
+                    </Bar>
+                </BarChart>
+            </ResponsiveContainer>)}
         </div>);
 }

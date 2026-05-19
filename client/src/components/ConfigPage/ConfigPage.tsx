@@ -49,7 +49,7 @@ const ConfigPage: React.FC = () => {
                 </div>
 
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-4 mb-4 backdrop-blur-sm">
-                    <p className="text-[13px] uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-5">
+                    <p className="text-sm uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-5">
                         Habit Rules </p>{configs ? (<div>
                         <NumericConfigField label="Coffee Intake Limit" description="Maximum cups of coffee per day" value={configs?.coffee_limit} unit="cups" min={0} max={100} onChange={(v) => setConfigs(
                             (r) => ({...r as Config, coffee_limit: v}))}/>

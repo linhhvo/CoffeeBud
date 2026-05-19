@@ -43,7 +43,7 @@ export function WeekComparisonChart({charts, weekOffset}: ComparisonProps) {
     }, [weekOffset]);
 
     return (<div>
-        <p className="text-sm text-emerald-600 tracking-[0.2em] uppercase mb-5 ml-2">
+        <p className="text-sm text-emerald-600 tracking-[0.2em] uppercase font-semibold mb-5 ml-2">
             Weekly Comparison </p>
 
         {error ? (<p className="text-sm text-red-400 text-center py-16">
