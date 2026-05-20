@@ -30,7 +30,7 @@ export function CompareBarChart({chart, currentWeek, previousWeek}: CompareCardP
     const maxVal = allValues.length ? Math.max(...allValues) + (chart.unit === "cups" ? 2 : 40) : 40;
 
     return (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col gap-3 hover:border-zinc-700 transition-all duration-200">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col gap-2 hover:border-zinc-700 transition-all duration-200">
             {/* Header */}
             <div className="flex items-start justify-between">
                 <div>
@@ -39,12 +39,12 @@ export function CompareBarChart({chart, currentWeek, previousWeek}: CompareCardP
                             {chart.label}
                         </h3>
                     </div>
-                    <p className="text-[13px] text-stone-500">{chart.description}</p>
+                    <p className="text-[13px] text-stone-500">{chart.comparisonDesc}</p>
                 </div>
             </div>
 
             {/* Legend */}
-            <div className="flex flex-wrap gap-x-3 gap-y-1">
+            <div className="flex flex-wrap gap-x-3 gap-y-1 pb-1 border-b border-zinc-800">
                 <LegendDot color={chart.colorPrevious} label="Last week"/>
                 <LegendDot color={chart.colorCurrent} label="This week"/>
             </div>
@@ -53,7 +53,7 @@ export function CompareBarChart({chart, currentWeek, previousWeek}: CompareCardP
             {allValues.length === 0 ? (
             <div className="flex items-center justify-center h-40 text-xs text-zinc-700">
                 No data available </div>) : (
-            <ResponsiveContainer width="100%" height={170}>
+            <ResponsiveContainer width="100%" height={240}>
                 <BarChart
                     data={data}
                     margin={{top: 4,right: 4,left: -22,bottom: 0}}
@@ -91,7 +91,7 @@ export function CompareBarChart({chart, currentWeek, previousWeek}: CompareCardP
                             (<Cell
                                 key={i}
                                 style={{stroke: `${chart.colorPrevious}30`,strokeWidth: 1}}
-                                fillOpacity={0.5}
+                                fillOpacity={0.8}
                             />))
                         }
                     </Bar>
@@ -102,10 +102,7 @@ export function CompareBarChart({chart, currentWeek, previousWeek}: CompareCardP
                         maxBarSize={25}
                         fill={chart.colorCurrent}
                     >
-                        {data.map((_, i) =>
-                            (<Cell
-                                key={i}
-                            />))
+                        {data.map((_, i) => (<Cell key={i}/>))
                         }
                     </Bar>
                 </BarChart>
