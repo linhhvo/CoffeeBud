@@ -1,22 +1,22 @@
-import React, {useCallback, useEffect, useState} from "react";
-import {statService} from "../../apis/stat.service.ts";
+import React, {useEffect, useState} from "react";
 import {configService} from "../../apis/config.service.ts";
-import {SkeletonCard} from "./SkeletonCard.tsx";
-import {HabitBarChart} from "./HabitBarChart.tsx";
-import {type ChartConfig, createDailyStat, type DailyStat} from "./types.ts";
+import {type ChartConfig} from "./types.ts";
 import {type Config, createConfig} from "../ConfigPage/types.ts";
-import {MoodLineChart} from "./MoodLineChart.tsx";
-import {useWebSocketEvent} from "../../websocket/useWebSocketEvent.ts";
-import {WsEventTypes} from "../../websocket/types.ts";
+import {WeeklyReport} from "./Weekly/WeeklyReport.tsx";
+import {getDateForWeek} from "../../utils/helpers.ts";
+import {ComparisonReport} from "./Comparison/ComparisonReport.tsx";
 
 const CHARTS: ChartConfig[] = [{
     key: "break_interval",
     dataKey: "avg_break_interval",
     label: "Break Intervals",
     unit: "min",
-    colorOver: "#f59e0b",
-    colorOk: "#10b981",
+    colorOver: "#A8577E",
+    colorOk: "#DCBCCB",
+    colorPrevious: "#874565",
+    colorCurrent: "#CB9AB2",
     description: "Avg minutes between breaks",
+    comparisonDesc: "Week-over-week break frequency",
     overLabel: "Too infrequent",
     okLabel: "Within target",
 }, {
@@ -24,32 +24,30 @@ const CHARTS: ChartConfig[] = [{
     dataKey: "avg_water_interval",
     label: "Water Intervals",
     unit: "min",
-    colorOver: "#38bdf8",
-    colorOk: "#64748b",
+    colorOver: "#1B86E4",
+    colorOk: "#A4CFF4",
+    colorPrevious: "#105189",
+    colorCurrent: "#76B7EF",
     description: "Avg minutes between drinks",
+    comparisonDesc: "Week-over-week water intake frequency",
     overLabel: "Too infrequent",
     okLabel: "Within target",
 }, {
     key: "coffee_limit",
     dataKey: "total_coffee",
-    label: "Coffee Cups",
+    label: "Coffee Intake",
     unit: "cups",
-    colorOver: "#f97316",
-    colorOk: "#a8a29e",
+    colorOver: "#BF7340",
+    colorOk: "#D9AB8C",
+    colorPrevious: "#995C33",
+    colorCurrent: "#CC8F66",
     description: "Daily cups consumed",
+    comparisonDesc: "Week-over-week coffee consumption",
     overLabel: "Over limit",
     okLabel: "Within limit",
 }];
 
 const WEEK_OFFSETS = [0, -1, -2, -3, -4] as const;
-
-/** Returns the Monday of the week identified by weekOffset relative to today. */
-function getDateForWeek(weekOffset: number): Date {
-    const now = new Date();
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - ((now.getDay() + 6) % 7) + weekOffset * 7);
-    return monday;
-}
 
 function getWeekLabel(offset: number): string {
     const monday = getDateForWeek(offset);
@@ -63,11 +61,8 @@ function getWeekLabel(offset: number): string {
 
 const DashboardPage: React.FC = () => {
     const [weekOffset, setWeekOffset] = useState<number>(0);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-
     const [config, setConfig] = useState<Config | null>(null);
-    const [weekStats, setWeekStats] = useState<DailyStat[]>(Array(7).fill(null),);
 
     // Fetch config once on mount
     useEffect(() => {
@@ -81,44 +76,10 @@ const DashboardPage: React.FC = () => {
             .catch(() => setError("Failed to load config."));
     }, []);
 
-    // Re-fetch weekly stats on weekOffset change
-    useEffect(() => {
-        setIsLoading(true);
-        setError(null);
 
-        statService
-            .getWeekly(getDateForWeek(weekOffset))
-            .then((res) => {
-                if (res.success && Array.isArray(res.data)) {
-                    const stats: DailyStat[] = Array(7).fill(null);
-                    res.data.forEach((raw: any) => {
-                        const stat = createDailyStat(raw);
-                        const dayIndex = (stat.date.getDay() + 6) % 7; // Mon=0 ... Sun=6
-                        stats[dayIndex] = stat;
-                    });
-                    setWeekStats(stats);
-                }
-            })
-            .catch(() => setError("Failed to load weekly stats."))
-            .finally(() => setIsLoading(false));
-    }, [weekOffset]);
 
     const handlePrev = (): void => setWeekOffset((w) => w - 1);
     const handleNext = (): void => setWeekOffset((w) => Math.min(0, w + 1));
-
-    const handleDataUpdate = useCallback((payload: DailyStat) => {
-        console.log(payload)
-        const stat = createDailyStat(payload);
-        const dayIndex = (stat.date.getDay() + 6) % 7;
-
-        setWeekStats((prev) => {
-            const updated = [...prev];
-            updated[dayIndex] = stat;
-            return updated;
-        });
-    }, []);
-
-    useWebSocketEvent(WsEventTypes.DATA_UPDATED, handleDataUpdate);
 
     return (<div className="min-h-[calc(100vh-3.75rem)] text-zinc-100 px-4 py-8 md:px-8">
         <div className="max-w-screen mx-auto flex flex-col">
@@ -155,15 +116,13 @@ const DashboardPage: React.FC = () => {
                 </button>))}
             </div>
 
-            {/* Body */} {error ? (<p className="text-sm text-red-400 text-center py-16">
-            {error}
-        </p>) : isLoading || config === null ? (<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {CHARTS.map((chart) => (<SkeletonCard key={chart.key}/>))}
-        </div>) : (<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-            <MoodLineChart data={weekStats}/>
-            {CHARTS.map((chart) => (<HabitBarChart key={chart.key} chart={chart} data={weekStats}
-                                                   target={config[chart.key as keyof Config] as number}/>))}
-        </div>)}
+            {error ? (<p className="text-sm text-red-400 text-center py-16">
+                {error}
+            </p>) : (<div className="flex flex-col gap-10">
+                <WeeklyReport config={config} charts={CHARTS} weekOffset={weekOffset}/>
+                <ComparisonReport charts={CHARTS} weekOffset={weekOffset}/>
+            </div>)}
+
         </div>
     </div>);
 };

@@ -1,24 +1,10 @@
-import type {DailyStat} from "./types.ts";
+import {type DailyStat, type Mood, MOOD_COLOR, MOOD_EMOJI, MOOD_LABEL, MOOD_VALUE} from "../types.ts";
 import {CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis} from "recharts";
-import happyFace from "../../assets/happy.png"
-import neutralFace from "../../assets/neutral.png"
-import sadFace from "../../assets/sad.png"
-
-type Mood = "happy" | "neutral" | "sad";
-
-const MOOD_VALUE: Record<Mood, number> = {sad: 0, neutral: 1, happy: 2};
-const MOOD_LABEL: Record<number, Mood> = {0: "sad", 1: "neutral", 2: "happy"};
-const MOOD_COLOR: Record<Mood, string> = {
-    happy: "#3EA865", neutral: "#8F55A2", sad: "#5578A5",
-};
-const MOOD_EMOJI: Record<Mood, string> = {
-    happy: happyFace, neutral: neutralFace, sad: sadFace,
-};
 
 interface MoodDayData {
     day: string;
     value: number | null;
-    mood: Mood;
+    mood: Mood ;
 }
 
 interface MoodDotProps {
@@ -90,48 +76,49 @@ export function MoodLineChart({data}: { data: DailyStat[] }) {
             >
                 {!singleColor && (<defs>
                     <linearGradient id="moodGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        {validMoods.length <= 2 ? (<>
-                            <stop key={0} offset={0} stopColor={MOOD_COLOR[chartData[0].mood]}/>
-                            <stop key={"n0"} offset={0.06} stopColor={mixColors(MOOD_COLOR[chartData[0].mood],
-                                MOOD_COLOR[chartData[1].mood], 0.45)}/>
-                            <stop key={"p1"} offset={0.94} stopColor={mixColors(MOOD_COLOR[chartData[0].mood],
-                                MOOD_COLOR[chartData[1].mood], 0.85)}/>
-                            <stop key={1} offset={1} stopColor={MOOD_COLOR[chartData[1].mood]}/>
-                        </>) : chartData.map((d, i) => {
-                            const offset = chartData.length > 1 ? (i / (chartData.length - 1)) : 0;
-                            const color = MOOD_COLOR[d.mood];
-                            const prevColor = i > 0 ? MOOD_COLOR[chartData[i - 1].mood] : color
-                            const nextColor = i < chartData.length - 1 ? MOOD_COLOR[chartData[i + 1].mood] : color
-                            return (<>
-                                <stop key={"p" + i} offset={offset - 0.06} stopColor={mixColors(prevColor, color,
-                                    0.85)}/>
-                                <stop key={i} offset={offset} stopColor={color}/>
-                                <stop key={"n" + i} offset={offset + 0.06} stopColor={mixColors(color, nextColor,
-                                    0.45)}/>
-                            </>);
+                        {chartData.map((d, i) => {
+                            const offset = chartData.length > 1 ? i / (chartData.length - 1) : 0;
+                            const color = d.mood ? MOOD_COLOR[d.mood] : null;
+                            const prevColor = (i > 0 && chartData[i - 1].mood) ? MOOD_COLOR[chartData[i - 1].mood] : color;
+                            const nextColor = (i < chartData.length - 1 && chartData[i + 1].mood) ? MOOD_COLOR[chartData[i + 1].mood] : color;
+
+                            if (!color) return null;  // skip days with no mood
+
+                            return (
+                                <>
+                                    <stop key={`p${i}`} offset={Math.max(0, offset - 0.06)} stopColor={mixColors(prevColor!, color, 0.85)} />
+                                    <stop key={`c${i}`} offset={offset} stopColor={color} />
+                                    <stop key={`n${i}`} offset={Math.min(1, offset + 0.06)} stopColor={mixColors(color, nextColor!, 0.45)} />
+                                </>
+                            );
                         })}
                     </linearGradient>
                 </defs>)}
                 <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="rgba(255,255,255,0.04)"
-                    vertical={false} horizontalValues={[0, 1, 2]}
+                    vertical={false}
+                    horizontalValues={[0, 1, 2]}
                 />
                 <XAxis
                     dataKey="day"
                     axisLine={false}
                     tickLine={false}
-                    tick={{fontSize: 13, fill: "#71717a"}} padding={{left: 30, right: 35}}
+                    tick={{fontSize: 13, fill: "#71717a"}}
+                    padding={{left: 30, right: 35}}
                 />
                 <YAxis
                     axisLine={false}
-                    tickLine={false} domain={[-0.1, 2.1]}
-                    ticks={[0, 1, 2]} width={50} tick={(props: any) => {
-                    const mood = MOOD_LABEL[props.payload.value as number];
-                    if (!mood) return <g/>;
-                    return (
-                        <image href={MOOD_EMOJI[mood]} x={props.x - 20} y={props.y - 15} aria-label="mood icon" className="w-6 h-6 object-contain"/>);
-                }}
+                    tickLine={false}
+                    domain={[-0.1, 2.1]}
+                    ticks={[0, 1, 2]}
+                    width={50}
+                    tick={(props: any) => {
+                        const mood = MOOD_LABEL[props.payload.value as number];
+                        if (!mood) return <g/>;
+                        return (
+                            <image href={MOOD_EMOJI[mood]} x={props.x - 20} y={props.y - 15} aria-label="mood icon" className="w-6 h-6 object-contain"/>);
+                    }}
                 />
                 <Line type="monotone" dataKey="value" stroke={singleColor ?? "url(#moodGradient)"} strokeWidth={3} connectNulls dot={(props: any) =>
                     <MoodDot key={props.index} {...props} />} activeDot={false}
