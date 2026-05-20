@@ -1,4 +1,4 @@
-import type {DailyStat} from "../types.ts";
+import type {DailyStat, Mood} from "../types.ts";
 import {DAY_LABELS, MOOD_COLOR, MOOD_VALUE} from "../types.ts";
 import {LegendDot} from "../UI/LegendDot.tsx";
 
@@ -26,9 +26,9 @@ function buildData(
         const prevMood = previous[i]?.avg_mood || null;
         return {
             day,
-            current: currMood ? MOOD_VALUE[currMood] ?? null : null,
+            current: currMood ? MOOD_VALUE[currMood as Mood] ?? null : null,
             currentMood: currMood,
-            previous: prevMood ? MOOD_VALUE[prevMood] ?? null : null,
+            previous: prevMood ? MOOD_VALUE[prevMood as Mood] ?? null : null,
             previousMood: prevMood,
         };
     });
@@ -42,7 +42,7 @@ interface MoodBarProps {
 
 function MoodBar({ value, mood, direction }: MoodBarProps) {
     const pct = value != null ? (value / MAX_VALUE) * 100 : 0;
-    const color = mood ? MOOD_COLOR[mood] : "rgba(255,255,255,0.06)";
+    const color = mood ? MOOD_COLOR[mood as Mood] : "rgba(255,255,255,0.06)";
     const isEmpty = value == null;
 
     return (

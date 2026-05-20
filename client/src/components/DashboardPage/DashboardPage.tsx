@@ -4,7 +4,7 @@ import {type ChartConfig} from "./types.ts";
 import {type Config, createConfig} from "../ConfigPage/types.ts";
 import {WeeklyReport} from "./Weekly/WeeklyReport.tsx";
 import {getDateForWeek} from "../../utils/helpers.ts";
-import {WeekComparisonChart} from "./Comparison/WeekComparisonChart.tsx";
+import {ComparisonReport} from "./Comparison/ComparisonReport.tsx";
 
 const CHARTS: ChartConfig[] = [{
     key: "break_interval",
@@ -120,7 +120,7 @@ const DashboardPage: React.FC = () => {
                 {error}
             </p>) : (<div className="flex flex-col gap-10">
                 <WeeklyReport config={config} charts={CHARTS} weekOffset={weekOffset}/>
-                <WeekComparisonChart charts={CHARTS} weekOffset={weekOffset}/>
+                <ComparisonReport charts={CHARTS} weekOffset={weekOffset}/>
             </div>)}
 
         </div>

@@ -24,7 +24,7 @@ function buildCompareData(current: DailyStat[], previous: DailyStat[], key: keyo
 }
 
 export function CompareBarChart({chart, currentWeek, previousWeek}: CompareCardProps) {
-    const data = buildCompareData(currentWeek, previousWeek, chart.dataKey);
+    const data = buildCompareData(currentWeek, previousWeek, chart.dataKey as keyof DailyStat);
 
     const allValues = data.flatMap((d) => [d.current, d.previous].filter((v): v is number => v != null));
     const maxVal = allValues.length ? Math.max(...allValues) + (chart.unit === "cups" ? 2 : 40) : 40;

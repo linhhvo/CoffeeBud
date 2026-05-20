@@ -86,9 +86,9 @@ export function MoodLineChart({data}: { data: DailyStat[] }) {
 
                             return (
                                 <>
-                                    <stop key={`p${i}`} offset={Math.max(0, offset - 0.06)} stopColor={mixColors(prevColor!, color)} />
+                                    <stop key={`p${i}`} offset={Math.max(0, offset - 0.06)} stopColor={mixColors(prevColor!, color, 0.85)} />
                                     <stop key={`c${i}`} offset={offset} stopColor={color} />
-                                    <stop key={`n${i}`} offset={Math.min(1, offset + 0.06)} stopColor={mixColors(color, nextColor!)} />
+                                    <stop key={`n${i}`} offset={Math.min(1, offset + 0.06)} stopColor={mixColors(color, nextColor!, 0.45)} />
                                 </>
                             );
                         })}

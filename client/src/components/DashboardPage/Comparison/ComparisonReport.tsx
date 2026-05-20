@@ -1,28 +1,19 @@
 import {useEffect, useState} from "react";
 import {statService} from "../../../apis/stat.service.ts";
 import {CompareBarChart} from "./CompareBarChart.tsx";
-import {type ChartConfig, type DailyStat, DAY_LABELS} from "../types.ts";
+import {type ChartConfig, type DailyStat} from "../types.ts";
 import {getDateForWeek} from "../../../utils/helpers.ts";
 import {SkeletonCard} from "../UI/SkeletonCard.tsx";
 import {MoodButterflyChart} from "./MoodButterflyChart.tsx";
-
-function mapToWeek(entries: DailyStat[]): (DailyStat | null)[] {
-    const byIndex = new Map<number, StatEntry>();
-    for (const e of entries) {
-        const idx = (new Date(e.date).getDay() + 6) % 7;
-        byIndex.set(idx, e);
-    }
-    return DAY_LABELS.map((_, i) => byIndex.get(i) ?? null);
-}
 
 interface ComparisonProps {
     charts: ChartConfig[],
     weekOffset: number,
 }
 
-export function WeekComparisonChart({charts, weekOffset}: ComparisonProps) {
-    const [currentWeek, setCurrentWeek] = useState<(StatEntry | null)[]>([]);
-    const [previousWeek, setPreviousWeek] = useState<(StatEntry | null)[]>([]);
+export function ComparisonReport({charts, weekOffset}: ComparisonProps) {
+    const [currentWeek, setCurrentWeek] = useState<DailyStat[]>([]);
+    const [previousWeek, setPreviousWeek] = useState<DailyStat[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
