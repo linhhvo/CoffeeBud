@@ -39,7 +39,7 @@ export function TimeField({
             <p className="text-sm font-medium text-stone-200">{label}</p>
             <p className="text-xs text-stone-500 mt-0.5">{description}</p>
         </div>
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
             <input id="time-input" type="time" value={timeValue} onChange={(e) => setTimeValue(e.target.value)}
                    onBlur={commit} className={segmentClass}/>
         </div>

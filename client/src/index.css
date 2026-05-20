@@ -31,6 +31,6 @@ h1, h2, h3 {
 
 @theme {
     --breakpoint-md: 60rem;
-    --breakpoint-xl: 91rem;
+    --breakpoint-xl: 96rem;
     --breakpoint-2xl: 120rem;
 }

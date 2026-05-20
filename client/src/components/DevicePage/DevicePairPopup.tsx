@@ -64,7 +64,7 @@ const DevicePairPopup: React.FC<DevicePairPopupProps> = ({onClose, onPairingInit
              onClick={(e) => e.target === e.currentTarget && onClose()}>
             {/* Panel */}
             <div className="
-                    relative w-full max-w-md mx-4
+                    relative w-full max-w-lg mx-4
                     bg-zinc-900 border border-zinc-700
                     rounded-2xl shadow-2xl overflow-hidden
                 ">

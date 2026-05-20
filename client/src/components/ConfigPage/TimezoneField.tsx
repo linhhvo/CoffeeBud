@@ -91,7 +91,7 @@ export function TimezoneField({
             {/* Dropdown */}
             <div
                 ref={containerRef}
-                className="relative flex-shrink-0"
+                className="relative shrink-0"
                 onKeyDown={handleKeyDown}
             >
                 {/* Trigger button */}
