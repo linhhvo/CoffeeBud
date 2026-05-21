@@ -4,6 +4,7 @@ import (
 	"coffee-bud/internal/database"
 	"coffee-bud/internal/handlers"
 	"coffee-bud/internal/middleware"
+	"coffee-bud/internal/r2"
 	"coffee-bud/internal/session"
 	"coffee-bud/internal/websocket"
 	"fmt"
@@ -60,6 +61,7 @@ func main() {
 	api.POST("/sync/:deviceId", handlers.AddDeviceHandler(wsHub, db)) // pair new device
 	api.PUT("/sync/:deviceId", handlers.SyncDataHandler(wsHub, db))
 	api.GET("/sync/:deviceId/configs", handlers.GetConfigByDeviceHandler(db))
+	api.GET("/sync/:deviceId/avatars/:mood", handlers.GetPetAvatarByDevice(db))
 
 	/** ROUTES FOR CLIENT INTERACTION **/
 	// websocket endpoint
@@ -93,6 +95,9 @@ func main() {
 
 		// update configs
 		api.POST("/configs", handlers.UpdateConfigHandler(db))
+
+		// get presigned URL for R2 uploads
+		api.GET("/pet/avatars/presign", r2.GetR2UrlHandler())
 
 		// get daily stat
 		api.GET("/stat/daily", handlers.GetDailyStatHandler(db))

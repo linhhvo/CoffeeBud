@@ -15,7 +15,14 @@ import (
 )
 
 func AddDefaultPet(ctx context.Context, db *sql.DB, userId uuid.UUID) error {
-	_, err := db.ExecContext(ctx, "INSERT INTO pet_states (user_id) VALUES ($1)", userId)
+	_, err := db.ExecContext(
+		ctx,
+		"INSERT INTO pet_states (user_id, happy_avatar_url, neutral_avatar_url, sad_avatar_url) VALUES ($1, $2, $3, $4)",
+		userId,
+		"https://coffeebud-assets.linhvo.me/default-happy.bmp",
+		"https://coffeebud-assets.linhvo.me/default-neutral.bmp",
+		"https://coffeebud-assets.linhvo.me/default-sad.bmp",
+	)
 	if err != nil {
 		return err
 	}
