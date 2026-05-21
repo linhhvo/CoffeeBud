@@ -173,7 +173,7 @@ func DeleteDevice(
 	}
 
 	if rows != 1 {
-		return fmt.Errorf("expected signle row affected, got %d rows affected", rows)
+		return fmt.Errorf("expected single row affected, got %d rows affected", rows)
 	}
 
 	return nil

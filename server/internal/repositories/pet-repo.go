@@ -5,7 +5,10 @@ import (
 	"coffee-bud/internal/utils"
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,11 +20,35 @@ func AddDefaultPet(ctx context.Context, db *sql.DB, userId uuid.UUID) error {
 		return err
 	}
 	return nil
-
 }
 
-// calculate pet mood after data sync
+func AssignDeviceToPet(ctx context.Context, db *sql.DB, deviceId string, userId uuid.UUID) error {
+	_, err := db.ExecContext(
+		ctx,
+		"UPDATE pet_states SET device_id=$1, last_updated=CURRENT_TIMESTAMP WHERE user_id = $2",
+		deviceId,
+		userId,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
+func RemoveDeviceFromPet(ctx context.Context, db *sql.DB, deviceId string, userId uuid.UUID) error {
+	_, err := db.ExecContext(
+		ctx,
+		"UPDATE pet_states SET device_id = NULL, last_updated=CURRENT_TIMESTAMP WHERE user_id=$1 AND device_id=$2",
+		userId,
+		deviceId,
+	)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	return nil
+}
+
+// CalculateMood calculate pet mood after data sync
 func CalculateMood(
 	ctx context.Context,
 	db *sql.DB,
@@ -113,12 +140,12 @@ func UpdateMood(
 
 	row := db.QueryRowContext(
 		ctx,
-		"UPDATE pet_states SET current_mood=$1, last_updated=CURRENT_TIMESTAMP WHERE user_id=$2 RETURNING user_id, avatar_id, current_mood, last_updated",
+		"UPDATE pet_states SET current_mood=$1, last_updated=CURRENT_TIMESTAMP WHERE user_id=$2 RETURNING user_id, current_mood, last_updated",
 		stat.Mood,
 		userId,
 	)
 
-	err = row.Scan(&pet.UserId, &pet.AvatarUrl, &pet.Mood, &pet.LastUpdateTime)
+	err = row.Scan(&pet.UserId, &pet.Mood, &pet.LastUpdateTime)
 	if err != nil {
 		return pet, stat, fmt.Errorf("error updating pet mood: %v", err)
 	}
@@ -135,4 +162,64 @@ func UpdateMood(
 	}
 
 	return pet, stat, nil
+}
+
+func GetPetAvatarByDevice(ctx context.Context, db *sql.DB, deviceId string, mood string) (string, error) {
+	var url string
+
+	moods := []string{"happy", "neutral", "sad"}
+
+	if !slices.Contains(moods, mood) {
+		return "", errors.New("invalid mood")
+	}
+
+	dbField := mood + "_avatar_url"
+	query := fmt.Sprintf("SELECT %s FROM pet_states WHERE device_id =$1", dbField)
+
+	row := db.QueryRowContext(ctx, query, deviceId)
+
+	err := row.Scan(&url)
+	if err != nil {
+		if strings.Contains(err.Error(), "Scan error on column index 0") {
+			return "", fmt.Errorf("%s avatar is not set", mood)
+		}
+
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return "", fmt.Errorf("device is not assigned to a pet")
+		}
+		return "", err
+	}
+
+	return url, nil
+}
+
+func UpdatePetAvatarByMood(ctx context.Context, db *sql.DB, userId uuid.UUID, mood string, avatarUrl string) error {
+	dbField := mood + "_avatar_url"
+
+	result, err := db.ExecContext(
+		ctx,
+		"UPDATE pet_states SET $1=$2, last_updated=CURRENT_TIMESTAMP WHERE user_id=$3",
+		dbField,
+		avatarUrl,
+		userId,
+	)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return errors.New("no pet updated")
+	}
+
+	if rows != 1 {
+		return fmt.Errorf("expected single row affected, got %d rows affected", rows)
+	}
+
+	return nil
+
 }
