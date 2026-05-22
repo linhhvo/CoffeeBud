@@ -179,12 +179,12 @@ const ConfigPage: React.FC = () => {
                     <p className="text-sm uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-1">
                         Pet Avatar
                     </p>
-                    <p className="text-xs text-stone-500 mb-5">
+                    <p className="text-xs text-stone-500 mb-2">
                         Upload an image for each of your pet's moods
-                        <p className="mt-2">
-                            Accepts only
-                            <span className="text-stone-400 font-semibold"> .bmp</span> files
-                        </p>
+                    </p>
+                    <p className="text-xs text-stone-500 mb-5">
+                        Accepts only
+                        <span className="text-stone-400 font-semibold"> .bmp</span> files
                     </p>
                     <PetAvatarField existing={existingAvatars} onChange={setPetAvatars} />
 

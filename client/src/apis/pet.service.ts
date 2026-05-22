@@ -1,4 +1,5 @@
-import { apiClient } from "./client.ts";
+import {apiClient} from "./client.ts";
+import type {ApiResponse, PetAvatars} from "./types.ts";
 
 export const petService = {
     getAvatars: () => {
@@ -6,10 +7,10 @@ export const petService = {
             method: "GET",
         });
     },
-    updateAvatars: (pet: Pet) => {
+    updateAvatars: (avatars: PetAvatars) => {
         return apiClient<ApiResponse>(`/pet/avatars`, {
             method: "POST",
-            body: JSON.stringify(pet),
+            body: JSON.stringify(avatars),
         });
     },
 };
