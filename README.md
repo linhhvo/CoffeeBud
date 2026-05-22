@@ -86,14 +86,16 @@ curl -X PUT "https://coffeebud-server.fly.dev/api/sync/DEV-0001?battery=80" \
             "last_update_time": "2026-05-18T08:39:03.249219Z",
             "wakeup_time": "0000-01-01T09:00:00Z",
             "sleep_time": "0000-01-01T22:00:00Z",
-            "timezone": "Europe/Helsinki"
+            "timezone": "Europe/Helsinki",
+            "now_timestamp": "2026-05-22T18:26:13.829309864+03:00"
         }
     }
     ```
 
-### Pet Details Sync *(wip)*
+### Pet Avatars Sync
 
-- **GET** `/api/sync/:deviceId/pet`
+- **GET** `/api/sync/:deviceId/avatars/:mood`
+  - Response is a 200x200 bitmap file in RGB565 ([Example](https://coffeebud-assets.linhvo.me/default-sad.bmp))
   
 ## Authorization
 
