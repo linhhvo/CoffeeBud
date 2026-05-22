@@ -111,6 +111,7 @@ func GetActivitiesByUser(
 			&activity.DeviceId,
 			&activity.UserId,
 			&activity.ActivityType,
+			&activity.IntervalMinutes,
 		)
 		if err != nil {
 			return foundActivities, err

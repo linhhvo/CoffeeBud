@@ -121,6 +121,13 @@ func PairDeviceHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
+		err = repositories.AssignDeviceToPet(ctx, db, data.DeviceId, userId.(uuid.UUID))
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			c.Error(fmt.Errorf("error assigning device to pet: %v", err))
+			return
+		}
+
 		middleware.SuccessResponse(c, 201, pairing)
 	}
 }
@@ -151,6 +158,19 @@ func RemoveDeviceHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
+		userId, exists := c.Get("userId")
+		if !exists {
+			c.Status(http.StatusUnauthorized)
+			c.Error(fmt.Errorf("invalid user"))
+			return
+		}
+
+		err = repositories.RemoveDeviceFromPet(ctx, db, device.DeviceId, userId.(uuid.UUID))
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			c.Error(fmt.Errorf("error removing device from pet: %v", err))
+			return
+		}
 		middleware.SuccessResponse(c, 200, nil)
 	}
 

@@ -41,13 +41,17 @@ type Config struct {
 	WakeUpTime     *time.Time `json:"wakeup_time"`
 	SleepTime      *time.Time `json:"sleep_time"`
 	Timezone       string     `json:"timezone"`
+	NowTimestamp   time.Time  `json:"now_timestamp" binding:"omitempty"`
 }
 
 type PetState struct {
-	UserId         uuid.UUID `json:"user_id"`
-	AvatarUrl      string    `json:"avatar_url"`
-	Mood           string    `json:"mood" binding:"oneof=happy neutral sad"`
-	LastUpdateTime time.Time `json:"last_update_time"`
+	UserId           uuid.UUID `json:"user_id"`
+	DeviceId         *string   `json:"device_id"`
+	HappyAvatarUrl   string    `json:"happy_avatar_url"`
+	NeutralAvatarUrl string    `json:"neutral_avatar_url"`
+	SadAvatarUrl     string    `json:"sad_avatar_url"`
+	Mood             string    `json:"mood" binding:"omitempty,oneof=happy neutral sad"`
+	LastUpdateTime   time.Time `json:"last_update_time"`
 }
 
 type WebSocketPayload struct {

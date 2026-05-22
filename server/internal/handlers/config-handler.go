@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -58,6 +59,8 @@ func GetConfigByDeviceHandler(db *sql.DB) gin.HandlerFunc {
 			c.Error(err)
 			return
 		}
+
+		config.NowTimestamp = time.Now()
 
 		middleware.SuccessResponse(c, 200, config)
 	}
