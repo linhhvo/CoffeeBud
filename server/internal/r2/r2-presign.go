@@ -14,15 +14,14 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
-var accountId string
 var accessKeyId string
 var accessKeySecret string
 var endpoint string
 
 func Init() {
-	accountId = os.Getenv("R2_ACCOUNT_ID")
 	accessKeyId = os.Getenv("R2_ACCESS_KEY_ID")
 	accessKeySecret = os.Getenv("R2_ACCESS_SECRET")
 	endpoint = os.Getenv("R2_ENDPOINT")
@@ -59,7 +58,7 @@ func GetR2UrlHandler() gin.HandlerFunc {
 		)
 
 		presignClient := s3.NewPresignClient(client)
-		objectKey := userId.(string) + "/" + mood + ".bmp"
+		objectKey := userId.(uuid.UUID).String() + "/" + mood + ".bmp"
 
 		presignedReq, err := presignClient.PresignPutObject(
 			context.TODO(), &s3.PutObjectInput{
@@ -73,8 +72,6 @@ func GetR2UrlHandler() gin.HandlerFunc {
 			return
 		}
 
-		middleware.SuccessResponse(c, http.StatusOK, presignedReq.URL)
-
+		middleware.SuccessResponse(c, http.StatusOK, gin.H{"upload_url": presignedReq.URL, "object_key": objectKey})
 	}
-
 }

@@ -200,15 +200,14 @@ func GetPetAvatarByDevice(ctx context.Context, db *sql.DB, deviceId string, mood
 	return url, nil
 }
 
-func UpdatePetAvatarByMood(ctx context.Context, db *sql.DB, userId uuid.UUID, mood string, avatarUrl string) error {
-	dbField := mood + "_avatar_url"
-
+func UpdatePetAvatars(ctx context.Context, db *sql.DB, pet models.PetState) error {
 	result, err := db.ExecContext(
 		ctx,
-		"UPDATE pet_states SET $1=$2, last_updated=CURRENT_TIMESTAMP WHERE user_id=$3",
-		dbField,
-		avatarUrl,
-		userId,
+		"UPDATE pet_states SET happy_avatar_url = $1, neutral_avatar_url = $2, sad_avatar_url = $3, last_updated=CURRENT_TIMESTAMP WHERE user_id=$4",
+		pet.HappyAvatarUrl,
+		pet.NeutralAvatarUrl,
+		pet.SadAvatarUrl,
+		pet.UserId,
 	)
 	if err != nil {
 		return err
@@ -228,5 +227,25 @@ func UpdatePetAvatarByMood(ctx context.Context, db *sql.DB, userId uuid.UUID, mo
 	}
 
 	return nil
+}
 
+func GetPetAvatars(ctx context.Context, db *sql.DB, userId uuid.UUID) (models.PetState, error) {
+	var pet models.PetState
+
+	row := db.QueryRowContext(ctx, "SELECT * FROM pet_states WHERE user_id = $1", userId)
+
+	err := row.Scan(
+		&pet.UserId,
+		&pet.Mood,
+		&pet.LastUpdateTime,
+		&pet.DeviceId,
+		&pet.HappyAvatarUrl,
+		&pet.NeutralAvatarUrl,
+		&pet.SadAvatarUrl,
+	)
+	if err != nil {
+		return pet, err
+	}
+
+	return pet, nil
 }

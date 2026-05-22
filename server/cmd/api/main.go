@@ -21,6 +21,7 @@ func main() {
 	// }
 
 	session.Init()
+	r2.Init()
 
 	/** DATABASE CONNECTION **/
 	db := database.ConnectDatabase()
@@ -98,6 +99,12 @@ func main() {
 
 		// get presigned URL for R2 uploads
 		api.GET("/pet/avatars/presign", r2.GetR2UrlHandler())
+
+		// update pet avatars
+		api.POST("/pet/avatars", handlers.UpdatePetAvatarsHandler(db))
+
+		// get pet avatars
+		api.GET("/pet/avatars", handlers.GetPetAvatars(db))
 
 		// get daily stat
 		api.GET("/stat/daily", handlers.GetDailyStatHandler(db))

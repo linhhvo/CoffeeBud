@@ -45,10 +45,11 @@ type Config struct {
 
 type PetState struct {
 	UserId           uuid.UUID `json:"user_id"`
+	DeviceId         *string   `json:"device_id"`
 	HappyAvatarUrl   string    `json:"happy_avatar_url"`
 	NeutralAvatarUrl string    `json:"neutral_avatar_url"`
 	SadAvatarUrl     string    `json:"sad_avatar_url"`
-	Mood             string    `json:"mood" binding:"oneof=happy neutral sad"`
+	Mood             string    `json:"mood" binding:"omitempty,oneof=happy neutral sad"`
 	LastUpdateTime   time.Time `json:"last_update_time"`
 }
 
