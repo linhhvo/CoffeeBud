@@ -41,6 +41,7 @@ type Config struct {
 	WakeUpTime     *time.Time `json:"wakeup_time"`
 	SleepTime      *time.Time `json:"sleep_time"`
 	Timezone       string     `json:"timezone"`
+	NowTimestamp   time.Time  `json:"now_timestamp" binding:"omitempty"`
 }
 
 type PetState struct {
