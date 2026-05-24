@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -74,6 +75,7 @@ func SyncDataHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 
 		// add activity events
 		for _, data := range json {
+			log.Println(data)
 			data.DeviceId = device.DeviceId
 			err := repositories.AddActivity(ctx, db, data)
 			if err != nil {
@@ -83,10 +85,6 @@ func SyncDataHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 			}
 		}
 
-		// TODO: get pet mood based on new data
-		// this should run every hour whenever data sync happens
-		// webapp can either calculate pet mood based on data sent from device
-		// or delegate the calculation to device and only store mood history for data analytics
 		pet, stat, err := repositories.UpdateMood(ctx, db, device.UserId, time.Now())
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
@@ -98,7 +96,6 @@ func SyncDataHandler(hub *websocketServer.Hub, db *sql.DB) gin.HandlerFunc {
 			EventType: "DATA_UPDATED",
 			EventData: stat,
 		}
-		// TODO: get pet name and avatar
 
 		c.Header("Rules-Need-Update", strconv.Itoa(configChanged))
 		middleware.SuccessResponse(c, 200, pet)

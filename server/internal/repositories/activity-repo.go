@@ -58,7 +58,7 @@ func AddActivity(ctx context.Context, db *sql.DB, data models.ActivityEvent) err
 		userId,
 		data.ActivityType,
 		data.Timestamp,
-		interval,
+		int(interval),
 	)
 
 	if err != nil {
