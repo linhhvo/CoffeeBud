@@ -111,6 +111,9 @@ func main() {
 
 		// get weekly stat
 		api.GET("/stat/weekly", handlers.GetWeeklyStatHandler(db))
+
+		// get monthly stat
+		api.GET("/stat/monthly", handlers.GetMonthlyStatHandler(db))
 	}
 
 	if err := router.Run(":8080"); err != nil {

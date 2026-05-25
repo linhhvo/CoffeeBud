@@ -55,6 +55,17 @@ func GetWeekDates(targetDate time.Time) []time.Time {
 	return week
 }
 
+func GetMonthDates(targetDate time.Time) []time.Time {
+	currentDay := targetDate.Day()
+
+	month := make([]time.Time, currentDay)
+
+	for i := range currentDay {
+		month[i] = time.Date(targetDate.Year(), targetDate.Month(), i+1, 0, 0, 0, 0, time.Local)
+	}
+
+	return month
+}
 func IsSameDate(a, b time.Time) bool {
 	ay, am, ad := a.Date()
 	by, bm, bd := b.Date()

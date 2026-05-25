@@ -51,7 +51,7 @@ export function CompareBarChart({chart, currentWeek, previousWeek}: CompareCardP
 
             {/* Chart */}
             {allValues.length === 0 ? (
-            <div className="flex items-center justify-center h-40 text-xs text-zinc-700">
+            <div className="flex items-center justify-center h-40 text-xs text-zinc-600">
                 No data available </div>) : (
             <ResponsiveContainer width="100%" height={240}>
                 <BarChart

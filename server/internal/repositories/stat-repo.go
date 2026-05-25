@@ -31,6 +31,25 @@ func GetWeeklyStat(
 	return weekStat, nil
 }
 
+func GetMonthStat(
+	ctx context.Context,
+	db *sql.DB,
+	userId uuid.UUID,
+	targetDate time.Time,
+) ([]models.DailyStats, error) {
+	var monthStat []models.DailyStats
+	month := utils.GetMonthDates(targetDate)
+
+	for _, d := range month {
+		stat, err := CalculateMood(ctx, db, userId, d)
+		if err != nil {
+			return monthStat, fmt.Errorf("error getting stat for %s: %v", d.Weekday(), err)
+		}
+		monthStat = append(monthStat, stat)
+	}
+	return monthStat, nil
+}
+
 func CalculateAvgInterval(
 	ctx context.Context,
 	db *sql.DB,

@@ -73,3 +73,33 @@ func GetWeeklyStatHandler(db *sql.DB) gin.HandlerFunc {
 		middleware.SuccessResponse(c, 200, weeklyStat)
 	}
 }
+
+func GetMonthlyStatHandler(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var monthlyStat []models.DailyStats
+		ctx := c.Request.Context()
+
+		userId, exists := c.Get("userId")
+		if !exists {
+			c.Status(http.StatusUnauthorized)
+			c.Error(errors.New("invalid user"))
+			return
+		}
+
+		requestedTime, err := time.Parse(time.DateOnly, c.Query("date"))
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			c.Error(fmt.Errorf("error parsing URL date param: %v", err))
+			return
+		}
+
+		monthlyStat, err = repositories.GetMonthStat(ctx, db, userId.(uuid.UUID), requestedTime)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			c.Error(fmt.Errorf("error getting daily stat: %v", err))
+			return
+		}
+
+		middleware.SuccessResponse(c, 200, monthlyStat)
+	}
+}
