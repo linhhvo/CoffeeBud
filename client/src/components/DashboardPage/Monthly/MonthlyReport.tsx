@@ -61,7 +61,7 @@ export function MonthlyReport({ charts, monthOffset }: MonthlyReportProps) {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
                     {/* Mood charts */}
-                    <MonthlyMoodLineChart monthOffset={monthOffset} />
+                    <MonthlyMoodLineChart stats={allStats}/>
                     <MoodDistributionChart stats={allStats} />
                     <MoodWeekdayChart stats={allStats} />
 

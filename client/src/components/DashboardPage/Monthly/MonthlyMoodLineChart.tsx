@@ -1,33 +1,10 @@
-import {useEffect, useState} from "react";
-import {statService} from "../../../apis/stat.service.ts";
-import {createDailyStat, type DailyStat, type Mood, MOOD_COLOR, MOOD_EMOJI, MOOD_LABEL, MOOD_VALUE} from "../types.ts";
+import {type DailyStat, type Mood, MOOD_COLOR, MOOD_EMOJI, MOOD_LABEL, MOOD_VALUE} from "../types.ts";
 import {CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis} from "recharts";
-import {getDateForWeek} from "../../../utils/helpers.ts";
 
 interface MoodDayData {
     day: string;
     value: number | null;
     mood: Mood | null;
-}
-
-interface MoodDotProps {
-    cx?: number;
-    cy?: number;
-    payload?: MoodDayData;
-}
-
-function MoodDot({ cx, cy, payload }: MoodDotProps) {
-    if (!payload?.mood || cx == null || cy == null) return null;
-    return (
-        <circle
-            cx={cx}
-            cy={cy}
-            r={4}
-            fill={MOOD_COLOR[payload.mood]}
-            stroke="#18181b"
-            strokeWidth={2}
-        />
-    );
 }
 
 function mixColors(hex1: string, hex2: string, t = 0.5): string {
@@ -41,42 +18,17 @@ function mixColors(hex1: string, hex2: string, t = 0.5): string {
 }
 
 interface MonthlyMoodLineChartProps {
-    monthOffset: number;
+    stats: DailyStat[];
 }
 
-export function MonthlyMoodLineChart({ monthOffset }: MonthlyMoodLineChartProps) {
-    const [chartData, setChartData] = useState<MoodDayData[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        setIsLoading(true);
-        setError(null);
-
-        // monthOffset 0 → current month, -1 → previous, etc.
-        // Use the Monday of the last week in the period as the anchor date
-        const anchorDate = getDateForWeek(monthOffset * 4);
-
-        statService
-            .getMonthly(anchorDate)
-            .then((res) => {
-                if (res.success && Array.isArray(res.data)) {
-                    const sorted = res.data
-                        .map((raw: any) => createDailyStat(raw))
-                        .sort((a: DailyStat, b: DailyStat) => a.date.getTime() - b.date.getTime());
-
-                    setChartData(
-                        sorted.map((d: DailyStat) => ({
-                            day: d.date.toLocaleDateString("en-GB", { day: "numeric" }),
-                            mood: (d.avg_mood as Mood) ?? null,
-                            value: d.avg_mood != null ? MOOD_VALUE[d.avg_mood as Mood] ?? null : null,
-                        }))
-                    );
-                }
-            })
-            .catch(() => setError("Failed to load mood data."))
-            .finally(() => setIsLoading(false));
-    }, [monthOffset]);
+export function MonthlyMoodLineChart({ stats  }: MonthlyMoodLineChartProps) {
+    const chartData: MoodDayData[] = [...stats]
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .map((d) => ({
+            day: new Date(d.date).toLocaleDateString("en-GB", { day: "numeric"}),
+            mood: (d.avg_mood as Mood) ?? null,
+            value: d.avg_mood != null ? MOOD_VALUE[d.avg_mood as Mood] ?? null : null,
+        }));
 
     const validMoods = chartData.filter((d) => d.value != null);
     const singleColor =
@@ -96,13 +48,7 @@ export function MonthlyMoodLineChart({ monthOffset }: MonthlyMoodLineChartProps)
             </div>
 
             {/* States */}
-            {isLoading ? (
-                <div className="flex items-center justify-center h-42.5">
-                    <div className="w-5 h-5 rounded-full border-2 border-zinc-700 border-t-zinc-400 animate-spin" />
-                </div>
-            ) : error ? (
-                <p className="text-xs text-red-400 text-center py-16">{error}</p>
-            ) : validMoods.length === 0 ? (
+            {validMoods.length === 0 ? (
                 <div className="flex items-center justify-center h-42.5 text-xs text-zinc-700">
                     No data available
                 </div>
@@ -182,7 +128,6 @@ export function MonthlyMoodLineChart({ monthOffset }: MonthlyMoodLineChartProps)
                             strokeWidth={2.5}
                             connectNulls
                             dot={false}
-                            // dot={(props: any) => <MoodDot key={props.index} {...props} />}
                             activeDot={false}
                         />
                     </LineChart>
