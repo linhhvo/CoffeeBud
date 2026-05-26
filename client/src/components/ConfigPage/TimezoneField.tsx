@@ -81,7 +81,7 @@ export function TimezoneField({
     };
 
     return (
-        <div className="flex items-center justify-between gap-4 py-4 border-b border-stone-800/60 last:border-0">
+        <div className={`flex items-center justify-between gap-4 py-4 border-b border-stone-800/60 last:border-0 relative ${open ? "z-20" : "z-0"}`}>
             {/* Label */}
             <div className="min-w-0">
                 <p className="text-sm font-medium text-stone-200">{label}</p>

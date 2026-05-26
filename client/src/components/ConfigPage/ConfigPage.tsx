@@ -111,7 +111,7 @@ const ConfigPage: React.FC = () => {
                 </div>
 
                 {/* ── Habit Rules ── */}
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-4 mb-4 backdrop-blur-sm">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-4 mb-4 backdrop-blur-sm relative z-10">
                     <p className="text-sm uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-5">
                         Habit Rules
                     </p>
@@ -175,7 +175,7 @@ const ConfigPage: React.FC = () => {
                 </div>
 
                 {/* ── Pet Avatar ── */}
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-4 mb-4 backdrop-blur-sm">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-4 mb-4 backdrop-blur-sm relative z-0">
                     <p className="text-sm uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-1">
                         Pet Avatar
                     </p>
