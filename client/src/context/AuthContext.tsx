@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState } from "react";
-import { checkIsAuthenticated, clearAuthFlag } from "../utils/cookie";
+import React, {createContext, useContext, useEffect, useState} from "react";
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -12,16 +13,34 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = (
     { children },
 ) => {
-    const [IsAuthenticated, setIsAuthenticated] = useState<boolean>(
-        checkIsAuthenticated(),
-    );
+    const [IsAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
 
     const setLoggedIn = () => setIsAuthenticated(true);
+    const setLoggedOut = () => setIsAuthenticated(false);
 
-    const setLoggedOut = () => {
-        clearAuthFlag();
-        setIsAuthenticated(false);
-    };
+    useEffect(() => {
+        const verifyAuth = async () => {
+            try {
+                const response = await fetch(`${apiUrl}/auth/validate`, { credentials: "include" });
+                if (response.ok) {
+                    setIsAuthenticated(true);
+                } else {
+                    setIsAuthenticated(false);
+                }
+            } catch (error) {
+                setIsAuthenticated(false);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        verifyAuth();
+    }, []);
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <AuthContext.Provider

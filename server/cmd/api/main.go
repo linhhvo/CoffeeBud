@@ -75,6 +75,7 @@ func main() {
 	api.POST("/auth/register", handlers.RegisterUserHandler(db))
 	api.POST("/auth/login", handlers.UserLogInHandler(db))
 	api.POST("/auth/logout", handlers.UserLogOutHandler())
+	api.GET("/auth/validate", handlers.ValidateUserHandler())
 
 	// endpoints that require token from client
 	api.Use(middleware.Authenticate())

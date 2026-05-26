@@ -24,27 +24,18 @@ func SetCookie(c *gin.Context, userId uuid.UUID) error {
 	}
 
 	jwtCookie := http.Cookie{
-		Name:     CookieName,
-		Value:    newToken,
-		Path:     "/",
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	}
-
-	authFlagCookie := http.Cookie{
-		Name:     "is_authenticated",
-		Value:    "true",
-		Path:     "/",
-		SameSite: http.SameSiteNoneMode,
-		Secure:   true,
+		Name:        CookieName,
+		Value:       newToken,
+		Path:        "/",
+		Secure:      true,
+		HttpOnly:    true,
+		SameSite:    http.SameSiteNoneMode,
+		Partitioned: true,
+		MaxAge:      60 * 60 * 24 * 7,
 	}
 
 	c.SetCookieData(&jwtCookie)
-	c.SetCookieData(&authFlagCookie)
-
 	sessions[newToken] = userId
-
 	return nil
 }
 
@@ -58,26 +49,16 @@ func IsSessionValid(tokenStr string) error {
 
 func ClearSessions(c *gin.Context, tokenId string) {
 	emptyCookie := http.Cookie{
-		Name:     CookieName,
-		Value:    "",
-		Path:     "/",
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-		MaxAge:   -1,
-	}
-
-	emptyFlagCookie := http.Cookie{
-		Name:     "is_authenticated",
-		Value:    "",
-		Path:     "/",
-		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
-		MaxAge:   -1,
+		Name:        CookieName,
+		Value:       "",
+		Path:        "/",
+		Secure:      true,
+		HttpOnly:    true,
+		SameSite:    http.SameSiteNoneMode,
+		MaxAge:      -1,
+		Partitioned: true,
 	}
 
 	c.SetCookieData(&emptyCookie)
-	c.SetCookieData(&emptyFlagCookie)
-
 	delete(sessions, tokenId)
 }

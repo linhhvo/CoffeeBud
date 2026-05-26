@@ -1,5 +1,4 @@
-import {clearAuthFlag} from "../utils/cookie.ts";
-import {router} from "../components/Router.tsx";
+import { router } from "../components/Router.tsx";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -19,7 +18,6 @@ export async function apiClient<T>(
     const response = await fetch(`${apiUrl}${endpoint}`, config);
 
     if (response.status === 401) {
-        clearAuthFlag();
         await router.navigate("/login");
         throw new Error("Not authorized");
     }
