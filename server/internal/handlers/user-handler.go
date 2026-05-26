@@ -123,3 +123,15 @@ func UserLogOutHandler() gin.HandlerFunc {
 		middleware.SuccessResponse(c, http.StatusOK, nil)
 	}
 }
+
+func ValidateUserHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token, err := c.Cookie(session.CookieName)
+		if err != nil || session.IsSessionValid(token) != nil {
+			c.Status(http.StatusUnauthorized)
+			c.Error(fmt.Errorf("user not authorized"))
+			return
+		}
+		middleware.SuccessResponse(c, http.StatusOK, gin.H{"authenticated": true})
+	}
+}

@@ -40,6 +40,12 @@ const EXISTING_URL_KEY: Record<Mood, keyof PetAvatars> = {
     sad: "sad_avatar_url",
 };
 
+const DEFAULT_AVATAR_URL: Record<Mood, string> = {
+    happy:   "https://coffeebud-assets.linhvo.me/default-happy.bmp",
+    neutral: "https://coffeebud-assets.linhvo.me/default-neutral.bmp",
+    sad:     "https://coffeebud-assets.linhvo.me/default-sad.bmp",
+};
+
 export function PetAvatarField({ existing, onChange }: PetAvatarFieldProps) {
     const [slots, setSlots] = useState<Record<Mood, SlotState | null>>({
         happy: null,
@@ -54,11 +60,49 @@ export function PetAvatarField({ existing, onChange }: PetAvatarFieldProps) {
         sad: null,
     });
 
+    const [isResetting, setIsResetting] = useState(false);
+
     const notifyParent = (mood: Mood, file: File | null, current: Record<Mood, SlotState | null>) => onChange?.({
         happy: mood === "happy" ? file : current.happy?.file ?? null,
         neutral: mood === "neutral" ? file : current.neutral?.file ?? null,
         sad: mood === "sad" ? file : current.sad?.file ?? null,
     });
+
+    const handleResetDefaults = async () => {
+        setIsResetting(true);
+        try {
+            // Fetch all three default BMPs and convert them to Files
+            const moods: Mood[] = ["happy", "neutral", "sad"];
+            const results = await Promise.all(
+                moods.map(async (mood) => {
+                    const res = await fetch(DEFAULT_AVATAR_URL[mood]);
+                    if (!res.ok) throw new Error(`Failed to fetch default ${mood} avatar`);
+                    const blob = await res.blob();
+                    const file = new File([blob], `default-${mood}.bmp`, { type: "image/bmp" });
+                    return { mood, file };
+                })
+            );
+
+            // Clear all slots and revoke old preview URLs
+            const next: Record<Mood, SlotState | null> = { happy: null, neutral: null, sad: null };
+            for (const { mood, file } of results) {
+                if (slots[mood]?.previewUrl) URL.revokeObjectURL(slots[mood]!.previewUrl);
+                const previewUrl = URL.createObjectURL(file);
+                next[mood] = { previewUrl, file, status: "ready", error: null };
+            }
+
+            setSlots(next);
+            onChange?.({
+                happy:   next.happy?.file   ?? null,
+                neutral: next.neutral?.file ?? null,
+                sad:     next.sad?.file     ?? null,
+            });
+        } catch (err) {
+            console.error("Failed to reset default avatars:", err);
+        } finally {
+            setIsResetting(false);
+        }
+    };
 
     const handleFile = async (mood: Mood, raw: File) => {
         if (!raw.type.startsWith("image/")) {
@@ -93,17 +137,13 @@ export function PetAvatarField({ existing, onChange }: PetAvatarFieldProps) {
         try {
             const bmpFile = await preprocessToBmp(raw, {width: 200, height: 200});
 
-            setSlots((prev) => {
-                const next = {
-                    ...prev,
-                    [mood]: {
-                        ...prev[mood]!,
-                        file: bmpFile,
-                        status: "ready" as SlotStatus,
-                    },
-                };
-                notifyParent(mood, bmpFile, next);
-                return next;
+            setSlots((prev) => ({
+                ...prev,
+                [mood]: { ...prev[mood]!, file: bmpFile, status: "ready" as SlotStatus },
+            }));
+            notifyParent(mood, bmpFile, {
+                ...slots,
+                [mood]: { ...slots[mood]!, file: bmpFile, status: "ready" as SlotStatus },
             });
         } catch (err) {
             setSlots((prev) => ({
@@ -120,14 +160,12 @@ export function PetAvatarField({ existing, onChange }: PetAvatarFieldProps) {
     };
 
     const handleRemove = (mood: Mood) => {
-        setSlots((prev) => {
-            if (prev[mood]?.previewUrl) {
-                URL.revokeObjectURL(prev[mood]!.previewUrl);
-            }
-            const next = { ...prev, [mood]: null };
-            notifyParent(mood, null, next);
-            return next;
-        });
+        if (slots[mood]?.previewUrl) {
+            URL.revokeObjectURL(slots[mood]!.previewUrl);
+        }
+        const next = { ...slots, [mood]: null };
+        setSlots(next);
+        notifyParent(mood, null, next);
     };
 
     const handleFileInput = (
@@ -148,6 +186,20 @@ export function PetAvatarField({ existing, onChange }: PetAvatarFieldProps) {
 
     return (
         <div>
+            <div className="flex justify-end mb-3">
+                <button
+                    type="button"
+                    disabled={isResetting}
+                    onClick={handleResetDefaults}
+                    className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-default"
+                >
+                    {isResetting
+                        ? <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+                        : <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    }
+                    {isResetting ? "Resetting…" : "Reset to defaults"}
+                </button>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {EMOTION_SLOTS.map(({ mood, label }) => {
                     const slot = slots[mood];

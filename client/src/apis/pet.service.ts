@@ -1,5 +1,5 @@
-import {apiClient} from "./client.ts";
-import type {ApiResponse, PetAvatars} from "./types.ts";
+import { apiClient } from "./client.ts";
+import type { ApiResponse, PetAvatars } from "./types.ts";
 
 export const petService = {
     getAvatars: () => {

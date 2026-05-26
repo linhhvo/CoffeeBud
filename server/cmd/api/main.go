@@ -75,6 +75,7 @@ func main() {
 	api.POST("/auth/register", handlers.RegisterUserHandler(db))
 	api.POST("/auth/login", handlers.UserLogInHandler(db))
 	api.POST("/auth/logout", handlers.UserLogOutHandler())
+	api.GET("/auth/validate", handlers.ValidateUserHandler())
 
 	// endpoints that require token from client
 	api.Use(middleware.Authenticate())
@@ -111,6 +112,9 @@ func main() {
 
 		// get weekly stat
 		api.GET("/stat/weekly", handlers.GetWeeklyStatHandler(db))
+
+		// get monthly stat
+		api.GET("/stat/monthly", handlers.GetMonthlyStatHandler(db))
 	}
 
 	if err := router.Run(":8080"); err != nil {
