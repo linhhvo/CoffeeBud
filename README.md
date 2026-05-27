@@ -1,11 +1,11 @@
 # Deployment
-The app is hosted at <a href="https://coffeebud-client.fly.dev" target="_blank">CoffeeBud</a>
+The web UI is hosted at <a href="https://coffeebud-client.fly.dev" target="_blank">CoffeeBud</a>
 
-To test the app, log in with username **demo** and password **dtap**
+To test the app, create a new account or log in with username **demo1** and password **dtap** to see the web app with mock data populated.
 
 ------
 # API Endpoints
-Coffeebud server is \*temporarily\* hosted on Fly.io at `https://coffeebud-server.fly.dev`
+Coffeebud server is hosted separately at `https://coffeebud-server.fly.dev`
 
 ### Example Requests
 ```bash
@@ -171,4 +171,6 @@ curl -X PUT "https://coffeebud-server.fly.dev/api/sync/DEV-0001?battery=80" \
 - **GET** `api/stat/weekly` - Get statistics for the week including requested date
   - Query param: `date` - value needs to be in format `YYYY-MM-DD`
       - Example: `https://coffeebud-server.fly.dev/api/stat/weekly?date=2026-05-12`
-
+- **GET** `api/stat/monthly` - Get statistics for the month including requested date
+  - Query param: `date` - value needs to be in format `YYYY-MM-DD`
+      - Example: `https://coffeebud-server.fly.dev/api/stat/monthly?date=2026-05-12`
